@@ -1,0 +1,25 @@
+{
+  "name": "delta-club-info",
+  "private": true,
+  "packageManager": "pnpm@10.11.0",
+  "scripts": {
+    "dev:server": "turbo run dev --filter=@delta-club/server",
+    "dev:admin": "turbo run dev --filter=@delta-club/admin",
+    "dev": "turbo run dev --parallel",
+    "build": "turbo run build",
+    "lint": "turbo run lint",
+    "db:generate": "turbo run db:generate --filter=@delta-club/server",
+    "db:migrate": "turbo run db:migrate --filter=@delta-club/server",
+    "db:seed": "turbo run db:seed --filter=@delta-club/server"
+  },
+  "devDependencies": {
+    "turbo": "^2"
+  },
+  "pnpm": {
+    "onlyBuiltDependencies": [
+      "bcrypt",
+      "esbuild",
+      "@nestjs/core"
+    ]
+  }
+}
