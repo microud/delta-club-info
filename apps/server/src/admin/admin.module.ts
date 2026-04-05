@@ -8,6 +8,10 @@ import { ClubsController } from './clubs/clubs.controller';
 import { ClubsService } from './clubs/clubs.service';
 import { ClubServicesController } from './club-services/club-services.controller';
 import { ClubServicesService } from './club-services/club-services.service';
+import { ClubRulesController } from './club-rules/club-rules.controller';
+import { ClubRulesService } from './club-rules/club-rules.service';
+import { PromotionsController } from './promotions/promotions.controller';
+import { PromotionsService } from './promotions/promotions.service';
 
 @Module({
   imports: [
@@ -19,7 +23,20 @@ import { ClubServicesService } from './club-services/club-services.service';
       }),
     }),
   ],
-  controllers: [AuthController, ClubsController, ClubServicesController],
-  providers: [AuthService, JwtStrategy, ClubsService, ClubServicesService],
+  controllers: [
+    AuthController,
+    ClubsController,
+    ClubServicesController,
+    ClubRulesController,
+    PromotionsController,
+  ],
+  providers: [
+    AuthService,
+    JwtStrategy,
+    ClubsService,
+    ClubServicesService,
+    ClubRulesService,
+    PromotionsService,
+  ],
 })
 export class AdminModule {}
