@@ -15,6 +15,13 @@
       "when": 1775372241130,
       "tag": "0001_useful_omega_sentinel",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1775372303986,
+      "tag": "0002_sweet_bishop",
+      "breakpoints": true
     }
   ]
 }
