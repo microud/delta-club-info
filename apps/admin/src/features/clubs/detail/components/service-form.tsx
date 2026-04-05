@@ -52,9 +52,10 @@ export function ServiceForm({ initialData, onSubmit, isSubmitting }: ServiceForm
   const watchType = form.watch('type')
   const watchHasGuarantee = form.watch('hasGuarantee')
 
-  const showPriceFields = ['KNIFE_RUN', 'ESCORT_TRIAL', 'ESCORT_STANDARD'].includes(watchType)
+  const showPriceFields = ['KNIFE_RUN', 'ESCORT_TRIAL', 'ESCORT_STANDARD', 'ESCORT_FUN'].includes(watchType)
   const showAccompanyFields = watchType === 'ACCOMPANY'
   const showEscortFunFields = watchType === 'ESCORT_FUN'
+  const showGuaranteeFields = ['KNIFE_RUN', 'ESCORT_TRIAL', 'ESCORT_STANDARD', 'ESCORT_FUN'].includes(watchType)
 
   return (
     <Form {...form}>
@@ -104,34 +105,19 @@ export function ServiceForm({ initialData, onSubmit, isSubmitting }: ServiceForm
         />
 
         {showPriceFields && (
-          <div className='grid gap-4 sm:grid-cols-2'>
-            <FormField
-              control={form.control}
-              name='priceYuan'
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>价格 (元)</FormLabel>
-                  <FormControl>
-                    <Input placeholder='请输入价格' {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name='priceHafuCoin'
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>价格 (万哈夫币)</FormLabel>
-                  <FormControl>
-                    <Input placeholder='请输入哈夫币价格（万）' {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-          </div>
+          <FormField
+            control={form.control}
+            name='priceYuan'
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>价格 (元)</FormLabel>
+                <FormControl>
+                  <Input placeholder='请输入价格' {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
         )}
 
         {showAccompanyFields && (
@@ -166,37 +152,23 @@ export function ServiceForm({ initialData, onSubmit, isSubmitting }: ServiceForm
         )}
 
         {showEscortFunFields && (
+          <FormField
+            control={form.control}
+            name='gameName'
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>玩法名称</FormLabel>
+                <FormControl>
+                  <Input placeholder='请输入玩法名称' {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        )}
+
+        {showGuaranteeFields && (
           <>
-            <FormField
-              control={form.control}
-              name='gameName'
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>玩法名称</FormLabel>
-                  <FormControl>
-                    <Input placeholder='请输入玩法名称' {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <div className='grid gap-4 sm:grid-cols-2'>
-              <FormField
-                control={form.control}
-                name='priceYuan'
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>价格 (元)</FormLabel>
-                    <FormControl>
-                      <Input placeholder='请输入价格' {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </div>
-
             <FormField
               control={form.control}
               name='hasGuarantee'

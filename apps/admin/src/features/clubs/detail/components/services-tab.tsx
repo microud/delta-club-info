@@ -39,23 +39,29 @@ import { serviceTypeLabels, type ServiceFormValues } from '../../data/service-sc
 import { ServiceForm } from './service-form'
 
 function getPriceSummary(service: ClubServiceDto): string {
+  const parts: string[] = []
+
   switch (service.type) {
     case 'KNIFE_RUN':
     case 'ESCORT_TRIAL':
     case 'ESCORT_STANDARD':
-      return `¥${service.priceYuan ?? '-'} / ${service.priceHafuCoin ?? '-'}万哈夫币`
+      parts.push(`¥${service.priceYuan ?? '-'}`)
+      break
     case 'ACCOMPANY':
       return `${service.tier ?? '-'} ¥${service.pricePerHour ?? '-'}/小时`
-    case 'ESCORT_FUN': {
-      let summary = service.gameName ?? '-'
-      if (service.hasGuarantee) {
-        summary += ` (保底 ${service.guaranteeHafuCoin ?? '-'}万哈夫币)`
-      }
-      return summary
-    }
+    case 'ESCORT_FUN':
+      parts.push(service.gameName ?? '-')
+      if (service.priceYuan) parts.push(`¥${service.priceYuan}`)
+      break
     default:
       return '-'
   }
+
+  if (service.hasGuarantee && service.guaranteeHafuCoin) {
+    parts.push(`保底${service.guaranteeHafuCoin}万哈夫币`)
+  }
+
+  return parts.join(' / ')
 }
 
 function toFormValues(service: ClubServiceDto): ServiceFormValues {
