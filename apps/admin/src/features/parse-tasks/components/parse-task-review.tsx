@@ -13,6 +13,7 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { useState } from 'react'
+import { Main } from '@/components/layout/main'
 
 export function ParseTaskReview() {
   const { id } = useParams({ from: '/_authenticated/parse-tasks/$id' })
@@ -48,7 +49,7 @@ export function ParseTaskReview() {
     },
   })
 
-  if (isLoading || !task) return <div>加载中...</div>
+  if (isLoading || !task) return <Main>加载中...</Main>
 
   const statusMap: Record<string, string> = {
     pending: '待解析',
@@ -58,7 +59,7 @@ export function ParseTaskReview() {
   }
 
   return (
-    <div className='space-y-6'>
+    <Main className='space-y-6'>
       <div className='flex items-center justify-between'>
         <div>
           <h2 className='text-2xl font-bold tracking-tight'>解析任务详情</h2>
@@ -172,6 +173,6 @@ export function ParseTaskReview() {
           )}
         </div>
       </div>
-    </div>
+    </Main>
   )
 }

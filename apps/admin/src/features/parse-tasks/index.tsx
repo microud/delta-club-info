@@ -14,6 +14,7 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table'
+import { Main } from '@/components/layout/main'
 
 export default function ParseTasksPage() {
   const { data: tasks = [] } = useQuery({
@@ -28,7 +29,7 @@ export default function ParseTasksPage() {
   })
 
   return (
-    <div className='space-y-4'>
+    <Main className='space-y-4'>
       <div>
         <h2 className='text-2xl font-bold tracking-tight'>消息解析</h2>
         <p className='text-muted-foreground'>
@@ -72,6 +73,6 @@ export default function ParseTasksPage() {
           </TableBody>
         </Table>
       </div>
-    </div>
+    </Main>
   )
 }
