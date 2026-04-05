@@ -117,6 +117,8 @@ export class AiParseService {
       messages: [{ role: 'user', content }],
     });
 
+    this.logger.debug('AI parse result: %j', object);
+
     return object;
   }
 }
