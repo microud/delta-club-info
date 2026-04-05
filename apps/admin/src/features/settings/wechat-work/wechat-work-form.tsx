@@ -6,12 +6,11 @@ import { Input } from '@/components/ui/input'
 import {
   Form,
   FormControl,
-  FormDescription,
   FormField,
   FormItem,
-  FormLabel,
   FormMessage,
 } from '@/components/ui/form'
+import { Label } from '@/components/ui/label'
 import { showSubmittedData } from '@/lib/show-submitted-data'
 
 const wechatWorkFormSchema = z.object({
@@ -23,6 +22,14 @@ const wechatWorkFormSchema = z.object({
 })
 
 type WechatWorkFormValues = z.infer<typeof wechatWorkFormSchema>
+
+const fields = [
+  { name: 'corpId' as const, label: '企业 ID (CorpId)', desc: '企业微信管理后台「我的企业」中的企业 ID。', placeholder: 'ww1234567890abcdef' },
+  { name: 'agentId' as const, label: '应用 AgentId', desc: '企业微信自建应用的 AgentId。', placeholder: '1000002' },
+  { name: 'secret' as const, label: '应用 Secret', desc: '企业微信自建应用的 Secret。', placeholder: '••••••••', type: 'password' },
+  { name: 'token' as const, label: 'Token（可选）', desc: '接收消息回调的 Token，用于验证消息签名。', placeholder: '回调 Token' },
+  { name: 'encodingAESKey' as const, label: 'EncodingAESKey（可选）', desc: '接收消息回调的 EncodingAESKey，用于消息加解密。', placeholder: '消息加解密密钥' },
+] as const
 
 export function WechatWorkForm() {
   const form = useForm<WechatWorkFormValues>({
@@ -42,88 +49,36 @@ export function WechatWorkForm() {
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className='space-y-6'>
-        <FormField
-          control={form.control}
-          name='corpId'
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>企业 ID (CorpId)</FormLabel>
-              <FormControl>
-                <Input placeholder='ww1234567890abcdef' {...field} />
-              </FormControl>
-              <FormDescription>
-                企业微信管理后台「我的企业」中的企业 ID。
-              </FormDescription>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        <FormField
-          control={form.control}
-          name='agentId'
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>应用 AgentId</FormLabel>
-              <FormControl>
-                <Input placeholder='1000002' {...field} />
-              </FormControl>
-              <FormDescription>
-                企业微信自建应用的 AgentId。
-              </FormDescription>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        <FormField
-          control={form.control}
-          name='secret'
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>应用 Secret</FormLabel>
-              <FormControl>
-                <Input type='password' placeholder='••••••••' {...field} />
-              </FormControl>
-              <FormDescription>
-                企业微信自建应用的 Secret。
-              </FormDescription>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        <FormField
-          control={form.control}
-          name='token'
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Token（可选）</FormLabel>
-              <FormControl>
-                <Input placeholder='回调 Token' {...field} />
-              </FormControl>
-              <FormDescription>
-                接收消息回调的 Token，用于验证消息签名。
-              </FormDescription>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        <FormField
-          control={form.control}
-          name='encodingAESKey'
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>EncodingAESKey（可选）</FormLabel>
-              <FormControl>
-                <Input placeholder='消息加解密密钥' {...field} />
-              </FormControl>
-              <FormDescription>
-                接收消息回调的 EncodingAESKey，用于消息加解密。
-              </FormDescription>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        <Button type='submit'>保存配置</Button>
+      <form onSubmit={form.handleSubmit(onSubmit)}>
+        <div className='divide-y'>
+          {fields.map((f) => (
+            <FormField
+              key={f.name}
+              control={form.control}
+              name={f.name}
+              render={({ field }) => (
+                <FormItem className='flex items-center justify-between gap-8 py-4'>
+                  <div className='space-y-1'>
+                    <Label>{f.label}</Label>
+                    <p className='text-muted-foreground text-xs'>{f.desc}</p>
+                    <FormMessage />
+                  </div>
+                  <FormControl>
+                    <Input
+                      className='w-[280px] shrink-0'
+                      type={f.type ?? 'text'}
+                      placeholder={f.placeholder}
+                      {...field}
+                    />
+                  </FormControl>
+                </FormItem>
+              )}
+            />
+          ))}
+        </div>
+        <div className='mt-4 flex justify-end'>
+          <Button type='submit'>保存配置</Button>
+        </div>
       </form>
     </Form>
   )
