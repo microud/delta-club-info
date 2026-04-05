@@ -238,5 +238,7 @@ Body: { wechatOfficialAccount: "xxx" }
 | `@aws-sdk/s3-request-presigner` | S3 签名 URL |
 | `ai` | Vercel AI SDK |
 | `@ai-sdk/xai` | xAI Grok provider |
-| `@wecom/crypto` | 企业微信消息加解密（或手动实现） |
+| `@wecom/crypto` | 企业微信官方加解密库，处理回调验签和消息解密 |
 | `xml2js` | 解析企业微信 XML 消息体 |
+
+注：企业微信无官方综合 Node.js SDK，REST API（access_token 管理、媒体文件下载等）直接使用 axios 调用。
