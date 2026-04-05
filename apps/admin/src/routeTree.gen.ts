@@ -26,6 +26,7 @@ import { Route as AuthenticatedClubsRouteRouteImport } from './routes/_authentic
 import { Route as AuthenticatedSettingsIndexRouteImport } from './routes/_authenticated/settings/index'
 import { Route as AuthenticatedSettingsAppearanceRouteImport } from './routes/_authenticated/settings/appearance'
 import { Route as AuthenticatedErrorsErrorRouteImport } from './routes/_authenticated/errors/$error'
+import { Route as AuthenticatedClubsIdRouteRouteImport } from './routes/_authenticated/clubs/$id/route'
 
 const AuthenticatedRouteRoute = AuthenticatedRouteRouteImport.update({
   id: '/_authenticated',
@@ -115,10 +116,16 @@ const AuthenticatedErrorsErrorRoute =
     path: '/errors/$error',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedClubsIdRouteRoute =
+  AuthenticatedClubsIdRouteRouteImport.update({
+    id: '/$id',
+    path: '/$id',
+    getParentRoute: () => AuthenticatedClubsRouteRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof AuthenticatedIndexRoute
-  '/clubs': typeof AuthenticatedClubsRouteRoute
+  '/clubs': typeof AuthenticatedClubsRouteRouteWithChildren
   '/settings': typeof AuthenticatedSettingsRouteRouteWithChildren
   '/forgot-password': typeof authForgotPasswordRoute
   '/otp': typeof authOtpRoute
@@ -130,12 +137,13 @@ export interface FileRoutesByFullPath {
   '/404': typeof errors404Route
   '/500': typeof errors500Route
   '/503': typeof errors503Route
+  '/clubs/$id': typeof AuthenticatedClubsIdRouteRoute
   '/errors/$error': typeof AuthenticatedErrorsErrorRoute
   '/settings/appearance': typeof AuthenticatedSettingsAppearanceRoute
   '/settings/': typeof AuthenticatedSettingsIndexRoute
 }
 export interface FileRoutesByTo {
-  '/clubs': typeof AuthenticatedClubsRouteRoute
+  '/clubs': typeof AuthenticatedClubsRouteRouteWithChildren
   '/forgot-password': typeof authForgotPasswordRoute
   '/otp': typeof authOtpRoute
   '/sign-in': typeof authSignInRoute
@@ -147,6 +155,7 @@ export interface FileRoutesByTo {
   '/500': typeof errors500Route
   '/503': typeof errors503Route
   '/': typeof AuthenticatedIndexRoute
+  '/clubs/$id': typeof AuthenticatedClubsIdRouteRoute
   '/errors/$error': typeof AuthenticatedErrorsErrorRoute
   '/settings/appearance': typeof AuthenticatedSettingsAppearanceRoute
   '/settings': typeof AuthenticatedSettingsIndexRoute
@@ -154,7 +163,7 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
-  '/_authenticated/clubs': typeof AuthenticatedClubsRouteRoute
+  '/_authenticated/clubs': typeof AuthenticatedClubsRouteRouteWithChildren
   '/_authenticated/settings': typeof AuthenticatedSettingsRouteRouteWithChildren
   '/(auth)/forgot-password': typeof authForgotPasswordRoute
   '/(auth)/otp': typeof authOtpRoute
@@ -167,6 +176,7 @@ export interface FileRoutesById {
   '/(errors)/500': typeof errors500Route
   '/(errors)/503': typeof errors503Route
   '/_authenticated/': typeof AuthenticatedIndexRoute
+  '/_authenticated/clubs/$id': typeof AuthenticatedClubsIdRouteRoute
   '/_authenticated/errors/$error': typeof AuthenticatedErrorsErrorRoute
   '/_authenticated/settings/appearance': typeof AuthenticatedSettingsAppearanceRoute
   '/_authenticated/settings/': typeof AuthenticatedSettingsIndexRoute
@@ -187,6 +197,7 @@ export interface FileRouteTypes {
     | '/404'
     | '/500'
     | '/503'
+    | '/clubs/$id'
     | '/errors/$error'
     | '/settings/appearance'
     | '/settings/'
@@ -204,6 +215,7 @@ export interface FileRouteTypes {
     | '/500'
     | '/503'
     | '/'
+    | '/clubs/$id'
     | '/errors/$error'
     | '/settings/appearance'
     | '/settings'
@@ -223,6 +235,7 @@ export interface FileRouteTypes {
     | '/(errors)/500'
     | '/(errors)/503'
     | '/_authenticated/'
+    | '/_authenticated/clubs/$id'
     | '/_authenticated/errors/$error'
     | '/_authenticated/settings/appearance'
     | '/_authenticated/settings/'
@@ -363,8 +376,29 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedErrorsErrorRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/clubs/$id': {
+      id: '/_authenticated/clubs/$id'
+      path: '/$id'
+      fullPath: '/clubs/$id'
+      preLoaderRoute: typeof AuthenticatedClubsIdRouteRouteImport
+      parentRoute: typeof AuthenticatedClubsRouteRoute
+    }
   }
 }
+
+interface AuthenticatedClubsRouteRouteChildren {
+  AuthenticatedClubsIdRouteRoute: typeof AuthenticatedClubsIdRouteRoute
+}
+
+const AuthenticatedClubsRouteRouteChildren: AuthenticatedClubsRouteRouteChildren =
+  {
+    AuthenticatedClubsIdRouteRoute: AuthenticatedClubsIdRouteRoute,
+  }
+
+const AuthenticatedClubsRouteRouteWithChildren =
+  AuthenticatedClubsRouteRoute._addFileChildren(
+    AuthenticatedClubsRouteRouteChildren,
+  )
 
 interface AuthenticatedSettingsRouteRouteChildren {
   AuthenticatedSettingsAppearanceRoute: typeof AuthenticatedSettingsAppearanceRoute
@@ -383,14 +417,14 @@ const AuthenticatedSettingsRouteRouteWithChildren =
   )
 
 interface AuthenticatedRouteRouteChildren {
-  AuthenticatedClubsRouteRoute: typeof AuthenticatedClubsRouteRoute
+  AuthenticatedClubsRouteRoute: typeof AuthenticatedClubsRouteRouteWithChildren
   AuthenticatedSettingsRouteRoute: typeof AuthenticatedSettingsRouteRouteWithChildren
   AuthenticatedIndexRoute: typeof AuthenticatedIndexRoute
   AuthenticatedErrorsErrorRoute: typeof AuthenticatedErrorsErrorRoute
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
-  AuthenticatedClubsRouteRoute: AuthenticatedClubsRouteRoute,
+  AuthenticatedClubsRouteRoute: AuthenticatedClubsRouteRouteWithChildren,
   AuthenticatedSettingsRouteRoute: AuthenticatedSettingsRouteRouteWithChildren,
   AuthenticatedIndexRoute: AuthenticatedIndexRoute,
   AuthenticatedErrorsErrorRoute: AuthenticatedErrorsErrorRoute,
