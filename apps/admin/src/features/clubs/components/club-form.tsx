@@ -46,7 +46,14 @@ export function ClubForm({ initialData, onSubmit, isSubmitting }: ClubFormProps)
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className='grid gap-4'>
+      <form onSubmit={form.handleSubmit((data) => {
+        const cleaned = {
+          ...data,
+          establishedAt: data.establishedAt || null,
+          companyEstablishedAt: data.companyEstablishedAt || null,
+        }
+        onSubmit(cleaned as ClubFormValues)
+      })} className='grid gap-4'>
         <FormField
           control={form.control}
           name='name'
@@ -163,7 +170,7 @@ export function ClubForm({ initialData, onSubmit, isSubmitting }: ClubFormProps)
             <FormItem>
               <FormLabel>成立时间</FormLabel>
               <FormControl>
-                <Input type='date' {...field} />
+                <Input type='date' {...field} value={field.value ?? ''} />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -229,7 +236,7 @@ export function ClubForm({ initialData, onSubmit, isSubmitting }: ClubFormProps)
             <FormField control={form.control} name='companyEstablishedAt' render={({ field }) => (
               <FormItem>
                 <FormLabel>公司成立日期</FormLabel>
-                <FormControl><Input type='date' {...field} /></FormControl>
+                <FormControl><Input type='date' {...field} value={field.value ?? ''} /></FormControl>
                 <FormMessage />
               </FormItem>
             )} />

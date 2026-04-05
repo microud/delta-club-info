@@ -30,7 +30,7 @@ export class CreateClubDto {
   status?: ClubStatus;
 
   @IsOptional()
-  @ValidateIf((o) => o.establishedAt !== null && o.establishedAt !== '')
+  @ValidateIf((o) => o.establishedAt !== null)
   @IsDateString()
   establishedAt?: string | null;
 
@@ -63,7 +63,7 @@ export class CreateClubDto {
   registeredCapital?: string;
 
   @IsOptional()
-  @ValidateIf((o) => o.companyEstablishedAt !== null && o.companyEstablishedAt !== '')
+  @ValidateIf((o) => o.companyEstablishedAt !== null)
   @IsDateString()
   companyEstablishedAt?: string | null;
 

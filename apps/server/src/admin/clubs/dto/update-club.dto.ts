@@ -31,12 +31,12 @@ export class UpdateClubDto {
   status?: ClubStatus;
 
   @IsOptional()
-  @ValidateIf((o) => o.establishedAt !== null && o.establishedAt !== '')
+  @ValidateIf((o) => o.establishedAt !== null)
   @IsDateString()
   establishedAt?: string | null;
 
   @IsOptional()
-  @ValidateIf((o) => o.closedAt !== null && o.closedAt !== '')
+  @ValidateIf((o) => o.closedAt !== null)
   @IsDateString()
   closedAt?: string | null;
 
@@ -73,7 +73,7 @@ export class UpdateClubDto {
   registeredCapital?: string;
 
   @IsOptional()
-  @ValidateIf((o) => o.companyEstablishedAt !== null && o.companyEstablishedAt !== '')
+  @ValidateIf((o) => o.companyEstablishedAt !== null)
   @IsDateString()
   companyEstablishedAt?: string | null;
 
