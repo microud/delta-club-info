@@ -7,7 +7,7 @@ async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
   // Parse XML body as raw text for WeChat Work webhook
-  app.use('/webhook/wechat-work', express.text({ type: 'text/xml' }));
+  app.use('/webhook/wechat-work', express.text({ type: ['text/xml', 'application/xml'] }));
 
   app.useGlobalPipes(
     new ValidationPipe({

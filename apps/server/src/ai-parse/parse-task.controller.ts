@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Param, Query, Body, UseGuards } from '@nestjs/common';
+import { Controller, Get, Post, Param, Query, Body, UseGuards, Logger } from '@nestjs/common';
 import { AdminGuard } from '../common/guards/admin.guard';
 import { ParseTaskService } from './parse-task.service';
 import { ConfirmParseDto } from './dto/confirm-parse.dto';
@@ -6,6 +6,8 @@ import { ConfirmParseDto } from './dto/confirm-parse.dto';
 @Controller('admin/parse-tasks')
 @UseGuards(AdminGuard)
 export class ParseTaskController {
+  private readonly logger = new Logger(ParseTaskController.name);
+
   constructor(private readonly parseTaskService: ParseTaskService) {}
 
   @Get()
@@ -19,8 +21,13 @@ export class ParseTaskController {
   }
 
   @Post(':id/retry')
-  retry(@Param('id') id: string) {
-    this.parseTaskService.retryParse(id);
+  async retry(@Param('id') id: string) {
+    // 先验证 task 存在
+    await this.parseTaskService.findOne(id);
+    // 异步触发解析
+    this.parseTaskService.retryParse(id).catch((e) => {
+      this.logger.error(`Retry parse failed for task ${id}`, e);
+    });
     return { message: 'Parse triggered' };
   }
 
