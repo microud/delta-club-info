@@ -1,5 +1,4 @@
-import { Outlet } from '@tanstack/react-router'
-import { Separator } from '@/components/ui/separator'
+import { Outlet, useMatches } from '@tanstack/react-router'
 import { ConfigDrawer } from '@/components/config-drawer'
 import { Header } from '@/components/layout/header'
 import { Main } from '@/components/layout/main'
@@ -7,7 +6,18 @@ import { ProfileDropdown } from '@/components/profile-dropdown'
 import { Search } from '@/components/search'
 import { ThemeSwitch } from '@/components/theme-switch'
 
+const pageTitles: Record<string, string> = {
+  appearance: '外观',
+  ai: 'AI 配置',
+  'wechat-work': '企业微信',
+}
+
 export function Settings() {
+  const matches = useMatches()
+  const lastMatch = matches[matches.length - 1]
+  const subPage = lastMatch?.id?.split('/').pop() ?? ''
+  const subTitle = pageTitles[subPage]
+
   return (
     <>
       <Header>
@@ -20,16 +30,10 @@ export function Settings() {
       </Header>
 
       <Main fixed>
-        <div className='space-y-0.5'>
-          <h1 className='text-2xl font-bold tracking-tight md:text-3xl'>
-            Settings
-          </h1>
-          <p className='text-muted-foreground'>
-            管理应用设置。
-          </p>
-        </div>
-        <Separator className='my-4 lg:my-6' />
-        <div className='flex flex-1 overflow-hidden p-1'>
+        <h1 className='text-2xl font-bold tracking-tight md:text-3xl'>
+          Settings{subTitle ? ` / ${subTitle}` : ''}
+        </h1>
+        <div className='mt-4 flex flex-1 overflow-hidden'>
           <Outlet />
         </div>
       </Main>
