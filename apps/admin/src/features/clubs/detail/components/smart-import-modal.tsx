@@ -19,8 +19,16 @@ import {
   TableRow,
 } from '@/components/ui/table'
 import { Input } from '@/components/ui/input'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select'
 import { X, Upload, Sparkles, Loader2, Trash2 } from 'lucide-react'
 import { aiImportServices, batchCreateClubServices } from '@/lib/api'
+import { serviceTypes, serviceTypeLabels } from '../../data/service-schema'
 
 type ParsedService = {
   type: string
@@ -293,6 +301,7 @@ export function SmartImportModal({
               <Table>
                 <TableHeader>
                   <TableRow>
+                    <TableHead>服务类型</TableHead>
                     <TableHead>玩法名称</TableHead>
                     <TableHead>价格(元)</TableHead>
                     <TableHead>保底(万哈夫币)</TableHead>
@@ -306,6 +315,23 @@ export function SmartImportModal({
                       key={i}
                       className={isDuplicate(svc) ? 'bg-yellow-50 dark:bg-yellow-950/20' : ''}
                     >
+                      <TableCell>
+                        <Select
+                          value={svc.type}
+                          onValueChange={(value) => updateParsedService(i, 'type', value)}
+                        >
+                          <SelectTrigger className='h-8 w-32'>
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {serviceTypes.map((t) => (
+                              <SelectItem key={t} value={t}>
+                                {serviceTypeLabels[t]}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </TableCell>
                       <TableCell>
                         <Input
                           value={svc.gameName}
