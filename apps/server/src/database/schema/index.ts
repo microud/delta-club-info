@@ -4,3 +4,4 @@ export * from './club-service.schema';
 export * from './club-rule.schema';
 export * from './promotion-order.schema';
 export * from './system-config.schema';
+export * from './blogger.schema';

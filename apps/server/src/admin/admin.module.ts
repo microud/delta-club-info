@@ -14,6 +14,8 @@ import { PromotionsController } from './promotions/promotions.controller';
 import { PromotionsService } from './promotions/promotions.service';
 import { SystemConfigsController } from './system-configs/system-configs.controller';
 import { SystemConfigsService } from './system-configs/system-configs.service';
+import { BloggersController } from './bloggers/bloggers.controller';
+import { BloggersService } from './bloggers/bloggers.service';
 
 @Module({
   imports: [
@@ -32,6 +34,7 @@ import { SystemConfigsService } from './system-configs/system-configs.service';
     ClubRulesController,
     PromotionsController,
     SystemConfigsController,
+    BloggersController,
   ],
   providers: [
     AuthService,
@@ -41,6 +44,7 @@ import { SystemConfigsService } from './system-configs/system-configs.service';
     ClubRulesService,
     PromotionsService,
     SystemConfigsService,
+    BloggersService,
   ],
 })
 export class AdminModule {}
