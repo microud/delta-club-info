@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from 'react'
 import { toast } from 'sonner'
-import { IconPlus, IconPencil, IconTrash } from '@tabler/icons-react'
+import { Plus, Pencil, Trash2 } from 'lucide-react'
 import type { AiConfigDto } from '@delta-club/shared'
 import {
   getAiConfigs,
@@ -110,7 +110,7 @@ export function SettingsAi() {
       <div className='space-y-4'>
         <div className='flex justify-end'>
           <Button onClick={handleCreate} size='sm'>
-            <IconPlus className='mr-1 h-4 w-4' />
+            <Plus className='mr-1 h-4 w-4' />
             新增配置
           </Button>
         </div>
@@ -134,7 +134,7 @@ export function SettingsAi() {
                       className='h-8 w-8'
                       onClick={() => handleEdit(config)}
                     >
-                      <IconPencil className='h-4 w-4' />
+                      <Pencil className='h-4 w-4' />
                     </Button>
                     <Button
                       variant='ghost'
@@ -142,7 +142,7 @@ export function SettingsAi() {
                       className='h-8 w-8 text-destructive'
                       onClick={() => setDeleteTarget(config)}
                     >
-                      <IconTrash className='h-4 w-4' />
+                      <Trash2 className='h-4 w-4' />
                     </Button>
                   </div>
                 </CardHeader>
