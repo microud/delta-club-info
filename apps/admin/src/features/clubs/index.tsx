@@ -6,7 +6,7 @@ import { Main } from '@/components/layout/main'
 import { ProfileDropdown } from '@/components/profile-dropdown'
 import { ThemeSwitch } from '@/components/theme-switch'
 import { Button } from '@/components/ui/button'
-import { getClubs, createClub, deleteClub } from '@/lib/api'
+import { getClubs, createClub, updateClub, deleteClub } from '@/lib/api'
 import { type Club, type ClubFormValues } from './data/schema'
 import { ClubsTable } from './components/clubs-table'
 import { ClubsActionDialog } from './components/clubs-action-dialog'
@@ -25,6 +25,8 @@ export default function ClubsPage() {
 
   // Dialog states
   const [createOpen, setCreateOpen] = useState(false)
+  const [editOpen, setEditOpen] = useState(false)
+  const [editTarget, setEditTarget] = useState<Club | null>(null)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [deleteOpen, setDeleteOpen] = useState(false)
   const [deleteTarget, setDeleteTarget] = useState<Club | null>(null)
@@ -58,6 +60,27 @@ export default function ClubsPage() {
       fetchClubs()
     } catch {
       toast.error('创建失败')
+    } finally {
+      setIsSubmitting(false)
+    }
+  }
+
+  const handleEdit = (club: Club) => {
+    setEditTarget(club)
+    setEditOpen(true)
+  }
+
+  const handleUpdate = async (data: ClubFormValues) => {
+    if (!editTarget) return
+    try {
+      setIsSubmitting(true)
+      await updateClub(editTarget.id, data)
+      toast.success('更新成功')
+      setEditOpen(false)
+      setEditTarget(null)
+      fetchClubs()
+    } catch {
+      toast.error('更新失败')
     } finally {
       setIsSubmitting(false)
     }
@@ -103,6 +126,7 @@ export default function ClubsPage() {
             total={total}
             pagination={pagination}
             onPaginationChange={setPagination}
+            onEdit={handleEdit}
           />
         )}
       </Main>
@@ -111,6 +135,29 @@ export default function ClubsPage() {
         open={createOpen}
         onOpenChange={setCreateOpen}
         onSubmit={handleCreate}
+        isSubmitting={isSubmitting}
+      />
+
+      <ClubsActionDialog
+        open={editOpen}
+        onOpenChange={(open) => {
+          setEditOpen(open)
+          if (!open) setEditTarget(null)
+        }}
+        initialData={
+          editTarget
+            ? {
+                name: editTarget.name,
+                logo: editTarget.logo ?? '',
+                description: editTarget.description ?? '',
+                wechatOfficialAccount: editTarget.wechatOfficialAccount ?? '',
+                wechatMiniProgram: editTarget.wechatMiniProgram ?? '',
+                contactInfo: editTarget.contactInfo ?? '',
+                establishedAt: editTarget.establishedAt ?? '',
+              }
+            : undefined
+        }
+        onSubmit={handleUpdate}
         isSubmitting={isSubmitting}
       />
 

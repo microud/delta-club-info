@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 import {
   type ColumnFiltersState,
   type OnChangeFn,
@@ -25,21 +25,23 @@ import {
 } from '@/components/ui/table'
 import { DataTablePagination, DataTableToolbar } from '@/components/data-table'
 import { type Club, clubStatusLabels } from '../data/schema'
-import { clubsColumns as columns } from './clubs-columns'
+import { getClubsColumns } from './clubs-columns'
 
 type ClubsTableProps = {
   data: Club[]
   total: number
   pagination: PaginationState
   onPaginationChange: OnChangeFn<PaginationState>
+  onEdit: (club: Club) => void
 }
 
 const statusFilterOptions = Object.entries(clubStatusLabels).map(
   ([value, label]) => ({ value, label })
 )
 
-export function ClubsTable({ data, total, pagination, onPaginationChange }: ClubsTableProps) {
+export function ClubsTable({ data, total, pagination, onPaginationChange, onEdit }: ClubsTableProps) {
   const router = useRouter()
+  const columns = useMemo(() => getClubsColumns({ onEdit }), [onEdit])
 
   const [rowSelection, setRowSelection] = useState({})
   const [sorting, setSorting] = useState<SortingState>([])
