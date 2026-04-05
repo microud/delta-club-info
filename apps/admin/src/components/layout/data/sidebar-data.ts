@@ -2,7 +2,6 @@ import {
   LayoutDashboard,
   Building2,
   Megaphone,
-  Palette,
   UserSearch,
   Bot,
   Video,
@@ -56,11 +55,6 @@ export const sidebarData: SidebarData = {
     {
       title: '设置',
       items: [
-        {
-          title: '外观',
-          url: '/settings/appearance',
-          icon: Palette,
-        },
         {
           title: '企业微信',
           url: '/settings/wechat-work',

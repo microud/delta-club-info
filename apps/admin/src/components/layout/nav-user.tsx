@@ -72,9 +72,9 @@ export function NavUser() {
               <DropdownMenuSeparator />
               <DropdownMenuGroup>
                 <DropdownMenuItem asChild>
-                  <Link to='/settings/appearance'>
+                  <Link to='/settings/ai'>
                     <Settings />
-                    外观设置
+                    设置
                   </Link>
                 </DropdownMenuItem>
               </DropdownMenuGroup>

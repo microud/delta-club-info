@@ -7,7 +7,6 @@ import { Search } from '@/components/search'
 import { ThemeSwitch } from '@/components/theme-switch'
 
 const pageTitles: Record<string, string> = {
-  appearance: '外观',
   ai: 'AI 配置',
   'wechat-work': '企业微信',
 }
