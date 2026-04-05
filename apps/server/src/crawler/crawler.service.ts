@@ -27,7 +27,7 @@ export class CrawlerService implements OnModuleInit {
     bilibiliAdapter: BilibiliAdapter,
     douyinAdapter: DouyinAdapter,
   ) {
-    this.adapters = new Map([
+    this.adapters = new Map<string, CrawlerAdapter>([
       ['BILIBILI', bilibiliAdapter],
       ['DOUYIN', douyinAdapter],
     ]);
