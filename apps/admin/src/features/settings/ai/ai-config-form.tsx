@@ -19,35 +19,55 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
-import { showSubmittedData } from '@/lib/show-submitted-data'
+import type { AiConfigDto } from '@delta-club/shared'
 
 const aiConfigFormSchema = z.object({
+  name: z.string().min(1, '请输入配置名称'),
   provider: z.enum(['openai', 'anthropic', 'xai', 'deepseek']),
   apiKey: z.string().min(1, '请输入 API Key'),
   baseUrl: z.string().url('请输入有效的 URL').optional().or(z.literal('')),
   model: z.string().min(1, '请输入模型名称'),
 })
 
-type AiConfigFormValues = z.infer<typeof aiConfigFormSchema>
+export type AiConfigFormValues = z.infer<typeof aiConfigFormSchema>
 
-export function AiConfigForm() {
+interface AiConfigFormProps {
+  defaultValues?: AiConfigDto
+  onSubmit: (data: AiConfigFormValues) => void
+  isSubmitting?: boolean
+}
+
+export function AiConfigForm({ defaultValues, onSubmit, isSubmitting }: AiConfigFormProps) {
   const form = useForm<AiConfigFormValues>({
     resolver: zodResolver(aiConfigFormSchema),
     defaultValues: {
-      provider: 'openai',
-      apiKey: '',
-      baseUrl: '',
-      model: '',
+      name: defaultValues?.name ?? '',
+      provider: (defaultValues?.provider as AiConfigFormValues['provider']) ?? 'openai',
+      apiKey: defaultValues?.apiKey ?? '',
+      baseUrl: defaultValues?.baseUrl ?? '',
+      model: defaultValues?.model ?? '',
     },
   })
 
-  function onSubmit(data: AiConfigFormValues) {
-    showSubmittedData(data)
-  }
-
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className='space-y-6'>
+      <form onSubmit={form.handleSubmit(onSubmit)} className='space-y-4'>
+        <FormField
+          control={form.control}
+          name='name'
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>配置名称</FormLabel>
+              <FormControl>
+                <Input placeholder='如：图片解析-xAI' {...field} />
+              </FormControl>
+              <FormDescription>
+                为这个配置起一个便于识别的名称。
+              </FormDescription>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
         <FormField
           control={form.control}
           name='provider'
@@ -67,9 +87,6 @@ export function AiConfigForm() {
                   <SelectItem value='deepseek'>DeepSeek</SelectItem>
                 </SelectContent>
               </Select>
-              <FormDescription>
-                选择 AI 服务提供商。
-              </FormDescription>
               <FormMessage />
             </FormItem>
           )}
@@ -83,9 +100,6 @@ export function AiConfigForm() {
               <FormControl>
                 <Input type='password' placeholder='sk-••••••••' {...field} />
               </FormControl>
-              <FormDescription>
-                AI 服务商提供的 API 密钥。
-              </FormDescription>
               <FormMessage />
             </FormItem>
           )}
@@ -115,14 +129,15 @@ export function AiConfigForm() {
               <FormControl>
                 <Input placeholder='gpt-4o' {...field} />
               </FormControl>
-              <FormDescription>
-                指定使用的模型名称。
-              </FormDescription>
               <FormMessage />
             </FormItem>
           )}
         />
-        <Button type='submit'>保存配置</Button>
+        <div className='flex justify-end'>
+          <Button type='submit' disabled={isSubmitting}>
+            {isSubmitting ? '保存中...' : '保存'}
+          </Button>
+        </div>
       </form>
     </Form>
   )

@@ -1,8 +1,11 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { createXai } from '@ai-sdk/xai';
+import { createOpenAI } from '@ai-sdk/openai';
+import { createAnthropic } from '@ai-sdk/anthropic';
 import { generateObject } from 'ai';
 import { z } from 'zod';
 import { SystemConfigsService } from '../admin/system-configs/system-configs.service';
+import { AiConfigsService } from '../admin/ai-configs/ai-configs.service';
 import { StorageService } from '../storage/storage.service';
 
 const parsedResultSchema = z.object({
@@ -33,16 +36,34 @@ export class AiParseService {
 
   constructor(
     private readonly configService: SystemConfigsService,
+    private readonly aiConfigsService: AiConfigsService,
     private readonly storageService: StorageService,
   ) {}
 
-  async parseImages(imageKeys: string[], textContents: string[]) {
-    const apiKey = await this.configService.getValue('xai.api_key');
-    const model =
-      (await this.configService.getValue('xai.model')) || 'grok-4-1-fast-non-reasoning';
-    if (!apiKey) throw new Error('xAI API key not configured');
+  private createProvider(provider: string, apiKey: string, baseUrl: string | null) {
+    switch (provider) {
+      case 'xai':
+        return createXai({ apiKey, ...(baseUrl ? { baseURL: baseUrl } : {}) });
+      case 'openai':
+        return createOpenAI({ apiKey, ...(baseUrl ? { baseURL: baseUrl } : {}) });
+      case 'anthropic':
+        return createAnthropic({ apiKey, ...(baseUrl ? { baseURL: baseUrl } : {}) });
+      case 'deepseek':
+        return createOpenAI({
+          apiKey,
+          baseURL: baseUrl || 'https://api.deepseek.com',
+        });
+      default:
+        throw new Error(`不支持的 AI 服务商: ${provider}`);
+    }
+  }
 
-    const provider = createXai({ apiKey });
+  async parseImages(imageKeys: string[], textContents: string[]) {
+    const aiConfigId = await this.configService.getValue('ai_parse.ai_config_id');
+    if (!aiConfigId) throw new Error('未配置 AI 解析使用的 AI 配置，请在系统设置中绑定');
+
+    const aiConfig = await this.aiConfigsService.findById(aiConfigId);
+    const provider = this.createProvider(aiConfig.provider, aiConfig.apiKey, aiConfig.baseUrl);
 
     const content: Array<{ type: 'text'; text: string } | { type: 'image'; image: Buffer }> = [];
 
@@ -69,7 +90,7 @@ export class AiParseService {
     }
 
     const { object } = await generateObject({
-      model: provider(model),
+      model: provider(aiConfig.model),
       schema: parsedResultSchema,
       messages: [{ role: 'user', content }],
     });

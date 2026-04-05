@@ -11,6 +11,10 @@ import type {
   CrawlTaskDto,
   VideoDto,
   ParseTaskDto,
+  AiConfigDto,
+  CreateAiConfigDto,
+  UpdateAiConfigDto,
+  SystemConfigDto,
 } from '@delta-club/shared'
 
 const api = axios.create({
@@ -147,5 +151,25 @@ export const confirmParseTask = (id: string, data: { clubId: string; parsedResul
 // Wechat Avatar
 export const fetchWechatAvatar = (wechatOfficialAccount: string) =>
   api.post<{ logoUrl: string }>('/clubs/fetch-wechat-avatar', { wechatOfficialAccount }).then((res) => res.data)
+
+// AI Configs
+export const getAiConfigs = () =>
+  api.get<AiConfigDto[]>('/ai-configs').then((res) => res.data)
+
+export const createAiConfig = (data: CreateAiConfigDto) =>
+  api.post<AiConfigDto>('/ai-configs', data).then((res) => res.data)
+
+export const updateAiConfig = (id: string, data: UpdateAiConfigDto) =>
+  api.put<AiConfigDto>(`/ai-configs/${id}`, data).then((res) => res.data)
+
+export const deleteAiConfig = (id: string) =>
+  api.delete(`/ai-configs/${id}`)
+
+// System Configs
+export const getSystemConfigs = () =>
+  api.get<SystemConfigDto[]>('/system-configs').then((res) => res.data)
+
+export const updateSystemConfig = (key: string, value: string) =>
+  api.put<SystemConfigDto>(`/system-configs/${key}`, { value }).then((res) => res.data)
 
 export default api

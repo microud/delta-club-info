@@ -116,6 +116,33 @@ export interface VideoDto {
   createdAt: string;
 }
 
+export interface AiConfigDto {
+  id: string;
+  name: string;
+  provider: string;
+  apiKey: string;
+  baseUrl: string | null;
+  model: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface CreateAiConfigDto {
+  name: string;
+  provider: string;
+  apiKey: string;
+  baseUrl?: string;
+  model: string;
+}
+
+export interface UpdateAiConfigDto {
+  name?: string;
+  provider?: string;
+  apiKey?: string;
+  baseUrl?: string;
+  model?: string;
+}
+
 export interface SystemConfigDto {
   id: string;
   key: string;

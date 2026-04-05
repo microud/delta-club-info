@@ -20,6 +20,8 @@ import { AdminCrawlTasksController } from './crawl-tasks/crawl-tasks.controller'
 import { AdminCrawlTasksService } from './crawl-tasks/crawl-tasks.service';
 import { AdminVideosController } from './videos/videos.controller';
 import { AdminVideosService } from './videos/videos.service';
+import { AiConfigsController } from './ai-configs/ai-configs.controller';
+import { AiConfigsService } from './ai-configs/ai-configs.service';
 import { CrawlerModule } from '../crawler/crawler.module';
 
 @Module({
@@ -43,6 +45,7 @@ import { CrawlerModule } from '../crawler/crawler.module';
     BloggersController,
     AdminCrawlTasksController,
     AdminVideosController,
+    AiConfigsController,
   ],
   providers: [
     AuthService,
@@ -55,6 +58,7 @@ import { CrawlerModule } from '../crawler/crawler.module';
     BloggersService,
     AdminCrawlTasksService,
     AdminVideosService,
+    AiConfigsService,
   ],
 })
 export class AdminModule {}
