@@ -19,7 +19,8 @@
     "onlyBuiltDependencies": [
       "bcrypt",
       "esbuild",
-      "@nestjs/core"
+      "@nestjs/core",
+      "@swc/core"
     ]
   }
 }
