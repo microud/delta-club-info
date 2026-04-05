@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   Body,
   Controller,
   Delete,
@@ -26,6 +27,16 @@ export class ClubsController {
     @Query('search') search?: string,
   ) {
     return this.clubsService.findAll(page, pageSize, search);
+  }
+
+  @Post('fetch-wechat-avatar')
+  async fetchWechatAvatar(@Body() body: { wechatOfficialAccount: string }) {
+    try {
+      const logoUrl = await this.clubsService.fetchWechatAvatar(body.wechatOfficialAccount);
+      return { logoUrl };
+    } catch {
+      throw new BadRequestException('获取失败，请手动上传');
+    }
   }
 
   @Get(':id')

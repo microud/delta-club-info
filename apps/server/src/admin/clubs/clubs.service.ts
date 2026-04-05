@@ -5,11 +5,14 @@ import { DRIZZLE } from '../../database/database.module';
 import * as schema from '../../database/schema';
 import { CreateClubDto } from './dto/create-club.dto';
 import { UpdateClubDto } from './dto/update-club.dto';
+import { StorageService } from '../../storage/storage.service';
+import axios from 'axios';
 
 @Injectable()
 export class ClubsService {
   constructor(
     @Inject(DRIZZLE) private readonly db: NodePgDatabase<typeof schema>,
+    private readonly storageService: StorageService,
   ) {}
 
   async findAll(page = 1, pageSize = 20, search?: string) {
@@ -70,5 +73,31 @@ export class ClubsService {
 
     if (!club) throw new NotFoundException('Club not found');
     return club;
+  }
+
+  async fetchWechatAvatar(wechatOfficialAccount: string): Promise<string> {
+    // 通过搜狗微信搜索获取公众号头像
+    const searchUrl = `https://weixin.sogou.com/weixin?type=1&query=${encodeURIComponent(wechatOfficialAccount)}`;
+
+    const response = await axios.get(searchUrl, {
+      headers: {
+        'User-Agent':
+          'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36',
+      },
+    });
+
+    const html = response.data as string;
+    const avatarMatch = html.match(/img[^>]+src="(https?:\/\/[^"]+)"/);
+    if (!avatarMatch) {
+      throw new Error('无法获取公众号头像');
+    }
+
+    const avatarUrl = avatarMatch[1];
+    const imgResponse = await axios.get(avatarUrl, { responseType: 'arraybuffer' });
+    const buffer = Buffer.from(imgResponse.data);
+    const key = `club-logos/${wechatOfficialAccount}-${Date.now()}.jpg`;
+    await this.storageService.upload(key, buffer, 'image/jpeg');
+
+    return this.storageService.getPublicUrl(key);
   }
 }
