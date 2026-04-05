@@ -10,6 +10,7 @@ import type {
   BloggerDto,
   CrawlTaskDto,
   VideoDto,
+  ParseTaskDto,
 } from '@delta-club/shared'
 
 const api = axios.create({
@@ -129,5 +130,22 @@ export const setCrawlEnabled = (enabled: boolean) =>
 // Videos
 export const getVideos = (params?: { platform?: string; category?: string }) =>
   api.get<VideoDto[]>('/videos', { params }).then((res) => res.data)
+
+// Parse Tasks
+export const getParseTasks = (status?: string) =>
+  api.get<ParseTaskDto[]>('/parse-tasks', { params: { status } }).then((res) => res.data)
+
+export const getParseTask = (id: string) =>
+  api.get<ParseTaskDto>(`/parse-tasks/${id}`).then((res) => res.data)
+
+export const retryParseTask = (id: string) =>
+  api.post(`/parse-tasks/${id}/retry`).then((res) => res.data)
+
+export const confirmParseTask = (id: string, data: { clubId: string; parsedResult?: unknown }) =>
+  api.post(`/parse-tasks/${id}/confirm`, data).then((res) => res.data)
+
+// Wechat Avatar
+export const fetchWechatAvatar = (wechatOfficialAccount: string) =>
+  api.post<{ logoUrl: string }>('/clubs/fetch-wechat-avatar', { wechatOfficialAccount }).then((res) => res.data)
 
 export default api

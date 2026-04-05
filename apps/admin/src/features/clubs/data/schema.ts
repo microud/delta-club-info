@@ -13,6 +13,14 @@ export const clubSchema = z.object({
   closedAt: z.string().nullable(),
   predecessorId: z.string().nullable(),
   closureNote: z.string().nullable(),
+  companyName: z.string().nullable(),
+  creditCode: z.string().nullable(),
+  legalPerson: z.string().nullable(),
+  registeredAddress: z.string().nullable(),
+  businessScope: z.string().nullable(),
+  registeredCapital: z.string().nullable(),
+  companyEstablishedAt: z.string().nullable(),
+  businessStatus: z.string().nullable(),
   createdAt: z.string(),
   updatedAt: z.string(),
 })
@@ -27,6 +35,14 @@ export const clubFormSchema = z.object({
   wechatMiniProgram: z.string().optional(),
   contactInfo: z.string().optional(),
   establishedAt: z.string().optional(),
+  companyName: z.string().optional(),
+  creditCode: z.string().optional(),
+  legalPerson: z.string().optional(),
+  registeredAddress: z.string().optional(),
+  businessScope: z.string().optional(),
+  registeredCapital: z.string().optional(),
+  companyEstablishedAt: z.string().optional(),
+  businessStatus: z.string().optional(),
 })
 
 export type ClubFormValues = z.infer<typeof clubFormSchema>
