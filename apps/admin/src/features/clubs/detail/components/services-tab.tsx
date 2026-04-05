@@ -1,7 +1,9 @@
 import { useCallback, useEffect, useState } from 'react'
 import { toast } from 'sonner'
+import { Sparkles } from 'lucide-react'
 import type { ClubServiceDto } from '@delta-club/shared'
 import { Button } from '@/components/ui/button'
+import { SmartImportModal } from './smart-import-modal'
 import {
   Dialog,
   DialogContent,
@@ -85,6 +87,7 @@ export function ServicesTab({ clubId }: ServicesTabProps) {
   const [deleteOpen, setDeleteOpen] = useState(false)
   const [deleteTarget, setDeleteTarget] = useState<ClubServiceDto | null>(null)
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const [smartImportOpen, setSmartImportOpen] = useState(false)
 
   const fetchServices = useCallback(async () => {
     try {
@@ -161,7 +164,11 @@ export function ServicesTab({ clubId }: ServicesTabProps) {
 
   return (
     <div className='space-y-4'>
-      <div className='flex justify-end'>
+      <div className='flex justify-end gap-2'>
+        <Button variant='outline' onClick={() => setSmartImportOpen(true)}>
+          <Sparkles className='h-4 w-4 mr-2' />
+          智能录入
+        </Button>
         <Button onClick={() => setCreateOpen(true)}>添加服务</Button>
       </div>
 
@@ -256,6 +263,14 @@ export function ServicesTab({ clubId }: ServicesTabProps) {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      <SmartImportModal
+        clubId={clubId}
+        open={smartImportOpen}
+        onOpenChange={setSmartImportOpen}
+        onImported={fetchServices}
+        existingServices={services}
+      />
     </div>
   )
 }
