@@ -29,7 +29,7 @@ export function ClubsActionDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className='sm:max-w-lg'>
         <DialogHeader>
-          <DialogTitle>{isEdit ? '编辑俱乐部' : '创建俱乐部'}</DialogTitle>
+          <DialogTitle>{isEdit ? '编辑俱乐部' : '添加俱乐部'}</DialogTitle>
           <DialogDescription>
             {isEdit
               ? '修改俱乐部信息，完成后点击保存。'

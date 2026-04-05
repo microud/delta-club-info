@@ -114,7 +114,7 @@ export default function ClubsPage() {
             <h2 className='text-2xl font-bold tracking-tight'>俱乐部管理</h2>
             <p className='text-muted-foreground'>管理所有三角洲陪玩俱乐部信息</p>
           </div>
-          <Button onClick={() => setCreateOpen(true)}>创建俱乐部</Button>
+          <Button onClick={() => setCreateOpen(true)}>添加俱乐部</Button>
         </div>
         {loading ? (
           <div className='flex flex-1 items-center justify-center'>
