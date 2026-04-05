@@ -22,6 +22,7 @@ import { Route as authSignInRouteImport } from './routes/(auth)/sign-in'
 import { Route as authOtpRouteImport } from './routes/(auth)/otp'
 import { Route as authForgotPasswordRouteImport } from './routes/(auth)/forgot-password'
 import { Route as AuthenticatedSettingsRouteRouteImport } from './routes/_authenticated/settings/route'
+import { Route as AuthenticatedPromotionsRouteRouteImport } from './routes/_authenticated/promotions/route'
 import { Route as AuthenticatedClubsRouteRouteImport } from './routes/_authenticated/clubs/route'
 import { Route as AuthenticatedSettingsIndexRouteImport } from './routes/_authenticated/settings/index'
 import { Route as AuthenticatedSettingsAppearanceRouteImport } from './routes/_authenticated/settings/appearance'
@@ -93,6 +94,12 @@ const AuthenticatedSettingsRouteRoute =
     path: '/settings',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedPromotionsRouteRoute =
+  AuthenticatedPromotionsRouteRouteImport.update({
+    id: '/promotions',
+    path: '/promotions',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedClubsRouteRoute = AuthenticatedClubsRouteRouteImport.update({
   id: '/clubs',
   path: '/clubs',
@@ -126,6 +133,7 @@ const AuthenticatedClubsIdRouteRoute =
 export interface FileRoutesByFullPath {
   '/': typeof AuthenticatedIndexRoute
   '/clubs': typeof AuthenticatedClubsRouteRouteWithChildren
+  '/promotions': typeof AuthenticatedPromotionsRouteRoute
   '/settings': typeof AuthenticatedSettingsRouteRouteWithChildren
   '/forgot-password': typeof authForgotPasswordRoute
   '/otp': typeof authOtpRoute
@@ -144,6 +152,7 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/clubs': typeof AuthenticatedClubsRouteRouteWithChildren
+  '/promotions': typeof AuthenticatedPromotionsRouteRoute
   '/forgot-password': typeof authForgotPasswordRoute
   '/otp': typeof authOtpRoute
   '/sign-in': typeof authSignInRoute
@@ -164,6 +173,7 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
   '/_authenticated/clubs': typeof AuthenticatedClubsRouteRouteWithChildren
+  '/_authenticated/promotions': typeof AuthenticatedPromotionsRouteRoute
   '/_authenticated/settings': typeof AuthenticatedSettingsRouteRouteWithChildren
   '/(auth)/forgot-password': typeof authForgotPasswordRoute
   '/(auth)/otp': typeof authOtpRoute
@@ -186,6 +196,7 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/clubs'
+    | '/promotions'
     | '/settings'
     | '/forgot-password'
     | '/otp'
@@ -204,6 +215,7 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/clubs'
+    | '/promotions'
     | '/forgot-password'
     | '/otp'
     | '/sign-in'
@@ -223,6 +235,7 @@ export interface FileRouteTypes {
     | '__root__'
     | '/_authenticated'
     | '/_authenticated/clubs'
+    | '/_authenticated/promotions'
     | '/_authenticated/settings'
     | '/(auth)/forgot-password'
     | '/(auth)/otp'
@@ -348,6 +361,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedSettingsRouteRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/promotions': {
+      id: '/_authenticated/promotions'
+      path: '/promotions'
+      fullPath: '/promotions'
+      preLoaderRoute: typeof AuthenticatedPromotionsRouteRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/clubs': {
       id: '/_authenticated/clubs'
       path: '/clubs'
@@ -418,6 +438,7 @@ const AuthenticatedSettingsRouteRouteWithChildren =
 
 interface AuthenticatedRouteRouteChildren {
   AuthenticatedClubsRouteRoute: typeof AuthenticatedClubsRouteRouteWithChildren
+  AuthenticatedPromotionsRouteRoute: typeof AuthenticatedPromotionsRouteRoute
   AuthenticatedSettingsRouteRoute: typeof AuthenticatedSettingsRouteRouteWithChildren
   AuthenticatedIndexRoute: typeof AuthenticatedIndexRoute
   AuthenticatedErrorsErrorRoute: typeof AuthenticatedErrorsErrorRoute
@@ -425,6 +446,7 @@ interface AuthenticatedRouteRouteChildren {
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedClubsRouteRoute: AuthenticatedClubsRouteRouteWithChildren,
+  AuthenticatedPromotionsRouteRoute: AuthenticatedPromotionsRouteRoute,
   AuthenticatedSettingsRouteRoute: AuthenticatedSettingsRouteRouteWithChildren,
   AuthenticatedIndexRoute: AuthenticatedIndexRoute,
   AuthenticatedErrorsErrorRoute: AuthenticatedErrorsErrorRoute,
