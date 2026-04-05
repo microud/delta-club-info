@@ -58,7 +58,7 @@ function getPriceSummary(service: ClubServiceDto): string {
   }
 
   if (service.hasGuarantee && service.guaranteeHafuCoin) {
-    parts.push(`保底${service.guaranteeHafuCoin}万哈夫币`)
+    parts.push(`保底${Math.round(Number(service.guaranteeHafuCoin))}万哈夫币`)
   }
 
   return parts.join(' / ')
