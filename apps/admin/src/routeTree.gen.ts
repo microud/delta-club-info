@@ -27,7 +27,9 @@ import { Route as AuthenticatedBloggersRouteRouteImport } from './routes/_authen
 import { Route as AuthenticatedSettingsIndexRouteImport } from './routes/_authenticated/settings/index'
 import { Route as AuthenticatedParseTasksIndexRouteImport } from './routes/_authenticated/parse-tasks/index'
 import { Route as AuthenticatedClubsIndexRouteImport } from './routes/_authenticated/clubs/index'
+import { Route as AuthenticatedSettingsWechatWorkRouteImport } from './routes/_authenticated/settings/wechat-work'
 import { Route as AuthenticatedSettingsAppearanceRouteImport } from './routes/_authenticated/settings/appearance'
+import { Route as AuthenticatedSettingsAiRouteImport } from './routes/_authenticated/settings/ai'
 import { Route as AuthenticatedErrorsErrorRouteImport } from './routes/_authenticated/errors/$error'
 import { Route as AuthenticatedParseTasksIdRouteRouteImport } from './routes/_authenticated/parse-tasks/$id/route'
 import { Route as AuthenticatedClubsIdRouteRouteImport } from './routes/_authenticated/clubs/$id/route'
@@ -129,12 +131,23 @@ const AuthenticatedClubsIndexRoute = AuthenticatedClubsIndexRouteImport.update({
   path: '/',
   getParentRoute: () => AuthenticatedClubsRouteRoute,
 } as any)
+const AuthenticatedSettingsWechatWorkRoute =
+  AuthenticatedSettingsWechatWorkRouteImport.update({
+    id: '/wechat-work',
+    path: '/wechat-work',
+    getParentRoute: () => AuthenticatedSettingsRouteRoute,
+  } as any)
 const AuthenticatedSettingsAppearanceRoute =
   AuthenticatedSettingsAppearanceRouteImport.update({
     id: '/appearance',
     path: '/appearance',
     getParentRoute: () => AuthenticatedSettingsRouteRoute,
   } as any)
+const AuthenticatedSettingsAiRoute = AuthenticatedSettingsAiRouteImport.update({
+  id: '/ai',
+  path: '/ai',
+  getParentRoute: () => AuthenticatedSettingsRouteRoute,
+} as any)
 const AuthenticatedErrorsErrorRoute =
   AuthenticatedErrorsErrorRouteImport.update({
     id: '/errors/$error',
@@ -172,7 +185,9 @@ export interface FileRoutesByFullPath {
   '/clubs/$id': typeof AuthenticatedClubsIdRouteRoute
   '/parse-tasks/$id': typeof AuthenticatedParseTasksIdRouteRoute
   '/errors/$error': typeof AuthenticatedErrorsErrorRoute
+  '/settings/ai': typeof AuthenticatedSettingsAiRoute
   '/settings/appearance': typeof AuthenticatedSettingsAppearanceRoute
+  '/settings/wechat-work': typeof AuthenticatedSettingsWechatWorkRoute
   '/clubs/': typeof AuthenticatedClubsIndexRoute
   '/parse-tasks/': typeof AuthenticatedParseTasksIndexRoute
   '/settings/': typeof AuthenticatedSettingsIndexRoute
@@ -192,7 +207,9 @@ export interface FileRoutesByTo {
   '/clubs/$id': typeof AuthenticatedClubsIdRouteRoute
   '/parse-tasks/$id': typeof AuthenticatedParseTasksIdRouteRoute
   '/errors/$error': typeof AuthenticatedErrorsErrorRoute
+  '/settings/ai': typeof AuthenticatedSettingsAiRoute
   '/settings/appearance': typeof AuthenticatedSettingsAppearanceRoute
+  '/settings/wechat-work': typeof AuthenticatedSettingsWechatWorkRoute
   '/clubs': typeof AuthenticatedClubsIndexRoute
   '/parse-tasks': typeof AuthenticatedParseTasksIndexRoute
   '/settings': typeof AuthenticatedSettingsIndexRoute
@@ -217,7 +234,9 @@ export interface FileRoutesById {
   '/_authenticated/clubs/$id': typeof AuthenticatedClubsIdRouteRoute
   '/_authenticated/parse-tasks/$id': typeof AuthenticatedParseTasksIdRouteRoute
   '/_authenticated/errors/$error': typeof AuthenticatedErrorsErrorRoute
+  '/_authenticated/settings/ai': typeof AuthenticatedSettingsAiRoute
   '/_authenticated/settings/appearance': typeof AuthenticatedSettingsAppearanceRoute
+  '/_authenticated/settings/wechat-work': typeof AuthenticatedSettingsWechatWorkRoute
   '/_authenticated/clubs/': typeof AuthenticatedClubsIndexRoute
   '/_authenticated/parse-tasks/': typeof AuthenticatedParseTasksIndexRoute
   '/_authenticated/settings/': typeof AuthenticatedSettingsIndexRoute
@@ -242,7 +261,9 @@ export interface FileRouteTypes {
     | '/clubs/$id'
     | '/parse-tasks/$id'
     | '/errors/$error'
+    | '/settings/ai'
     | '/settings/appearance'
+    | '/settings/wechat-work'
     | '/clubs/'
     | '/parse-tasks/'
     | '/settings/'
@@ -262,7 +283,9 @@ export interface FileRouteTypes {
     | '/clubs/$id'
     | '/parse-tasks/$id'
     | '/errors/$error'
+    | '/settings/ai'
     | '/settings/appearance'
+    | '/settings/wechat-work'
     | '/clubs'
     | '/parse-tasks'
     | '/settings'
@@ -286,7 +309,9 @@ export interface FileRouteTypes {
     | '/_authenticated/clubs/$id'
     | '/_authenticated/parse-tasks/$id'
     | '/_authenticated/errors/$error'
+    | '/_authenticated/settings/ai'
     | '/_authenticated/settings/appearance'
+    | '/_authenticated/settings/wechat-work'
     | '/_authenticated/clubs/'
     | '/_authenticated/parse-tasks/'
     | '/_authenticated/settings/'
@@ -430,11 +455,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedClubsIndexRouteImport
       parentRoute: typeof AuthenticatedClubsRouteRoute
     }
+    '/_authenticated/settings/wechat-work': {
+      id: '/_authenticated/settings/wechat-work'
+      path: '/wechat-work'
+      fullPath: '/settings/wechat-work'
+      preLoaderRoute: typeof AuthenticatedSettingsWechatWorkRouteImport
+      parentRoute: typeof AuthenticatedSettingsRouteRoute
+    }
     '/_authenticated/settings/appearance': {
       id: '/_authenticated/settings/appearance'
       path: '/appearance'
       fullPath: '/settings/appearance'
       preLoaderRoute: typeof AuthenticatedSettingsAppearanceRouteImport
+      parentRoute: typeof AuthenticatedSettingsRouteRoute
+    }
+    '/_authenticated/settings/ai': {
+      id: '/_authenticated/settings/ai'
+      path: '/ai'
+      fullPath: '/settings/ai'
+      preLoaderRoute: typeof AuthenticatedSettingsAiRouteImport
       parentRoute: typeof AuthenticatedSettingsRouteRoute
     }
     '/_authenticated/errors/$error': {
@@ -494,13 +533,17 @@ const AuthenticatedParseTasksRouteRouteWithChildren =
   )
 
 interface AuthenticatedSettingsRouteRouteChildren {
+  AuthenticatedSettingsAiRoute: typeof AuthenticatedSettingsAiRoute
   AuthenticatedSettingsAppearanceRoute: typeof AuthenticatedSettingsAppearanceRoute
+  AuthenticatedSettingsWechatWorkRoute: typeof AuthenticatedSettingsWechatWorkRoute
   AuthenticatedSettingsIndexRoute: typeof AuthenticatedSettingsIndexRoute
 }
 
 const AuthenticatedSettingsRouteRouteChildren: AuthenticatedSettingsRouteRouteChildren =
   {
+    AuthenticatedSettingsAiRoute: AuthenticatedSettingsAiRoute,
     AuthenticatedSettingsAppearanceRoute: AuthenticatedSettingsAppearanceRoute,
+    AuthenticatedSettingsWechatWorkRoute: AuthenticatedSettingsWechatWorkRoute,
     AuthenticatedSettingsIndexRoute: AuthenticatedSettingsIndexRoute,
   }
 

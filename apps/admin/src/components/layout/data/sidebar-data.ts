@@ -7,6 +7,7 @@ import {
   Bot,
   Video,
   ScanText,
+  Smartphone,
 } from 'lucide-react'
 import { type SidebarData } from '../types'
 
@@ -59,6 +60,16 @@ export const sidebarData: SidebarData = {
           title: '外观',
           url: '/settings/appearance',
           icon: Palette,
+        },
+        {
+          title: '企业微信',
+          url: '/settings/wechat-work',
+          icon: Smartphone,
+        },
+        {
+          title: 'AI 配置',
+          url: '/settings/ai',
+          icon: Bot,
         },
       ],
     },
