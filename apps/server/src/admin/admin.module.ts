@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { Module, forwardRef } from '@nestjs/common';
 import { JwtModule } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
 import { AuthController } from './auth/auth.controller';
@@ -16,6 +16,11 @@ import { SystemConfigsController } from './system-configs/system-configs.control
 import { SystemConfigsService } from './system-configs/system-configs.service';
 import { BloggersController } from './bloggers/bloggers.controller';
 import { BloggersService } from './bloggers/bloggers.service';
+import { AdminCrawlTasksController } from './crawl-tasks/crawl-tasks.controller';
+import { AdminCrawlTasksService } from './crawl-tasks/crawl-tasks.service';
+import { AdminVideosController } from './videos/videos.controller';
+import { AdminVideosService } from './videos/videos.service';
+import { CrawlerModule } from '../crawler/crawler.module';
 
 @Module({
   imports: [
@@ -26,6 +31,7 @@ import { BloggersService } from './bloggers/bloggers.service';
         signOptions: { expiresIn: '7d' },
       }),
     }),
+    forwardRef(() => CrawlerModule),
   ],
   controllers: [
     AuthController,
@@ -35,6 +41,8 @@ import { BloggersService } from './bloggers/bloggers.service';
     PromotionsController,
     SystemConfigsController,
     BloggersController,
+    AdminCrawlTasksController,
+    AdminVideosController,
   ],
   providers: [
     AuthService,
@@ -45,6 +53,8 @@ import { BloggersService } from './bloggers/bloggers.service';
     PromotionsService,
     SystemConfigsService,
     BloggersService,
+    AdminCrawlTasksService,
+    AdminVideosService,
   ],
 })
 export class AdminModule {}
