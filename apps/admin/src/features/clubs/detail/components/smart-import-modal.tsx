@@ -21,7 +21,6 @@ import {
 import { Input } from '@/components/ui/input'
 import { X, Upload, Sparkles, Loader2, Trash2 } from 'lucide-react'
 import { uploadFile, aiImportServices, batchCreateClubServices } from '@/lib/api'
-import { serviceTypeLabels } from '../../data/service-schema'
 
 type ParsedService = {
   type: string
