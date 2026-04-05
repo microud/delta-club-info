@@ -20,7 +20,7 @@ import {
 } from '@/components/ui/table'
 import { Input } from '@/components/ui/input'
 import { X, Upload, Sparkles, Loader2, Trash2 } from 'lucide-react'
-import { uploadFile, aiImportServices, batchCreateClubServices } from '@/lib/api'
+import { aiImportServices, batchCreateClubServices } from '@/lib/api'
 
 type ParsedService = {
   type: string
@@ -47,7 +47,7 @@ export function SmartImportModal({
   existingServices,
 }: SmartImportModalProps) {
   const [step, setStep] = useState<'input' | 'result'>('input')
-  const [images, setImages] = useState<{ file: File; preview: string; key?: string; uploading: boolean }[]>([])
+  const [images, setImages] = useState<{ file: File; preview: string }[]>([])
   const [textContent, setTextContent] = useState('')
   const [parsing, setParsing] = useState(false)
   const [parsedServices, setParsedServices] = useState<ParsedService[]>([])
@@ -68,31 +68,16 @@ export function SmartImportModal({
     onOpenChange(open)
   }
 
-  const addFiles = useCallback(async (files: File[]) => {
+  const addFiles = useCallback((files: File[]) => {
     const imageFiles = files.filter((f) => f.type.startsWith('image/'))
     if (imageFiles.length === 0) return
 
     const newImages = imageFiles.map((file) => ({
       file,
       preview: URL.createObjectURL(file),
-      uploading: true,
     }))
 
     setImages((prev) => [...prev, ...newImages])
-
-    for (let i = 0; i < imageFiles.length; i++) {
-      try {
-        const { key } = await uploadFile(imageFiles[i])
-        setImages((prev) =>
-          prev.map((img) =>
-            img.file === imageFiles[i] ? { ...img, key, uploading: false } : img,
-          ),
-        )
-      } catch {
-        toast.error(`上传图片失败: ${imageFiles[i].name}`)
-        setImages((prev) => prev.filter((img) => img.file !== imageFiles[i]))
-      }
-    }
   }, [])
 
   const removeImage = (index: number) => {
@@ -130,22 +115,15 @@ export function SmartImportModal({
   }
 
   const handleParse = async () => {
-    const uploadedKeys = images.filter((img) => img.key).map((img) => img.key!)
-    if (uploadedKeys.length === 0 && !textContent.trim()) {
+    if (images.length === 0 && !textContent.trim()) {
       toast.error('请至少添加一张图片或输入文本')
-      return
-    }
-
-    const stillUploading = images.some((img) => img.uploading)
-    if (stillUploading) {
-      toast.error('部分图片仍在上传中，请稍候')
       return
     }
 
     try {
       setParsing(true)
       const result = await aiImportServices(clubId, {
-        imageKeys: uploadedKeys,
+        files: images.map((img) => img.file),
         textContent: textContent.trim() || undefined,
       })
 
@@ -267,11 +245,6 @@ export function SmartImportModal({
                       alt={`预览 ${i + 1}`}
                       className='w-full h-24 object-cover rounded border'
                     />
-                    {img.uploading && (
-                      <div className='absolute inset-0 bg-black/50 rounded flex items-center justify-center'>
-                        <Loader2 className='h-4 w-4 animate-spin text-white' />
-                      </div>
-                    )}
                     <button
                       type='button'
                       className='absolute -top-1.5 -right-1.5 bg-destructive text-destructive-foreground rounded-full p-0.5 opacity-0 group-hover:opacity-100 transition-opacity'

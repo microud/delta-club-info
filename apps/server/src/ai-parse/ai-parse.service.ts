@@ -59,6 +59,16 @@ export class AiParseService {
   }
 
   async parseImages(imageKeys: string[], textContents: string[]) {
+    const buffers: Buffer[] = [];
+    for (const key of imageKeys) {
+      const url = await this.storageService.getSignedUrl(key);
+      const response = await fetch(url);
+      buffers.push(Buffer.from(await response.arrayBuffer()));
+    }
+    return this.parseFromBuffers(buffers, textContents);
+  }
+
+  async parseFromBuffers(imageBuffers: Buffer[], textContents: string[]) {
     const aiConfigId = await this.configService.getValue('ai_parse.ai_config_id');
     if (!aiConfigId) throw new Error('未配置 AI 解析使用的 AI 配置，请在系统设置中绑定');
 
@@ -73,15 +83,10 @@ export class AiParseService {
 所有图片来自同一家俱乐部。请尽可能完整地提取所有信息。`,
     });
 
-    // 添加图片
-    for (const key of imageKeys) {
-      const url = await this.storageService.getSignedUrl(key);
-      const response = await fetch(url);
-      const buffer = Buffer.from(await response.arrayBuffer());
+    for (const buffer of imageBuffers) {
       content.push({ type: 'image', image: buffer });
     }
 
-    // 添加文本内容
     if (textContents.length > 0) {
       content.push({
         type: 'text',

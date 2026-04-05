@@ -6,11 +6,13 @@ import {
   Param,
   Post,
   Put,
+  UploadedFiles,
   UseGuards,
+  UseInterceptors,
 } from '@nestjs/common';
+import { FilesInterceptor } from '@nestjs/platform-express';
 import { AdminGuard } from '../../common/guards/admin.guard';
 import { ClubServicesService } from './club-services.service';
-import { AiImportDto } from './dto/ai-import.dto';
 import { BatchCreateClubServiceDto } from './dto/batch-create-club-service.dto';
 import { CreateClubServiceDto } from './dto/create-club-service.dto';
 import { UpdateClubServiceDto } from './dto/update-club-service.dto';
@@ -26,11 +28,13 @@ export class ClubServicesController {
   }
 
   @Post('ai-import')
+  @UseInterceptors(FilesInterceptor('files', 20))
   aiImport(
     @Param('clubId') clubId: string,
-    @Body() dto: AiImportDto,
+    @UploadedFiles() files: Express.Multer.File[],
+    @Body() body: { textContent?: string },
   ) {
-    return this.clubServicesService.aiImport(dto.imageKeys ?? [], dto.textContent);
+    return this.clubServicesService.aiImport(files ?? [], body.textContent);
   }
 
   @Post('batch')

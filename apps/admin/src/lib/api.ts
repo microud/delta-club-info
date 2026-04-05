@@ -76,16 +76,17 @@ export const updateClubService = (clubId: string, id: string, data: Partial<Club
 export const deleteClubService = (clubId: string, id: string) =>
   api.delete(`/clubs/${clubId}/services/${id}`)
 
-// Upload
-export const uploadFile = (file: File) => {
-  const formData = new FormData()
-  formData.append('file', file)
-  return api.post<{ key: string }>('/upload', formData).then((res) => res.data)
-}
-
 // AI Smart Import
-export const aiImportServices = (clubId: string, data: { imageKeys: string[]; textContent?: string }) =>
-  api.post<{ clubName: string; services: Array<{ name: string; tiers: Array<{ price: number; guarantee: string; note?: string }> }>; rules: Array<{ content: string; category: string }> }>(`/clubs/${clubId}/services/ai-import`, data).then((res) => res.data)
+export const aiImportServices = (clubId: string, data: { files: File[]; textContent?: string }) => {
+  const formData = new FormData()
+  for (const file of data.files) {
+    formData.append('files', file)
+  }
+  if (data.textContent) {
+    formData.append('textContent', data.textContent)
+  }
+  return api.post<{ clubName: string; services: Array<{ name: string; tiers: Array<{ price: number; guarantee: string; note?: string }> }>; rules: Array<{ content: string; category: string }> }>(`/clubs/${clubId}/services/ai-import`, formData).then((res) => res.data)
+}
 
 // Batch create services
 export const batchCreateClubServices = (clubId: string, services: Array<Record<string, unknown>>) =>

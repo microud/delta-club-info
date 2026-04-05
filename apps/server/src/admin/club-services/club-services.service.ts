@@ -84,9 +84,10 @@ export class ClubServicesService {
     return service;
   }
 
-  async aiImport(imageKeys: string[], textContent?: string) {
+  async aiImport(files: Express.Multer.File[], textContent?: string) {
+    const buffers = files.map((f) => f.buffer);
     const textContents = textContent ? [textContent] : [];
-    return this.aiParseService.parseImages(imageKeys, textContents);
+    return this.aiParseService.parseFromBuffers(buffers, textContents);
   }
 
   async batchCreate(clubId: string, dtos: CreateClubServiceDto[]) {
