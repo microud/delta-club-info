@@ -70,3 +70,48 @@ export interface PromotionOrderDto {
   isActive?: boolean;
   createdAt: string;
 }
+
+export interface BloggerDto {
+  id: string;
+  platform: string;
+  externalId: string;
+  name: string;
+  isActive: boolean;
+  createdAt: string;
+}
+
+export interface CrawlTaskDto {
+  id: string;
+  type: string;
+  targetId: string;
+  status: string;
+  startedAt: string;
+  finishedAt: string | null;
+  videoCount: number;
+  errorMessage: string | null;
+}
+
+export interface VideoDto {
+  id: string;
+  clubId: string | null;
+  clubName?: string | null;
+  platform: string;
+  externalId: string;
+  title: string;
+  coverUrl: string;
+  videoUrl: string;
+  authorName: string;
+  category: string;
+  aiParsed: boolean;
+  aiSentiment: string | null;
+  publishedAt: string;
+  createdAt: string;
+}
+
+export interface SystemConfigDto {
+  id: string;
+  key: string;
+  value: string;
+  description: string | null;
+  updatedAt: string;
+}
