@@ -4,6 +4,7 @@ import { DRIZZLE } from '../database/database.module';
 import * as schema from '../database/schema';
 import { SystemConfigsService } from '../admin/system-configs/system-configs.service';
 import { StorageService } from '../storage/storage.service';
+import { ParseTaskService } from '../ai-parse/parse-task.service';
 import { getSignature, decrypt } from '@wecom/crypto';
 import { parseStringPromise } from 'xml2js';
 import axios from 'axios';
@@ -20,6 +21,7 @@ export class WechatWorkService {
     @Inject(DRIZZLE) private readonly db: NodePgDatabase<typeof schema>,
     private readonly configService: SystemConfigsService,
     private readonly storageService: StorageService,
+    private readonly parseTaskService: ParseTaskService,
   ) {}
 
   async verifyCallback(
@@ -160,8 +162,11 @@ export class WechatWorkService {
     if (!group) return;
     this.pendingGroups.delete(groupKey);
 
-    // Placeholder - will be connected in Task 8 when ParseTaskService is injected
     this.logger.log(`Triggering parse for task ${group.taskId}`);
+    // 异步触发，不等待结果
+    this.parseTaskService.triggerParse(group.taskId).catch((e) => {
+      this.logger.error(`Parse failed for task ${group.taskId}`, e);
+    });
   }
 
   async getAccessToken(): Promise<string> {
