@@ -4,6 +4,10 @@ import { ConfigService } from '@nestjs/config';
 import { AuthController } from './auth/auth.controller';
 import { AuthService } from './auth/auth.service';
 import { JwtStrategy } from './auth/jwt.strategy';
+import { ClubsController } from './clubs/clubs.controller';
+import { ClubsService } from './clubs/clubs.service';
+import { ClubServicesController } from './club-services/club-services.controller';
+import { ClubServicesService } from './club-services/club-services.service';
 
 @Module({
   imports: [
@@ -15,7 +19,7 @@ import { JwtStrategy } from './auth/jwt.strategy';
       }),
     }),
   ],
-  controllers: [AuthController],
-  providers: [AuthService, JwtStrategy],
+  controllers: [AuthController, ClubsController, ClubServicesController],
+  providers: [AuthService, JwtStrategy, ClubsService, ClubServicesService],
 })
 export class AdminModule {}
