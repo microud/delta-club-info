@@ -51,3 +51,10 @@ export enum CrawlTaskStatus {
   SUCCESS = 'SUCCESS',
   FAILED = 'FAILED',
 }
+
+export enum ParseTaskStatus {
+  PENDING = 'pending',
+  PARSING = 'parsing',
+  COMPLETED = 'completed',
+  FAILED = 'failed',
+}

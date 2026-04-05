@@ -123,3 +123,46 @@ export interface SystemConfigDto {
   description: string | null;
   updatedAt: string;
 }
+
+export interface WechatMessageDto {
+  id: string;
+  msgId: string;
+  msgType: string;
+  content: string | null;
+  mediaUrl: string | null;
+  fromUser: string;
+  createdAt: string;
+}
+
+export interface ParseTaskDto {
+  id: string;
+  status: string;
+  clubId: string | null;
+  parsedResult: ParsedResult | null;
+  errorMessage: string | null;
+  messages?: WechatMessageDto[];
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface ParsedResult {
+  clubName: string;
+  services: ParsedService[];
+  rules: ParsedRule[];
+}
+
+export interface ParsedService {
+  name: string;
+  tiers: ParsedTier[];
+}
+
+export interface ParsedTier {
+  price: number;
+  guarantee: string;
+  note?: string;
+}
+
+export interface ParsedRule {
+  content: string;
+  category: string;
+}

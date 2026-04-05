@@ -8,3 +8,4 @@ export * from './blogger.schema';
 export * from './video.schema';
 export * from './crawl-task.schema';
 export * from './wechat-message.schema';
+export * from './parse-task.schema';
