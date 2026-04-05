@@ -24,6 +24,7 @@ import { AiConfigsController } from './ai-configs/ai-configs.controller';
 import { AiConfigsService } from './ai-configs/ai-configs.service';
 import { UploadController } from './upload/upload.controller';
 import { CrawlerModule } from '../crawler/crawler.module';
+import { AiParseModule } from '../ai-parse/ai-parse.module';
 
 @Module({
   imports: [
@@ -35,6 +36,7 @@ import { CrawlerModule } from '../crawler/crawler.module';
       }),
     }),
     forwardRef(() => CrawlerModule),
+    AiParseModule,
   ],
   controllers: [
     AuthController,

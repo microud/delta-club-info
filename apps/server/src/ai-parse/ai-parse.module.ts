@@ -8,6 +8,6 @@ import { AiConfigsService } from '../admin/ai-configs/ai-configs.service';
 @Module({
   controllers: [ParseTaskController],
   providers: [AiParseService, ParseTaskService, SystemConfigsService, AiConfigsService],
-  exports: [ParseTaskService],
+  exports: [ParseTaskService, AiParseService],
 })
 export class AiParseModule {}
