@@ -22,6 +22,7 @@ import { AdminVideosController } from './videos/videos.controller';
 import { AdminVideosService } from './videos/videos.service';
 import { AiConfigsController } from './ai-configs/ai-configs.controller';
 import { AiConfigsService } from './ai-configs/ai-configs.service';
+import { UploadController } from './upload/upload.controller';
 import { CrawlerModule } from '../crawler/crawler.module';
 
 @Module({
@@ -46,6 +47,7 @@ import { CrawlerModule } from '../crawler/crawler.module';
     AdminCrawlTasksController,
     AdminVideosController,
     AiConfigsController,
+    UploadController,
   ],
   providers: [
     AuthService,
