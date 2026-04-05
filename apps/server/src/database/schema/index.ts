@@ -7,3 +7,4 @@ export * from './system-config.schema';
 export * from './blogger.schema';
 export * from './video.schema';
 export * from './crawl-task.schema';
+export * from './wechat-message.schema';
