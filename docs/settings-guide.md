@@ -77,7 +77,15 @@
 4. 复制生成的 API Key
 5. 常用模型：`claude-sonnet-4-6`、`claude-haiku-4-5-20251001`
 
-#### 1.3 DeepSeek
+#### 1.3 xAI
+
+1. 前往 [xAI Console](https://console.x.ai/)，注册并登录
+2. 进入 **API Keys** 页面
+3. 点击「Create API Key」，命名后创建
+4. 复制生成的 API Key
+5. 常用模型：`grok-3`、`grok-3-mini`
+
+#### 1.4 DeepSeek
 
 1. 前往 [DeepSeek 开放平台](https://platform.deepseek.com/)，注册并登录
 2. 进入「API Keys」页面
@@ -91,7 +99,7 @@
 
 | 字段 | 说明 | 是否必填 |
 |------|------|----------|
-| AI 服务商 | 选择 OpenAI / Anthropic / DeepSeek | 是 |
+| AI 服务商 | 选择 OpenAI / Anthropic / xAI / DeepSeek | 是 |
 | API Key | 从对应平台获取的密钥 | 是 |
 | Base URL | 自定义 API 端点，留空则使用各服务商默认地址 | 否 |
 | 模型 | 要使用的模型名称，如 `gpt-4o`、`claude-sonnet-4-6` 等 | 是 |
@@ -104,4 +112,5 @@
 |--------|--------------|
 | OpenAI | `https://api.openai.com/v1` |
 | Anthropic | `https://api.anthropic.com` |
+| xAI | `https://api.x.ai/v1` |
 | DeepSeek | `https://api.deepseek.com` |

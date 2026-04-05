@@ -22,7 +22,7 @@ import {
 import { showSubmittedData } from '@/lib/show-submitted-data'
 
 const aiConfigFormSchema = z.object({
-  provider: z.enum(['openai', 'anthropic', 'deepseek']),
+  provider: z.enum(['openai', 'anthropic', 'xai', 'deepseek']),
   apiKey: z.string().min(1, '请输入 API Key'),
   baseUrl: z.string().url('请输入有效的 URL').optional().or(z.literal('')),
   model: z.string().min(1, '请输入模型名称'),
@@ -63,6 +63,7 @@ export function AiConfigForm() {
                 <SelectContent>
                   <SelectItem value='openai'>OpenAI</SelectItem>
                   <SelectItem value='anthropic'>Anthropic</SelectItem>
+                  <SelectItem value='xai'>xAI</SelectItem>
                   <SelectItem value='deepseek'>DeepSeek</SelectItem>
                 </SelectContent>
               </Select>
