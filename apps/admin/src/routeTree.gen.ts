@@ -20,13 +20,16 @@ import { Route as authSignInRouteImport } from './routes/(auth)/sign-in'
 import { Route as AuthenticatedVideosRouteRouteImport } from './routes/_authenticated/videos/route'
 import { Route as AuthenticatedSettingsRouteRouteImport } from './routes/_authenticated/settings/route'
 import { Route as AuthenticatedPromotionsRouteRouteImport } from './routes/_authenticated/promotions/route'
+import { Route as AuthenticatedParseTasksRouteRouteImport } from './routes/_authenticated/parse-tasks/route'
 import { Route as AuthenticatedCrawlerRouteRouteImport } from './routes/_authenticated/crawler/route'
 import { Route as AuthenticatedClubsRouteRouteImport } from './routes/_authenticated/clubs/route'
 import { Route as AuthenticatedBloggersRouteRouteImport } from './routes/_authenticated/bloggers/route'
 import { Route as AuthenticatedSettingsIndexRouteImport } from './routes/_authenticated/settings/index'
+import { Route as AuthenticatedParseTasksIndexRouteImport } from './routes/_authenticated/parse-tasks/index'
 import { Route as AuthenticatedClubsIndexRouteImport } from './routes/_authenticated/clubs/index'
 import { Route as AuthenticatedSettingsAppearanceRouteImport } from './routes/_authenticated/settings/appearance'
 import { Route as AuthenticatedErrorsErrorRouteImport } from './routes/_authenticated/errors/$error'
+import { Route as AuthenticatedParseTasksIdRouteRouteImport } from './routes/_authenticated/parse-tasks/$id/route'
 import { Route as AuthenticatedClubsIdRouteRouteImport } from './routes/_authenticated/clubs/$id/route'
 
 const AuthenticatedRouteRoute = AuthenticatedRouteRouteImport.update({
@@ -86,6 +89,12 @@ const AuthenticatedPromotionsRouteRoute =
     path: '/promotions',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedParseTasksRouteRoute =
+  AuthenticatedParseTasksRouteRouteImport.update({
+    id: '/parse-tasks',
+    path: '/parse-tasks',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedCrawlerRouteRoute =
   AuthenticatedCrawlerRouteRouteImport.update({
     id: '/crawler',
@@ -109,6 +118,12 @@ const AuthenticatedSettingsIndexRoute =
     path: '/',
     getParentRoute: () => AuthenticatedSettingsRouteRoute,
   } as any)
+const AuthenticatedParseTasksIndexRoute =
+  AuthenticatedParseTasksIndexRouteImport.update({
+    id: '/',
+    path: '/',
+    getParentRoute: () => AuthenticatedParseTasksRouteRoute,
+  } as any)
 const AuthenticatedClubsIndexRoute = AuthenticatedClubsIndexRouteImport.update({
   id: '/',
   path: '/',
@@ -126,6 +141,12 @@ const AuthenticatedErrorsErrorRoute =
     path: '/errors/$error',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedParseTasksIdRouteRoute =
+  AuthenticatedParseTasksIdRouteRouteImport.update({
+    id: '/$id',
+    path: '/$id',
+    getParentRoute: () => AuthenticatedParseTasksRouteRoute,
+  } as any)
 const AuthenticatedClubsIdRouteRoute =
   AuthenticatedClubsIdRouteRouteImport.update({
     id: '/$id',
@@ -138,6 +159,7 @@ export interface FileRoutesByFullPath {
   '/bloggers': typeof AuthenticatedBloggersRouteRoute
   '/clubs': typeof AuthenticatedClubsRouteRouteWithChildren
   '/crawler': typeof AuthenticatedCrawlerRouteRoute
+  '/parse-tasks': typeof AuthenticatedParseTasksRouteRouteWithChildren
   '/promotions': typeof AuthenticatedPromotionsRouteRoute
   '/settings': typeof AuthenticatedSettingsRouteRouteWithChildren
   '/videos': typeof AuthenticatedVideosRouteRoute
@@ -148,9 +170,11 @@ export interface FileRoutesByFullPath {
   '/500': typeof errors500Route
   '/503': typeof errors503Route
   '/clubs/$id': typeof AuthenticatedClubsIdRouteRoute
+  '/parse-tasks/$id': typeof AuthenticatedParseTasksIdRouteRoute
   '/errors/$error': typeof AuthenticatedErrorsErrorRoute
   '/settings/appearance': typeof AuthenticatedSettingsAppearanceRoute
   '/clubs/': typeof AuthenticatedClubsIndexRoute
+  '/parse-tasks/': typeof AuthenticatedParseTasksIndexRoute
   '/settings/': typeof AuthenticatedSettingsIndexRoute
 }
 export interface FileRoutesByTo {
@@ -166,9 +190,11 @@ export interface FileRoutesByTo {
   '/503': typeof errors503Route
   '/': typeof AuthenticatedIndexRoute
   '/clubs/$id': typeof AuthenticatedClubsIdRouteRoute
+  '/parse-tasks/$id': typeof AuthenticatedParseTasksIdRouteRoute
   '/errors/$error': typeof AuthenticatedErrorsErrorRoute
   '/settings/appearance': typeof AuthenticatedSettingsAppearanceRoute
   '/clubs': typeof AuthenticatedClubsIndexRoute
+  '/parse-tasks': typeof AuthenticatedParseTasksIndexRoute
   '/settings': typeof AuthenticatedSettingsIndexRoute
 }
 export interface FileRoutesById {
@@ -177,6 +203,7 @@ export interface FileRoutesById {
   '/_authenticated/bloggers': typeof AuthenticatedBloggersRouteRoute
   '/_authenticated/clubs': typeof AuthenticatedClubsRouteRouteWithChildren
   '/_authenticated/crawler': typeof AuthenticatedCrawlerRouteRoute
+  '/_authenticated/parse-tasks': typeof AuthenticatedParseTasksRouteRouteWithChildren
   '/_authenticated/promotions': typeof AuthenticatedPromotionsRouteRoute
   '/_authenticated/settings': typeof AuthenticatedSettingsRouteRouteWithChildren
   '/_authenticated/videos': typeof AuthenticatedVideosRouteRoute
@@ -188,9 +215,11 @@ export interface FileRoutesById {
   '/(errors)/503': typeof errors503Route
   '/_authenticated/': typeof AuthenticatedIndexRoute
   '/_authenticated/clubs/$id': typeof AuthenticatedClubsIdRouteRoute
+  '/_authenticated/parse-tasks/$id': typeof AuthenticatedParseTasksIdRouteRoute
   '/_authenticated/errors/$error': typeof AuthenticatedErrorsErrorRoute
   '/_authenticated/settings/appearance': typeof AuthenticatedSettingsAppearanceRoute
   '/_authenticated/clubs/': typeof AuthenticatedClubsIndexRoute
+  '/_authenticated/parse-tasks/': typeof AuthenticatedParseTasksIndexRoute
   '/_authenticated/settings/': typeof AuthenticatedSettingsIndexRoute
 }
 export interface FileRouteTypes {
@@ -200,6 +229,7 @@ export interface FileRouteTypes {
     | '/bloggers'
     | '/clubs'
     | '/crawler'
+    | '/parse-tasks'
     | '/promotions'
     | '/settings'
     | '/videos'
@@ -210,9 +240,11 @@ export interface FileRouteTypes {
     | '/500'
     | '/503'
     | '/clubs/$id'
+    | '/parse-tasks/$id'
     | '/errors/$error'
     | '/settings/appearance'
     | '/clubs/'
+    | '/parse-tasks/'
     | '/settings/'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -228,9 +260,11 @@ export interface FileRouteTypes {
     | '/503'
     | '/'
     | '/clubs/$id'
+    | '/parse-tasks/$id'
     | '/errors/$error'
     | '/settings/appearance'
     | '/clubs'
+    | '/parse-tasks'
     | '/settings'
   id:
     | '__root__'
@@ -238,6 +272,7 @@ export interface FileRouteTypes {
     | '/_authenticated/bloggers'
     | '/_authenticated/clubs'
     | '/_authenticated/crawler'
+    | '/_authenticated/parse-tasks'
     | '/_authenticated/promotions'
     | '/_authenticated/settings'
     | '/_authenticated/videos'
@@ -249,9 +284,11 @@ export interface FileRouteTypes {
     | '/(errors)/503'
     | '/_authenticated/'
     | '/_authenticated/clubs/$id'
+    | '/_authenticated/parse-tasks/$id'
     | '/_authenticated/errors/$error'
     | '/_authenticated/settings/appearance'
     | '/_authenticated/clubs/'
+    | '/_authenticated/parse-tasks/'
     | '/_authenticated/settings/'
   fileRoutesById: FileRoutesById
 }
@@ -344,6 +381,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedPromotionsRouteRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/parse-tasks': {
+      id: '/_authenticated/parse-tasks'
+      path: '/parse-tasks'
+      fullPath: '/parse-tasks'
+      preLoaderRoute: typeof AuthenticatedParseTasksRouteRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/crawler': {
       id: '/_authenticated/crawler'
       path: '/crawler'
@@ -372,6 +416,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedSettingsIndexRouteImport
       parentRoute: typeof AuthenticatedSettingsRouteRoute
     }
+    '/_authenticated/parse-tasks/': {
+      id: '/_authenticated/parse-tasks/'
+      path: '/'
+      fullPath: '/parse-tasks/'
+      preLoaderRoute: typeof AuthenticatedParseTasksIndexRouteImport
+      parentRoute: typeof AuthenticatedParseTasksRouteRoute
+    }
     '/_authenticated/clubs/': {
       id: '/_authenticated/clubs/'
       path: '/'
@@ -392,6 +443,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/errors/$error'
       preLoaderRoute: typeof AuthenticatedErrorsErrorRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/parse-tasks/$id': {
+      id: '/_authenticated/parse-tasks/$id'
+      path: '/$id'
+      fullPath: '/parse-tasks/$id'
+      preLoaderRoute: typeof AuthenticatedParseTasksIdRouteRouteImport
+      parentRoute: typeof AuthenticatedParseTasksRouteRoute
     }
     '/_authenticated/clubs/$id': {
       id: '/_authenticated/clubs/$id'
@@ -419,6 +477,22 @@ const AuthenticatedClubsRouteRouteWithChildren =
     AuthenticatedClubsRouteRouteChildren,
   )
 
+interface AuthenticatedParseTasksRouteRouteChildren {
+  AuthenticatedParseTasksIdRouteRoute: typeof AuthenticatedParseTasksIdRouteRoute
+  AuthenticatedParseTasksIndexRoute: typeof AuthenticatedParseTasksIndexRoute
+}
+
+const AuthenticatedParseTasksRouteRouteChildren: AuthenticatedParseTasksRouteRouteChildren =
+  {
+    AuthenticatedParseTasksIdRouteRoute: AuthenticatedParseTasksIdRouteRoute,
+    AuthenticatedParseTasksIndexRoute: AuthenticatedParseTasksIndexRoute,
+  }
+
+const AuthenticatedParseTasksRouteRouteWithChildren =
+  AuthenticatedParseTasksRouteRoute._addFileChildren(
+    AuthenticatedParseTasksRouteRouteChildren,
+  )
+
 interface AuthenticatedSettingsRouteRouteChildren {
   AuthenticatedSettingsAppearanceRoute: typeof AuthenticatedSettingsAppearanceRoute
   AuthenticatedSettingsIndexRoute: typeof AuthenticatedSettingsIndexRoute
@@ -439,6 +513,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedBloggersRouteRoute: typeof AuthenticatedBloggersRouteRoute
   AuthenticatedClubsRouteRoute: typeof AuthenticatedClubsRouteRouteWithChildren
   AuthenticatedCrawlerRouteRoute: typeof AuthenticatedCrawlerRouteRoute
+  AuthenticatedParseTasksRouteRoute: typeof AuthenticatedParseTasksRouteRouteWithChildren
   AuthenticatedPromotionsRouteRoute: typeof AuthenticatedPromotionsRouteRoute
   AuthenticatedSettingsRouteRoute: typeof AuthenticatedSettingsRouteRouteWithChildren
   AuthenticatedVideosRouteRoute: typeof AuthenticatedVideosRouteRoute
@@ -450,6 +525,8 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedBloggersRouteRoute: AuthenticatedBloggersRouteRoute,
   AuthenticatedClubsRouteRoute: AuthenticatedClubsRouteRouteWithChildren,
   AuthenticatedCrawlerRouteRoute: AuthenticatedCrawlerRouteRoute,
+  AuthenticatedParseTasksRouteRoute:
+    AuthenticatedParseTasksRouteRouteWithChildren,
   AuthenticatedPromotionsRouteRoute: AuthenticatedPromotionsRouteRoute,
   AuthenticatedSettingsRouteRoute: AuthenticatedSettingsRouteRouteWithChildren,
   AuthenticatedVideosRouteRoute: AuthenticatedVideosRouteRoute,

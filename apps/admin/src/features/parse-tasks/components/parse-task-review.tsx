@@ -1,6 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { useParams, useNavigate } from '@tanstack/react-router'
 import { getParseTask, retryParseTask, confirmParseTask, getClubs } from '@/lib/api'
+import type { WechatMessageDto } from '@delta-club/shared'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Textarea } from '@/components/ui/textarea'
@@ -81,7 +82,7 @@ export function ParseTaskReview() {
         <div className='space-y-4'>
           <h3 className='text-lg font-medium'>原始消息</h3>
           <div className='space-y-2'>
-            {task.messages?.map((msg) => (
+            {task.messages?.map((msg: WechatMessageDto) => (
               <div key={msg.id} className='rounded-md border p-3'>
                 {msg.msgType === 'image' && msg.mediaUrl && (
                   <img
