@@ -1,4 +1,4 @@
-import { IsString, IsOptional, IsEnum, IsDateString } from 'class-validator';
+import { IsString, IsOptional, IsEnum, IsDateString, ValidateIf } from 'class-validator';
 import { ClubStatus } from '@delta-club/shared';
 
 export class UpdateClubDto {
@@ -31,12 +31,14 @@ export class UpdateClubDto {
   status?: ClubStatus;
 
   @IsOptional()
+  @ValidateIf((o) => o.establishedAt !== null)
   @IsDateString()
-  establishedAt?: string;
+  establishedAt?: string | null;
 
   @IsOptional()
+  @ValidateIf((o) => o.closedAt !== null)
   @IsDateString()
-  closedAt?: string;
+  closedAt?: string | null;
 
   @IsOptional()
   @IsString()
@@ -71,8 +73,9 @@ export class UpdateClubDto {
   registeredCapital?: string;
 
   @IsOptional()
+  @ValidateIf((o) => o.companyEstablishedAt !== null)
   @IsDateString()
-  companyEstablishedAt?: string;
+  companyEstablishedAt?: string | null;
 
   @IsOptional()
   @IsString()
