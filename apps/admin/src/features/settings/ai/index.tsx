@@ -209,18 +209,23 @@ export function SettingsAi() {
         </TabsContent>
 
         <TabsContent value='bindings'>
-          <div className='space-y-6'>
-            {loading ? (
-              <p className='text-muted-foreground text-sm'>加载中...</p>
-            ) : configs.length === 0 ? (
-              <p className='text-muted-foreground text-sm'>
-                请先在「配置管理」中添加 AI 配置。
-              </p>
-            ) : (
-              <div className='space-y-2'>
-                <Label>AI 解析（智能录入）</Label>
+          {loading ? (
+            <p className='text-muted-foreground text-sm'>加载中...</p>
+          ) : configs.length === 0 ? (
+            <p className='text-muted-foreground text-sm'>
+              请先在「配置管理」中添加 AI 配置。
+            </p>
+          ) : (
+            <div className='divide-y'>
+              <div className='flex items-center justify-between gap-8 py-4'>
+                <div className='space-y-1'>
+                  <Label>AI 解析（智能录入）</Label>
+                  <p className='text-muted-foreground text-xs'>
+                    用于俱乐部智能录入等图片/文本解析功能
+                  </p>
+                </div>
                 <Select value={parseConfigId} onValueChange={handleParseConfigChange}>
-                  <SelectTrigger className='w-full'>
+                  <SelectTrigger className='w-[280px] shrink-0'>
                     <SelectValue placeholder='请选择 AI 配置' />
                   </SelectTrigger>
                   <SelectContent>
@@ -231,12 +236,9 @@ export function SettingsAi() {
                     ))}
                   </SelectContent>
                 </Select>
-                <p className='text-muted-foreground text-xs'>
-                  用于俱乐部智能录入等图片/文本解析功能
-                </p>
               </div>
-            )}
-          </div>
+            </div>
+          )}
         </TabsContent>
       </Tabs>
 
