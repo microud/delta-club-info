@@ -12,7 +12,6 @@ import {
 } from '@/lib/api'
 import { ContentSection } from '../components/content-section'
 import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import {
   Dialog,
@@ -31,6 +30,14 @@ import {
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog'
 import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table'
+import {
   Select,
   SelectContent,
   SelectItem,
@@ -38,6 +45,7 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { Label } from '@/components/ui/label'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { AiConfigForm, type AiConfigFormValues } from './ai-config-form'
 
 const providerLabels: Record<string, string> = {
@@ -131,82 +139,106 @@ export function SettingsAi() {
   return (
     <ContentSection
       title='AI 配置'
-      desc='管理多个 AI 服务商配置，在不同业务中使用不同的 AI。'
+      desc='管理 AI 服务商配置，并为不同业务绑定对应的 AI。'
     >
-      <div className='space-y-6'>
-        {!loading && configs.length > 0 && (
-          <div className='space-y-2'>
-            <Label>AI 解析使用的配置</Label>
-            <Select value={parseConfigId} onValueChange={handleParseConfigChange}>
-              <SelectTrigger className='w-[300px]'>
-                <SelectValue placeholder='请选择 AI 配置' />
-              </SelectTrigger>
-              <SelectContent>
-                {configs.map((config) => (
-                  <SelectItem key={config.id} value={config.id}>
-                    {config.name} ({providerLabels[config.provider] ?? config.provider} / {config.model})
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-            <p className='text-muted-foreground text-xs'>
-              用于俱乐部智能录入等图片/文本解析功能
-            </p>
-          </div>
-        )}
+      <Tabs defaultValue='configs'>
+        <TabsList>
+          <TabsTrigger value='configs'>配置管理</TabsTrigger>
+          <TabsTrigger value='bindings'>业务绑定</TabsTrigger>
+        </TabsList>
 
-        <div className='flex justify-end'>
-          <Button onClick={handleCreate} size='sm'>
-            <Plus className='mr-1 h-4 w-4' />
-            新增配置
-          </Button>
-        </div>
+        <TabsContent value='configs'>
+          <div className='space-y-4'>
+            <div className='flex justify-end'>
+              <Button onClick={handleCreate} size='sm'>
+                <Plus className='mr-1 h-4 w-4' />
+                新增配置
+              </Button>
+            </div>
 
-        {loading ? (
-          <p className='text-muted-foreground text-sm'>加载中...</p>
-        ) : configs.length === 0 ? (
-          <p className='text-muted-foreground text-sm'>暂无 AI 配置，请点击「新增配置」添加。</p>
-        ) : (
-          <div className='grid gap-3'>
-            {configs.map((config) => (
-              <Card key={config.id}>
-                <CardHeader className='flex flex-row items-center justify-between pb-2'>
-                  <CardTitle className='text-base font-medium'>
-                    {config.name}
-                  </CardTitle>
-                  <div className='flex items-center gap-1'>
-                    <Button
-                      variant='ghost'
-                      size='icon'
-                      className='h-8 w-8'
-                      onClick={() => handleEdit(config)}
-                    >
-                      <Pencil className='h-4 w-4' />
-                    </Button>
-                    <Button
-                      variant='ghost'
-                      size='icon'
-                      className='h-8 w-8 text-destructive'
-                      onClick={() => setDeleteTarget(config)}
-                    >
-                      <Trash2 className='h-4 w-4' />
-                    </Button>
-                  </div>
-                </CardHeader>
-                <CardContent className='flex items-center gap-2 text-sm text-muted-foreground'>
-                  <Badge variant='secondary'>
-                    {providerLabels[config.provider] ?? config.provider}
-                  </Badge>
-                  <span>{config.model}</span>
-                  {config.baseUrl && (
-                    <span className='truncate max-w-[200px]'>{config.baseUrl}</span>
-                  )}
-                </CardContent>
-              </Card>
-            ))}
+            {loading ? (
+              <p className='text-muted-foreground text-sm'>加载中...</p>
+            ) : configs.length === 0 ? (
+              <p className='text-muted-foreground text-sm'>暂无 AI 配置，请点击「新增配置」添加。</p>
+            ) : (
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>名称</TableHead>
+                    <TableHead>服务商</TableHead>
+                    <TableHead>模型</TableHead>
+                    <TableHead>自定义地址</TableHead>
+                    <TableHead className='text-right'>操作</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {configs.map((config) => (
+                    <TableRow key={config.id}>
+                      <TableCell className='font-medium'>{config.name}</TableCell>
+                      <TableCell>
+                        <Badge variant='secondary'>
+                          {providerLabels[config.provider] ?? config.provider}
+                        </Badge>
+                      </TableCell>
+                      <TableCell>{config.model}</TableCell>
+                      <TableCell className='max-w-[200px] truncate text-muted-foreground'>
+                        {config.baseUrl || '-'}
+                      </TableCell>
+                      <TableCell className='text-right'>
+                        <Button
+                          variant='ghost'
+                          size='sm'
+                          onClick={() => handleEdit(config)}
+                        >
+                          <Pencil className='h-4 w-4' />
+                        </Button>
+                        <Button
+                          variant='ghost'
+                          size='sm'
+                          onClick={() => setDeleteTarget(config)}
+                        >
+                          <Trash2 className='h-4 w-4' />
+                        </Button>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            )}
           </div>
-        )}
-      </div>
+        </TabsContent>
+
+        <TabsContent value='bindings'>
+          <div className='space-y-6'>
+            {loading ? (
+              <p className='text-muted-foreground text-sm'>加载中...</p>
+            ) : configs.length === 0 ? (
+              <p className='text-muted-foreground text-sm'>
+                请先在「配置管理」中添加 AI 配置。
+              </p>
+            ) : (
+              <div className='space-y-2'>
+                <Label>AI 解析（智能录入）</Label>
+                <Select value={parseConfigId} onValueChange={handleParseConfigChange}>
+                  <SelectTrigger className='w-full'>
+                    <SelectValue placeholder='请选择 AI 配置' />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {configs.map((config) => (
+                      <SelectItem key={config.id} value={config.id}>
+                        {config.name} ({providerLabels[config.provider] ?? config.provider} / {config.model})
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <p className='text-muted-foreground text-xs'>
+                  用于俱乐部智能录入等图片/文本解析功能
+                </p>
+              </div>
+            )}
+          </div>
+        </TabsContent>
+      </Tabs>
 
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
         <DialogContent>
