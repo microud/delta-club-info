@@ -7,6 +7,9 @@ import type {
   ClubRuleDto,
   PromotionOrderDto,
   PaginatedResponse,
+  BloggerDto,
+  CrawlTaskDto,
+  VideoDto,
 } from '@delta-club/shared'
 
 const api = axios.create({
@@ -93,5 +96,35 @@ export const deletePromotion = (id: string) =>
 
 export const getPromotionRanking = () =>
   api.get<{ clubId: string; clubName: string; totalDailyRate: string }[]>('/promotions/ranking').then((res) => res.data)
+
+// Bloggers
+export const getBloggers = () =>
+  api.get<BloggerDto[]>('/bloggers').then((res) => res.data)
+
+export const createBlogger = (data: { platform: string; externalId: string; name: string }) =>
+  api.post<BloggerDto>('/bloggers', data).then((res) => res.data)
+
+export const updateBlogger = (id: string, data: { name?: string; isActive?: boolean }) =>
+  api.patch<BloggerDto>(`/bloggers/${id}`, data).then((res) => res.data)
+
+export const deleteBlogger = (id: string) =>
+  api.delete(`/bloggers/${id}`)
+
+// Crawl Tasks
+export const getCrawlTasks = () =>
+  api.get<CrawlTaskDto[]>('/crawl-tasks').then((res) => res.data)
+
+export const triggerCrawl = () =>
+  api.post('/crawl-tasks/trigger').then((res) => res.data)
+
+export const getCrawlFrequency = () =>
+  api.get<{ frequency: number }>('/crawl-tasks/frequency').then((res) => res.data)
+
+export const updateCrawlFrequency = (frequency: number) =>
+  api.post<{ frequency: number }>('/crawl-tasks/frequency', { frequency }).then((res) => res.data)
+
+// Videos
+export const getVideos = (params?: { platform?: string; category?: string }) =>
+  api.get<VideoDto[]>('/videos', { params }).then((res) => res.data)
 
 export default api

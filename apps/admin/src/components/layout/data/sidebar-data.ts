@@ -3,6 +3,9 @@ import {
   Building2,
   Megaphone,
   Palette,
+  UserSearch,
+  Bot,
+  Video,
 } from 'lucide-react'
 import { type SidebarData } from '../types'
 
@@ -25,6 +28,21 @@ export const sidebarData: SidebarData = {
           title: '推广管理',
           url: '/promotions',
           icon: Megaphone,
+        },
+        {
+          title: '博主管理',
+          url: '/bloggers',
+          icon: UserSearch,
+        },
+        {
+          title: '爬虫管理',
+          url: '/crawler',
+          icon: Bot,
+        },
+        {
+          title: '视频列表',
+          url: '/videos',
+          icon: Video,
         },
       ],
     },
