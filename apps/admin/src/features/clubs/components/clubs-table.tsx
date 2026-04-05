@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import {
   type ColumnFiltersState,
+  type OnChangeFn,
   type PaginationState,
   type SortingState,
   type VisibilityState,
@@ -9,7 +10,6 @@ import {
   getFacetedRowModel,
   getFacetedUniqueValues,
   getFilteredRowModel,
-  getPaginationRowModel,
   getSortedRowModel,
   useReactTable,
 } from '@tanstack/react-table'
@@ -29,13 +29,16 @@ import { clubsColumns as columns } from './clubs-columns'
 
 type ClubsTableProps = {
   data: Club[]
+  total: number
+  pagination: PaginationState
+  onPaginationChange: OnChangeFn<PaginationState>
 }
 
 const statusFilterOptions = Object.entries(clubStatusLabels).map(
   ([value, label]) => ({ value, label })
 )
 
-export function ClubsTable({ data }: ClubsTableProps) {
+export function ClubsTable({ data, total, pagination, onPaginationChange }: ClubsTableProps) {
   const router = useRouter()
 
   const [rowSelection, setRowSelection] = useState({})
@@ -45,15 +48,15 @@ export function ClubsTable({ data }: ClubsTableProps) {
   const [columnFilters, onColumnFiltersChange] = useState<ColumnFiltersState>(
     []
   )
-  const [pagination, onPaginationChange] = useState<PaginationState>({
-    pageIndex: 0,
-    pageSize: 10,
-  })
+
+  const pageCount = Math.ceil(total / pagination.pageSize)
 
   // eslint-disable-next-line react-hooks/incompatible-library
   const table = useReactTable({
     data,
     columns,
+    pageCount,
+    manualPagination: true,
     state: {
       sorting,
       columnVisibility,
@@ -73,7 +76,6 @@ export function ClubsTable({ data }: ClubsTableProps) {
     },
     getCoreRowModel: getCoreRowModel(),
     getFilteredRowModel: getFilteredRowModel(),
-    getPaginationRowModel: getPaginationRowModel(),
     getSortedRowModel: getSortedRowModel(),
     getFacetedRowModel: getFacetedRowModel(),
     getFacetedUniqueValues: getFacetedUniqueValues(),

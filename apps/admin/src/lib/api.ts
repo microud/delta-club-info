@@ -26,7 +26,7 @@ api.interceptors.response.use(
   (error) => {
     if (error.response?.status === 401) {
       localStorage.removeItem('token')
-      window.location.href = '/sign-in'
+      // Auth store's route guard will handle redirect
     }
     return Promise.reject(error)
   }

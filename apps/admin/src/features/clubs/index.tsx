@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useState } from 'react'
+import { type PaginationState } from '@tanstack/react-table'
 import { toast } from 'sonner'
 import { Header } from '@/components/layout/header'
 import { Main } from '@/components/layout/main'
@@ -13,7 +14,14 @@ import { ClubsDeleteDialog } from './components/clubs-delete-dialog'
 
 export default function ClubsPage() {
   const [clubs, setClubs] = useState<Club[]>([])
+  const [total, setTotal] = useState(0)
   const [loading, setLoading] = useState(true)
+
+  // Pagination state (shared with table)
+  const [pagination, setPagination] = useState<PaginationState>({
+    pageIndex: 0,
+    pageSize: 10,
+  })
 
   // Dialog states
   const [createOpen, setCreateOpen] = useState(false)
@@ -24,14 +32,18 @@ export default function ClubsPage() {
   const fetchClubs = useCallback(async () => {
     try {
       setLoading(true)
-      const res = await getClubs({ page: 1, pageSize: 100 })
+      const res = await getClubs({
+        page: pagination.pageIndex + 1,
+        pageSize: pagination.pageSize,
+      })
       setClubs(res.data as Club[])
+      setTotal(res.total)
     } catch {
       toast.error('获取俱乐部列表失败')
     } finally {
       setLoading(false)
     }
-  }, [])
+  }, [pagination.pageIndex, pagination.pageSize])
 
   useEffect(() => {
     fetchClubs()
@@ -86,7 +98,12 @@ export default function ClubsPage() {
             <p className='text-muted-foreground'>加载中...</p>
           </div>
         ) : (
-          <ClubsTable data={clubs} />
+          <ClubsTable
+            data={clubs}
+            total={total}
+            pagination={pagination}
+            onPaginationChange={setPagination}
+          />
         )}
       </Main>
 
