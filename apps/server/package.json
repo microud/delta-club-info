@@ -13,13 +13,13 @@
     "db:seed": "tsx src/database/seed.ts"
   },
   "dependencies": {
+    "@delta-club/shared": "workspace:*",
     "@nestjs/common": "^11",
+    "@nestjs/config": "^4",
     "@nestjs/core": "^11",
     "@nestjs/jwt": "^11",
     "@nestjs/passport": "^11",
     "@nestjs/platform-express": "^11",
-    "@nestjs/config": "^4",
-    "@delta-club/shared": "workspace:*",
     "bcrypt": "^6",
     "class-transformer": "^0.5",
     "class-validator": "^0.14",
@@ -37,6 +37,7 @@
     "@types/node": "^22",
     "@types/passport-jwt": "^4",
     "@types/pg": "^8",
+    "dotenv": "^17.4.0",
     "drizzle-kit": "^0.31",
     "tsx": "^4",
     "typescript": "^5"
