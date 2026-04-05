@@ -123,9 +123,9 @@ export function ServiceForm({ initialData, onSubmit, isSubmitting }: ServiceForm
               name='priceHafuCoin'
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>价格 (哈夫币)</FormLabel>
+                  <FormLabel>价格 (万哈夫币)</FormLabel>
                   <FormControl>
-                    <Input placeholder='请输入哈夫币价格' {...field} />
+                    <Input placeholder='请输入哈夫币价格（万）' {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -220,9 +220,9 @@ export function ServiceForm({ initialData, onSubmit, isSubmitting }: ServiceForm
                 name='guaranteeHafuCoin'
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>保底哈夫币</FormLabel>
+                    <FormLabel>保底哈夫币 (万)</FormLabel>
                     <FormControl>
-                      <Input placeholder='请输入保底哈夫币数额' {...field} />
+                      <Input placeholder='请输入保底哈夫币数额（万）' {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>

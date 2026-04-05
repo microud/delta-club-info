@@ -16,7 +16,7 @@ const parsedResultSchema = z.object({
       tiers: z.array(
         z.object({
           price: z.number().describe('价格（元）'),
-          guarantee: z.string().describe('保底数值，如"788W"'),
+          guarantee: z.string().describe('保底数值（万哈夫币），只提取数字部分，如788表示788万哈夫币'),
           note: z.string().optional().describe('附加说明，如"仅限一次"'),
         }),
       ),
@@ -80,7 +80,10 @@ export class AiParseService {
     content.push({
       type: 'text',
       text: `你是一个游戏陪玩俱乐部价目表解析助手。请从以下图片和文本中提取俱乐部名称、服务类型及其价格档位、以及规则条款。
-所有图片来自同一家俱乐部。请尽可能完整地提取所有信息。`,
+所有图片来自同一家俱乐部。请尽可能完整地提取所有信息。
+
+重要提示：哈夫币在游戏中以"万"为单位展示。如果你识别到几十W、几百W、几十万、几百万哈夫币等，都是以万为单位。
+请在保底数值中直接提取万为单位的数字，例如"788W"或"788万"应提取为 788，"50万"应提取为 50。`,
     });
 
     for (const buffer of imageBuffers) {

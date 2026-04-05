@@ -295,7 +295,7 @@ export function SmartImportModal({
                   <TableRow>
                     <TableHead>玩法名称</TableHead>
                     <TableHead>价格(元)</TableHead>
-                    <TableHead>保底</TableHead>
+                    <TableHead>保底(万哈夫币)</TableHead>
                     <TableHead>备注</TableHead>
                     <TableHead className='w-12'></TableHead>
                   </TableRow>

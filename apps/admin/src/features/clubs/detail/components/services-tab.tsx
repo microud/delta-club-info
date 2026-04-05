@@ -43,13 +43,13 @@ function getPriceSummary(service: ClubServiceDto): string {
     case 'KNIFE_RUN':
     case 'ESCORT_TRIAL':
     case 'ESCORT_STANDARD':
-      return `¥${service.priceYuan ?? '-'} / ${service.priceHafuCoin ?? '-'}哈夫币`
+      return `¥${service.priceYuan ?? '-'} / ${service.priceHafuCoin ?? '-'}万哈夫币`
     case 'ACCOMPANY':
       return `${service.tier ?? '-'} ¥${service.pricePerHour ?? '-'}/小时`
     case 'ESCORT_FUN': {
       let summary = service.gameName ?? '-'
       if (service.hasGuarantee) {
-        summary += ` (保底 ${service.guaranteeHafuCoin ?? '-'}哈夫币)`
+        summary += ` (保底 ${service.guaranteeHafuCoin ?? '-'}万哈夫币)`
       }
       return summary
     }
