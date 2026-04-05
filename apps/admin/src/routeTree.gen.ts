@@ -17,9 +17,12 @@ import { Route as errors404RouteImport } from './routes/(errors)/404'
 import { Route as errors403RouteImport } from './routes/(errors)/403'
 import { Route as errors401RouteImport } from './routes/(errors)/401'
 import { Route as authSignInRouteImport } from './routes/(auth)/sign-in'
+import { Route as AuthenticatedVideosRouteRouteImport } from './routes/_authenticated/videos/route'
 import { Route as AuthenticatedSettingsRouteRouteImport } from './routes/_authenticated/settings/route'
 import { Route as AuthenticatedPromotionsRouteRouteImport } from './routes/_authenticated/promotions/route'
+import { Route as AuthenticatedCrawlerRouteRouteImport } from './routes/_authenticated/crawler/route'
 import { Route as AuthenticatedClubsRouteRouteImport } from './routes/_authenticated/clubs/route'
+import { Route as AuthenticatedBloggersRouteRouteImport } from './routes/_authenticated/bloggers/route'
 import { Route as AuthenticatedSettingsIndexRouteImport } from './routes/_authenticated/settings/index'
 import { Route as AuthenticatedClubsIndexRouteImport } from './routes/_authenticated/clubs/index'
 import { Route as AuthenticatedSettingsAppearanceRouteImport } from './routes/_authenticated/settings/appearance'
@@ -65,6 +68,12 @@ const authSignInRoute = authSignInRouteImport.update({
   path: '/sign-in',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AuthenticatedVideosRouteRoute =
+  AuthenticatedVideosRouteRouteImport.update({
+    id: '/videos',
+    path: '/videos',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedSettingsRouteRoute =
   AuthenticatedSettingsRouteRouteImport.update({
     id: '/settings',
@@ -77,11 +86,23 @@ const AuthenticatedPromotionsRouteRoute =
     path: '/promotions',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedCrawlerRouteRoute =
+  AuthenticatedCrawlerRouteRouteImport.update({
+    id: '/crawler',
+    path: '/crawler',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedClubsRouteRoute = AuthenticatedClubsRouteRouteImport.update({
   id: '/clubs',
   path: '/clubs',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedBloggersRouteRoute =
+  AuthenticatedBloggersRouteRouteImport.update({
+    id: '/bloggers',
+    path: '/bloggers',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedSettingsIndexRoute =
   AuthenticatedSettingsIndexRouteImport.update({
     id: '/',
@@ -114,9 +135,12 @@ const AuthenticatedClubsIdRouteRoute =
 
 export interface FileRoutesByFullPath {
   '/': typeof AuthenticatedIndexRoute
+  '/bloggers': typeof AuthenticatedBloggersRouteRoute
   '/clubs': typeof AuthenticatedClubsRouteRouteWithChildren
+  '/crawler': typeof AuthenticatedCrawlerRouteRoute
   '/promotions': typeof AuthenticatedPromotionsRouteRoute
   '/settings': typeof AuthenticatedSettingsRouteRouteWithChildren
+  '/videos': typeof AuthenticatedVideosRouteRoute
   '/sign-in': typeof authSignInRoute
   '/401': typeof errors401Route
   '/403': typeof errors403Route
@@ -130,7 +154,10 @@ export interface FileRoutesByFullPath {
   '/settings/': typeof AuthenticatedSettingsIndexRoute
 }
 export interface FileRoutesByTo {
+  '/bloggers': typeof AuthenticatedBloggersRouteRoute
+  '/crawler': typeof AuthenticatedCrawlerRouteRoute
   '/promotions': typeof AuthenticatedPromotionsRouteRoute
+  '/videos': typeof AuthenticatedVideosRouteRoute
   '/sign-in': typeof authSignInRoute
   '/401': typeof errors401Route
   '/403': typeof errors403Route
@@ -147,9 +174,12 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
+  '/_authenticated/bloggers': typeof AuthenticatedBloggersRouteRoute
   '/_authenticated/clubs': typeof AuthenticatedClubsRouteRouteWithChildren
+  '/_authenticated/crawler': typeof AuthenticatedCrawlerRouteRoute
   '/_authenticated/promotions': typeof AuthenticatedPromotionsRouteRoute
   '/_authenticated/settings': typeof AuthenticatedSettingsRouteRouteWithChildren
+  '/_authenticated/videos': typeof AuthenticatedVideosRouteRoute
   '/(auth)/sign-in': typeof authSignInRoute
   '/(errors)/401': typeof errors401Route
   '/(errors)/403': typeof errors403Route
@@ -167,9 +197,12 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/bloggers'
     | '/clubs'
+    | '/crawler'
     | '/promotions'
     | '/settings'
+    | '/videos'
     | '/sign-in'
     | '/401'
     | '/403'
@@ -183,7 +216,10 @@ export interface FileRouteTypes {
     | '/settings/'
   fileRoutesByTo: FileRoutesByTo
   to:
+    | '/bloggers'
+    | '/crawler'
     | '/promotions'
+    | '/videos'
     | '/sign-in'
     | '/401'
     | '/403'
@@ -199,9 +235,12 @@ export interface FileRouteTypes {
   id:
     | '__root__'
     | '/_authenticated'
+    | '/_authenticated/bloggers'
     | '/_authenticated/clubs'
+    | '/_authenticated/crawler'
     | '/_authenticated/promotions'
     | '/_authenticated/settings'
+    | '/_authenticated/videos'
     | '/(auth)/sign-in'
     | '/(errors)/401'
     | '/(errors)/403'
@@ -284,6 +323,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof authSignInRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/_authenticated/videos': {
+      id: '/_authenticated/videos'
+      path: '/videos'
+      fullPath: '/videos'
+      preLoaderRoute: typeof AuthenticatedVideosRouteRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/settings': {
       id: '/_authenticated/settings'
       path: '/settings'
@@ -298,11 +344,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedPromotionsRouteRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/crawler': {
+      id: '/_authenticated/crawler'
+      path: '/crawler'
+      fullPath: '/crawler'
+      preLoaderRoute: typeof AuthenticatedCrawlerRouteRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/clubs': {
       id: '/_authenticated/clubs'
       path: '/clubs'
       fullPath: '/clubs'
       preLoaderRoute: typeof AuthenticatedClubsRouteRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/bloggers': {
+      id: '/_authenticated/bloggers'
+      path: '/bloggers'
+      fullPath: '/bloggers'
+      preLoaderRoute: typeof AuthenticatedBloggersRouteRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/settings/': {
@@ -376,17 +436,23 @@ const AuthenticatedSettingsRouteRouteWithChildren =
   )
 
 interface AuthenticatedRouteRouteChildren {
+  AuthenticatedBloggersRouteRoute: typeof AuthenticatedBloggersRouteRoute
   AuthenticatedClubsRouteRoute: typeof AuthenticatedClubsRouteRouteWithChildren
+  AuthenticatedCrawlerRouteRoute: typeof AuthenticatedCrawlerRouteRoute
   AuthenticatedPromotionsRouteRoute: typeof AuthenticatedPromotionsRouteRoute
   AuthenticatedSettingsRouteRoute: typeof AuthenticatedSettingsRouteRouteWithChildren
+  AuthenticatedVideosRouteRoute: typeof AuthenticatedVideosRouteRoute
   AuthenticatedIndexRoute: typeof AuthenticatedIndexRoute
   AuthenticatedErrorsErrorRoute: typeof AuthenticatedErrorsErrorRoute
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
+  AuthenticatedBloggersRouteRoute: AuthenticatedBloggersRouteRoute,
   AuthenticatedClubsRouteRoute: AuthenticatedClubsRouteRouteWithChildren,
+  AuthenticatedCrawlerRouteRoute: AuthenticatedCrawlerRouteRoute,
   AuthenticatedPromotionsRouteRoute: AuthenticatedPromotionsRouteRoute,
   AuthenticatedSettingsRouteRoute: AuthenticatedSettingsRouteRouteWithChildren,
+  AuthenticatedVideosRouteRoute: AuthenticatedVideosRouteRoute,
   AuthenticatedIndexRoute: AuthenticatedIndexRoute,
   AuthenticatedErrorsErrorRoute: AuthenticatedErrorsErrorRoute,
 }
