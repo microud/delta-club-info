@@ -45,4 +45,36 @@ export class UpdateClubDto {
   @IsOptional()
   @IsString()
   closureNote?: string;
+
+  @IsOptional()
+  @IsString()
+  companyName?: string;
+
+  @IsOptional()
+  @IsString()
+  creditCode?: string;
+
+  @IsOptional()
+  @IsString()
+  legalPerson?: string;
+
+  @IsOptional()
+  @IsString()
+  registeredAddress?: string;
+
+  @IsOptional()
+  @IsString()
+  businessScope?: string;
+
+  @IsOptional()
+  @IsString()
+  registeredCapital?: string;
+
+  @IsOptional()
+  @IsDateString()
+  companyEstablishedAt?: string;
+
+  @IsOptional()
+  @IsString()
+  businessStatus?: string;
 }

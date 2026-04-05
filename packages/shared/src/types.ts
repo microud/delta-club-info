@@ -32,6 +32,14 @@ export interface ClubDto {
   closedAt: string | null;
   predecessorId: string | null;
   closureNote: string | null;
+  companyName: string | null;
+  creditCode: string | null;
+  legalPerson: string | null;
+  registeredAddress: string | null;
+  businessScope: string | null;
+  registeredCapital: string | null;
+  companyEstablishedAt: string | null;
+  businessStatus: string | null;
   createdAt: string;
   updatedAt: string;
 }
