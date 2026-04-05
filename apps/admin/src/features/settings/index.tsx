@@ -1,5 +1,5 @@
 import { Outlet } from '@tanstack/react-router'
-import { Palette } from 'lucide-react'
+import { Bot, Palette, Smartphone } from 'lucide-react'
 import { Separator } from '@/components/ui/separator'
 import { ConfigDrawer } from '@/components/config-drawer'
 import { Header } from '@/components/layout/header'
@@ -14,6 +14,16 @@ const sidebarNavItems = [
     title: 'Appearance',
     href: '/settings/appearance',
     icon: <Palette size={18} />,
+  },
+  {
+    title: '企业微信',
+    href: '/settings/wechat-work',
+    icon: <Smartphone size={18} />,
+  },
+  {
+    title: 'AI 配置',
+    href: '/settings/ai',
+    icon: <Bot size={18} />,
   },
 ]
 

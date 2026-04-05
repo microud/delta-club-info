@@ -6,6 +6,7 @@ import {
   UserSearch,
   Bot,
   Video,
+  ScanText,
 } from 'lucide-react'
 import { type SidebarData } from '../types'
 
@@ -43,6 +44,11 @@ export const sidebarData: SidebarData = {
           title: '视频列表',
           url: '/videos',
           icon: Video,
+        },
+        {
+          title: '消息解析',
+          url: '/parse-tasks',
+          icon: ScanText,
         },
       ],
     },
