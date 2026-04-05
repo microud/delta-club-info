@@ -13,8 +13,11 @@ export class StorageService {
   private readonly bucket: string;
 
   constructor(private readonly config: ConfigService) {
+    const rawEndpoint = this.config.getOrThrow<string>('S3_ENDPOINT');
+    const endpoint = rawEndpoint.startsWith('http') ? rawEndpoint : `https://${rawEndpoint}`;
+
     this.client = new S3Client({
-      endpoint: this.config.getOrThrow('S3_ENDPOINT'),
+      endpoint,
       region: this.config.get('S3_REGION', 'us-east-1'),
       credentials: {
         accessKeyId: this.config.getOrThrow('S3_ACCESS_KEY_ID'),
@@ -46,7 +49,8 @@ export class StorageService {
   }
 
   getPublicUrl(key: string): string {
-    const endpoint = this.config.getOrThrow('S3_ENDPOINT');
+    const rawEndpoint = this.config.getOrThrow<string>('S3_ENDPOINT');
+    const endpoint = rawEndpoint.startsWith('http') ? rawEndpoint : `https://${rawEndpoint}`;
     return `${endpoint}/${this.bucket}/${key}`;
   }
 }
