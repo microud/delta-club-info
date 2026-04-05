@@ -7,6 +7,8 @@ import {
   createAiConfig,
   updateAiConfig,
   deleteAiConfig,
+  getSystemConfigs,
+  updateSystemConfig,
 } from '@/lib/api'
 import { ContentSection } from '../components/content-section'
 import { Button } from '@/components/ui/button'
@@ -28,6 +30,14 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select'
+import { Label } from '@/components/ui/label'
 import { AiConfigForm, type AiConfigFormValues } from './ai-config-form'
 
 const providerLabels: Record<string, string> = {
@@ -44,12 +54,18 @@ export function SettingsAi() {
   const [editingConfig, setEditingConfig] = useState<AiConfigDto | undefined>()
   const [deleteTarget, setDeleteTarget] = useState<AiConfigDto | undefined>()
   const [submitting, setSubmitting] = useState(false)
+  const [parseConfigId, setParseConfigId] = useState<string>('')
 
   const fetchConfigs = useCallback(async () => {
     try {
       setLoading(true)
-      const data = await getAiConfigs()
-      setConfigs(data)
+      const [configsData, sysConfigs] = await Promise.all([
+        getAiConfigs(),
+        getSystemConfigs(),
+      ])
+      setConfigs(configsData)
+      const parseConfig = sysConfigs.find((c) => c.key === 'ai_parse.ai_config_id')
+      setParseConfigId(parseConfig?.value ?? '')
     } catch {
       toast.error('获取 AI 配置列表失败')
     } finally {
@@ -60,6 +76,16 @@ export function SettingsAi() {
   useEffect(() => {
     fetchConfigs()
   }, [fetchConfigs])
+
+  const handleParseConfigChange = async (value: string) => {
+    try {
+      await updateSystemConfig('ai_parse.ai_config_id', value)
+      setParseConfigId(value)
+      toast.success('AI 解析配置已更新')
+    } catch {
+      toast.error('更新 AI 解析配置失败')
+    }
+  }
 
   const handleCreate = () => {
     setEditingConfig(undefined)
@@ -107,7 +133,28 @@ export function SettingsAi() {
       title='AI 配置'
       desc='管理多个 AI 服务商配置，在不同业务中使用不同的 AI。'
     >
-      <div className='space-y-4'>
+      <div className='space-y-6'>
+        {!loading && configs.length > 0 && (
+          <div className='space-y-2'>
+            <Label>AI 解析使用的配置</Label>
+            <Select value={parseConfigId} onValueChange={handleParseConfigChange}>
+              <SelectTrigger className='w-[300px]'>
+                <SelectValue placeholder='请选择 AI 配置' />
+              </SelectTrigger>
+              <SelectContent>
+                {configs.map((config) => (
+                  <SelectItem key={config.id} value={config.id}>
+                    {config.name} ({providerLabels[config.provider] ?? config.provider} / {config.model})
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <p className='text-muted-foreground text-xs'>
+              用于俱乐部智能录入等图片/文本解析功能
+            </p>
+          </div>
+        )}
+
         <div className='flex justify-end'>
           <Button onClick={handleCreate} size='sm'>
             <Plus className='mr-1 h-4 w-4' />
