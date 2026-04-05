@@ -34,7 +34,7 @@ export class CrawlerService implements OnModuleInit {
   }
 
   async onModuleInit() {
-    await this.registerInterval();
+    await this.syncSchedule();
   }
 
   async getFrequency(): Promise<number> {
@@ -42,11 +42,37 @@ export class CrawlerService implements OnModuleInit {
     return raw ? parseInt(raw, 10) || DEFAULT_FREQUENCY_MINUTES : DEFAULT_FREQUENCY_MINUTES;
   }
 
-  async registerInterval() {
+  async getEnabled(): Promise<boolean> {
+    const raw = await this.systemConfigsService.getValue('crawler.enabled');
+    return raw === 'true';
+  }
+
+  async setEnabled(enabled: boolean) {
+    await this.systemConfigsService.upsert(
+      'crawler.enabled',
+      String(enabled),
+      '爬虫定时任务开关',
+    );
+    await this.syncSchedule();
+  }
+
+  /**
+   * 根据 enabled 和 frequency 同步定时任务状态：
+   * enabled=true → 注册/更新 interval
+   * enabled=false → 删除 interval
+   */
+  private async syncSchedule() {
+    // 先清除已有 interval
     try {
       this.schedulerRegistry.deleteInterval(INTERVAL_NAME);
     } catch {
       // No existing interval
+    }
+
+    const enabled = await this.getEnabled();
+    if (!enabled) {
+      this.logger.log('Crawler is disabled, no interval registered');
+      return;
     }
 
     const raw = await this.systemConfigsService.getValue('crawler.frequency');
@@ -64,7 +90,7 @@ export class CrawlerService implements OnModuleInit {
       String(minutes),
       '爬虫抓取频率（分钟）',
     );
-    await this.registerInterval();
+    await this.syncSchedule();
   }
 
   async runAll() {

@@ -28,14 +28,23 @@ export class AdminCrawlTasksController {
     return { message: 'Crawl triggered' };
   }
 
-  @Get('frequency')
-  async getFrequency() {
-    return { frequency: await this.crawlerService.getFrequency() };
+  @Get('config')
+  async getConfig() {
+    return {
+      enabled: await this.crawlerService.getEnabled(),
+      frequency: await this.crawlerService.getFrequency(),
+    };
   }
 
   @Post('frequency')
   async updateFrequency(@Body() body: { frequency: number }) {
     await this.crawlerService.updateFrequency(body.frequency);
     return { frequency: body.frequency };
+  }
+
+  @Post('enabled')
+  async setEnabled(@Body() body: { enabled: boolean }) {
+    await this.crawlerService.setEnabled(body.enabled);
+    return { enabled: body.enabled };
   }
 }

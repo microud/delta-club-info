@@ -117,11 +117,14 @@ export const getCrawlTasks = () =>
 export const triggerCrawl = () =>
   api.post('/crawl-tasks/trigger').then((res) => res.data)
 
-export const getCrawlFrequency = () =>
-  api.get<{ frequency: number }>('/crawl-tasks/frequency').then((res) => res.data)
+export const getCrawlConfig = () =>
+  api.get<{ enabled: boolean; frequency: number }>('/crawl-tasks/config').then((res) => res.data)
 
 export const updateCrawlFrequency = (frequency: number) =>
   api.post<{ frequency: number }>('/crawl-tasks/frequency', { frequency }).then((res) => res.data)
+
+export const setCrawlEnabled = (enabled: boolean) =>
+  api.post<{ enabled: boolean }>('/crawl-tasks/enabled', { enabled }).then((res) => res.data)
 
 // Videos
 export const getVideos = (params?: { platform?: string; category?: string }) =>
