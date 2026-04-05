@@ -10,6 +10,8 @@ import {
 } from '@nestjs/common';
 import { AdminGuard } from '../../common/guards/admin.guard';
 import { ClubServicesService } from './club-services.service';
+import { AiImportDto } from './dto/ai-import.dto';
+import { BatchCreateClubServiceDto } from './dto/batch-create-club-service.dto';
 import { CreateClubServiceDto } from './dto/create-club-service.dto';
 import { UpdateClubServiceDto } from './dto/update-club-service.dto';
 
@@ -21,6 +23,22 @@ export class ClubServicesController {
   @Get()
   findByClub(@Param('clubId') clubId: string) {
     return this.clubServicesService.findByClub(clubId);
+  }
+
+  @Post('ai-import')
+  aiImport(
+    @Param('clubId') clubId: string,
+    @Body() dto: AiImportDto,
+  ) {
+    return this.clubServicesService.aiImport(dto.imageKeys ?? [], dto.textContent);
+  }
+
+  @Post('batch')
+  batchCreate(
+    @Param('clubId') clubId: string,
+    @Body() dto: BatchCreateClubServiceDto,
+  ) {
+    return this.clubServicesService.batchCreate(clubId, dto.services);
   }
 
   @Post()

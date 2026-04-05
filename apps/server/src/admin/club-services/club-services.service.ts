@@ -3,6 +3,7 @@ import { NodePgDatabase } from 'drizzle-orm/node-postgres';
 import { eq, asc, and } from 'drizzle-orm';
 import { DRIZZLE } from '../../database/database.module';
 import * as schema from '../../database/schema';
+import { AiParseService } from '../../ai-parse/ai-parse.service';
 import { CreateClubServiceDto } from './dto/create-club-service.dto';
 import { UpdateClubServiceDto } from './dto/update-club-service.dto';
 
@@ -10,6 +11,7 @@ import { UpdateClubServiceDto } from './dto/update-club-service.dto';
 export class ClubServicesService {
   constructor(
     @Inject(DRIZZLE) private readonly db: NodePgDatabase<typeof schema>,
+    private readonly aiParseService: AiParseService,
   ) {}
 
   async findByClub(clubId: string) {
@@ -80,5 +82,19 @@ export class ClubServicesService {
 
     if (!service) throw new NotFoundException('Service not found');
     return service;
+  }
+
+  async aiImport(imageKeys: string[], textContent?: string) {
+    const textContents = textContent ? [textContent] : [];
+    return this.aiParseService.parseImages(imageKeys, textContents);
+  }
+
+  async batchCreate(clubId: string, dtos: CreateClubServiceDto[]) {
+    const results = [];
+    for (const dto of dtos) {
+      const service = await this.create(clubId, dto);
+      results.push(service);
+    }
+    return results;
   }
 }
