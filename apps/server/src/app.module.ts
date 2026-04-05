@@ -5,6 +5,7 @@ import { StorageModule } from './storage/storage.module';
 import { AdminModule } from './admin/admin.module';
 import { CrawlerModule } from './crawler/crawler.module';
 import { WechatWorkModule } from './wechat-work/wechat-work.module';
+import { AiParseModule } from './ai-parse/ai-parse.module';
 
 @Module({
   imports: [
@@ -17,6 +18,7 @@ import { WechatWorkModule } from './wechat-work/wechat-work.module';
     AdminModule,
     CrawlerModule,
     WechatWorkModule,
+    AiParseModule,
   ],
 })
 export class AppModule {}
