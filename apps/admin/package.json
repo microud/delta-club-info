@@ -1,6 +1,6 @@
 {
-  "name": "shadcn-admin",
-  "private": false,
+  "name": "@delta-club/admin",
+  "private": true,
   "version": "2.2.1",
   "type": "module",
   "scripts": {
@@ -13,7 +13,7 @@
     "knip": "knip"
   },
   "dependencies": {
-    "@clerk/clerk-react": "^5.61.3",
+    "@delta-club/shared": "workspace:*",
     "@hookform/resolvers": "^5.2.2",
     "@radix-ui/react-alert-dialog": "^1.1.15",
     "@radix-ui/react-avatar": "^1.1.11",
