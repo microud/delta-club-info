@@ -8,6 +8,13 @@
       "when": 1775324188648,
       "tag": "0000_burly_wind_dancer",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1775372241130,
+      "tag": "0001_useful_omega_sentinel",
+      "breakpoints": true
     }
   ]
 }
