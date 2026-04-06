@@ -36,6 +36,7 @@ export const clubs = pgTable('clubs', {
   registeredCapital: varchar('registered_capital', { length: 100 }),
   companyEstablishedAt: date('company_established_at'),
   businessStatus: varchar('business_status', { length: 50 }),
+  orderPosters: text('order_posters').array().default([]),
   createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
   updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
 });

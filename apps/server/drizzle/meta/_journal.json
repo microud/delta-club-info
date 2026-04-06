@@ -50,6 +50,13 @@
       "when": 1775397321274,
       "tag": "0006_military_reavers",
       "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1775482075417,
+      "tag": "0007_gorgeous_barracuda",
+      "breakpoints": true
     }
   ]
 }

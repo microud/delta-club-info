@@ -32,6 +32,7 @@ export const clubServices = pgTable('club_services', {
   guaranteeHafuCoin: decimal('guarantee_hafu_coin', { precision: 10, scale: 2 }),
   rules: text('rules'),
   sortOrder: integer('sort_order').notNull().default(0),
+  images: text('images').array().default([]),
   createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
   updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
 });
