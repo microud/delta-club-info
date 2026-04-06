@@ -195,3 +195,81 @@ export interface ParsedRule {
   content: string;
   category: string;
 }
+
+// Client-facing types
+
+export interface ClientBannerDto {
+  clubId: string;
+  clubName: string;
+  imageUrl: string;
+}
+
+export interface FeedItemDto {
+  id: string;
+  type: 'video' | 'announcement';
+  title: string;
+  coverUrl: string | null;
+  authorName: string | null;
+  platform: string | null;
+  category: string | null;
+  clubId: string | null;
+  clubName: string | null;
+  content: string | null;
+  publishedAt: string | null;
+}
+
+export interface ClientClubListItemDto {
+  id: string;
+  name: string;
+  logo: string | null;
+  description: string | null;
+  establishedAt: string | null;
+  serviceTypes: string[];
+  createdAt: string;
+}
+
+export interface ClientClubDetailDto extends ClubDto {
+  predecessor: { id: string; name: string } | null;
+}
+
+export interface ClientVideoDetailDto {
+  id: string;
+  title: string;
+  description: string | null;
+  coverUrl: string;
+  videoUrl: string;
+  platform: string;
+  category: string;
+  authorName: string;
+  aiSummary: string | null;
+  aiSentiment: string | null;
+  clubId: string | null;
+  clubName: string | null;
+  publishedAt: string;
+}
+
+export interface AnnouncementDto {
+  id: string;
+  title: string;
+  content: string;
+  status: string;
+  publishedAt: string | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface UserProfileDto {
+  id: string;
+  nickname: string | null;
+  avatar: string | null;
+  createdAt: string;
+}
+
+export interface UserFavoriteClubDto {
+  id: string;
+  name: string;
+  logo: string | null;
+  description: string | null;
+  establishedAt: string | null;
+  favoritedAt: string;
+}
