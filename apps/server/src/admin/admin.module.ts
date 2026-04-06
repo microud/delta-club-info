@@ -23,6 +23,8 @@ import { AdminVideosService } from './videos/videos.service';
 import { AiConfigsController } from './ai-configs/ai-configs.controller';
 import { AiConfigsService } from './ai-configs/ai-configs.service';
 import { UploadController } from './upload/upload.controller';
+import { AnnouncementsController } from './announcements/announcements.controller';
+import { AnnouncementsService } from './announcements/announcements.service';
 import { CrawlerModule } from '../crawler/crawler.module';
 import { AiParseModule } from '../ai-parse/ai-parse.module';
 
@@ -50,6 +52,7 @@ import { AiParseModule } from '../ai-parse/ai-parse.module';
     AdminVideosController,
     AiConfigsController,
     UploadController,
+    AnnouncementsController,
   ],
   providers: [
     AuthService,
@@ -63,6 +66,7 @@ import { AiParseModule } from '../ai-parse/ai-parse.module';
     AdminCrawlTasksService,
     AdminVideosService,
     AiConfigsService,
+    AnnouncementsService,
   ],
 })
 export class AdminModule {}
