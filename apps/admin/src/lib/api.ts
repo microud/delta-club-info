@@ -195,4 +195,20 @@ export const getSystemConfigs = () =>
 export const updateSystemConfig = (key: string, value: string) =>
   api.put<SystemConfigDto>(`/system-configs/${key}`, { value }).then((res) => res.data)
 
+// Announcements
+export const getAnnouncements = (params?: { page?: number; pageSize?: number }) =>
+  api.get('/announcements', { params }).then((res) => res.data)
+
+export const getAnnouncement = (id: string) =>
+  api.get(`/announcements/${id}`).then((res) => res.data)
+
+export const createAnnouncement = (data: { title: string; content: string; status?: string }) =>
+  api.post('/announcements', data).then((res) => res.data)
+
+export const updateAnnouncement = (id: string, data: { title?: string; content?: string; status?: string }) =>
+  api.put(`/announcements/${id}`, data).then((res) => res.data)
+
+export const deleteAnnouncement = (id: string) =>
+  api.delete(`/announcements/${id}`).then((res) => res.data)
+
 export default api

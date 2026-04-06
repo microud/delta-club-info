@@ -7,6 +7,7 @@ import {
   Video,
   ScanText,
   Smartphone,
+  Bell,
 } from 'lucide-react'
 import { type SidebarData } from '../types'
 
@@ -49,6 +50,11 @@ export const sidebarData: SidebarData = {
           title: '消息解析',
           url: '/parse-tasks',
           icon: ScanText,
+        },
+        {
+          title: '公告管理',
+          url: '/announcements',
+          icon: Bell,
         },
       ],
     },
