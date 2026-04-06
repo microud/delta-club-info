@@ -4,6 +4,7 @@ import {
   IsString,
   IsNumber,
   IsBoolean,
+  IsArray,
 } from 'class-validator';
 import { ClubServiceType } from '@delta-club/shared';
 
@@ -46,4 +47,9 @@ export class CreateClubServiceDto {
   @IsOptional()
   @IsNumber()
   sortOrder?: number;
+
+  @IsOptional()
+  @IsString({ each: true })
+  @IsArray()
+  images?: string[];
 }

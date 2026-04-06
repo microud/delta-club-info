@@ -40,6 +40,7 @@ export interface ClubDto {
   registeredCapital: string | null;
   companyEstablishedAt: string | null;
   businessStatus: string | null;
+  orderPosters: string[];
   createdAt: string;
   updatedAt: string;
 }
@@ -57,6 +58,7 @@ export interface ClubServiceDto {
   guaranteeHafuCoin: string | null;
   rules: string | null;
   sortOrder: number;
+  images: string[];
 }
 
 export interface ClubRuleDto {

@@ -1,4 +1,4 @@
-import { IsString, IsOptional, IsEnum, IsDateString, ValidateIf } from 'class-validator';
+import { IsString, IsOptional, IsEnum, IsDateString, ValidateIf, IsArray } from 'class-validator';
 import { ClubStatus } from '@delta-club/shared';
 
 export class UpdateClubDto {
@@ -80,4 +80,9 @@ export class UpdateClubDto {
   @IsOptional()
   @IsString()
   businessStatus?: string;
+
+  @IsOptional()
+  @IsString({ each: true })
+  @IsArray()
+  orderPosters?: string[];
 }

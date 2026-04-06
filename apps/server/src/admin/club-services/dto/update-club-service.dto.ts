@@ -3,6 +3,7 @@ import {
   IsString,
   IsNumber,
   IsBoolean,
+  IsArray,
 } from 'class-validator';
 
 export class UpdateClubServiceDto {
@@ -41,4 +42,9 @@ export class UpdateClubServiceDto {
   @IsOptional()
   @IsNumber()
   sortOrder?: number;
+
+  @IsOptional()
+  @IsString({ each: true })
+  @IsArray()
+  images?: string[];
 }
