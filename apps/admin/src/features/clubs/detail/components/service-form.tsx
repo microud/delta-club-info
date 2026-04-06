@@ -1,7 +1,6 @@
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { ImageUploadButton } from '@/components/image-upload-button'
-import { X } from 'lucide-react'
+import { ImageUploadGrid } from '@/components/image-upload-grid'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
@@ -221,45 +220,23 @@ export function ServiceForm({ initialData, onSubmit, isSubmitting }: ServiceForm
           </>
         )}
 
-        <div className='space-y-2'>
-          <FormField
-            control={form.control}
-            name='images'
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>辅助图片</FormLabel>
-                <FormControl>
-                  <div className='space-y-3'>
-                    {field.value && field.value.length > 0 && (
-                      <div className='grid grid-cols-2 gap-3 sm:grid-cols-3'>
-                        {field.value.map((url: string, index: number) => (
-                          <div key={url} className='group relative aspect-[3/4] overflow-hidden rounded-lg border'>
-                            <img src={url} alt={`图片 ${index + 1}`} className='h-full w-full object-cover' />
-                            <button
-                              type='button'
-                              className='absolute right-1 top-1 rounded-full bg-black/50 p-1 text-white opacity-0 transition-opacity group-hover:opacity-100'
-                              onClick={() => {
-                                const next = [...field.value!]
-                                next.splice(index, 1)
-                                field.onChange(next)
-                              }}
-                            >
-                              <X className='h-3 w-3' />
-                            </button>
-                          </div>
-                        ))}
-                      </div>
-                    )}
-                    <ImageUploadButton
-                      onUploaded={(url) => field.onChange([...(field.value ?? []), url])}
-                    />
-                  </div>
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-        </div>
+        <FormField
+          control={form.control}
+          name='images'
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>辅助图片</FormLabel>
+              <FormControl>
+                <ImageUploadGrid
+                  value={field.value ?? []}
+                  onChange={field.onChange}
+                  columns='grid-cols-2 sm:grid-cols-3'
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
 
         <div className='flex justify-end gap-2 pt-2'>
           <Button type='submit' disabled={isSubmitting}>
