@@ -1,0 +1,24 @@
+{
+  "pages": [
+    { "path": "pages/home/index", "style": { "navigationBarTitleText": "首页" } },
+    { "path": "pages/clubs/index", "style": { "navigationBarTitleText": "俱乐部" } },
+    { "path": "pages/clubs/detail", "style": { "navigationBarTitleText": "俱乐部详情" } },
+    { "path": "pages/videos/detail", "style": { "navigationBarTitleText": "视频详情" } },
+    { "path": "pages/announcements/detail", "style": { "navigationBarTitleText": "公告详情" } },
+    { "path": "pages/profile/index", "style": { "navigationBarTitleText": "我的" } },
+    { "path": "pages/profile/favorites", "style": { "navigationBarTitleText": "我的收藏" } }
+  ],
+  "tabBar": {
+    "list": [
+      { "pagePath": "pages/home/index", "text": "首页" },
+      { "pagePath": "pages/clubs/index", "text": "俱乐部" },
+      { "pagePath": "pages/profile/index", "text": "我的" }
+    ]
+  },
+  "globalStyle": {
+    "navigationBarTextStyle": "black",
+    "navigationBarTitleText": "三角洲俱乐部",
+    "navigationBarBackgroundColor": "#ffffff",
+    "backgroundColor": "#f5f5f5"
+  }
+}
