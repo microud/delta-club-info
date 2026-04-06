@@ -83,7 +83,7 @@ delta-club-info/
 
 ```
 /admin/*              — Admin 后台接口，AdminGuard (JWT) 鉴权
-/api/v1/*             — 小程序端接口，WechatAuthGuard 鉴权（部分接口允许匿名访问）
+/api/client/*         — 小程序端接口，WechatAuthGuard 鉴权（部分接口允许匿名访问）
 /webhook/wechat-work  — 企业微信回调，签名验证鉴权
 ```
 
@@ -126,19 +126,21 @@ GET    /webhook/wechat-work                     (URL 验证 echostr)
 POST   /webhook/wechat-work                     (消息接收)
 
 # Client (小程序)
-GET    /api/v1/auth/wechat-login
-GET    /api/v1/clubs                            (列表 + 筛选)
-GET    /api/v1/clubs/:id                        (详情)
-GET    /api/v1/clubs/:id/videos
-GET    /api/v1/clubs/:id/reviews
-POST   /api/v1/clubs/:id/reviews                (需登录)
-GET    /api/v1/clubs/compare                    (对比)
-GET    /api/v1/clubs/graveyard                  (墓碑)
-GET    /api/v1/promotions/home                  (首页推广内容)
-GET    /api/v1/user/favorites                   (需登录)
-POST   /api/v1/user/favorites/:clubId           (需登录)
-DELETE /api/v1/user/favorites/:clubId           (需登录)
-POST   /api/v1/reviews/:id/reactions            (需登录)
+POST   /api/client/auth/login                   (静默登录，wx.login code → token)
+POST   /api/client/auth/profile                 (提交授权后的头像和昵称，需登录)
+GET    /api/client/home/banners                 (首页推广轮播)
+GET    /api/client/home/feed                    (混合 feed 流：视频+公告，分页)
+GET    /api/client/clubs                        (列表 + 筛选 + 搜索)
+GET    /api/client/clubs/:id                    (详情：基本信息+工商+前身俱乐部)
+GET    /api/client/clubs/:id/services           (服务项列表)
+GET    /api/client/clubs/:id/rules              (规则列表)
+GET    /api/client/clubs/:id/videos             (关联视频，type=REVIEW|SENTIMENT)
+GET    /api/client/videos/:id                   (视频详情)
+GET    /api/client/announcements/:id            (公告详情)
+GET    /api/client/user/profile                 (用户信息，需登录)
+GET    /api/client/user/favorites               (收藏列表，需登录)
+POST   /api/client/user/favorites/:clubId       (添加收藏，需登录+授权)
+DELETE /api/client/user/favorites/:clubId       (取消收藏，需登录)
 ```
 
 ### 初始管理员
@@ -407,6 +409,18 @@ parsedResult 结构：
 | createdAt | timestamp | |
 
 唯一约束：`userId + clubId`
+
+### Announcement (公告/活动)
+
+| 字段 | 类型 | 说明 |
+|------|------|------|
+| id | uuid | 主键 |
+| title | varchar | 标题 |
+| content | text | 正文 |
+| status | enum | draft / published |
+| publishedAt | timestamp | 发布时间 (nullable) |
+| createdAt | timestamp | |
+| updatedAt | timestamp | |
 
 ### SystemConfig (系统配置)
 
