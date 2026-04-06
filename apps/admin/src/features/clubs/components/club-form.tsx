@@ -13,8 +13,9 @@ import {
   FormMessage,
 } from '@/components/ui/form'
 import { clubFormSchema, type ClubFormValues } from '../data/schema'
-import { fetchWechatAvatar, uploadFile } from '@/lib/api'
-import { X, Upload, Loader2 } from 'lucide-react'
+import { fetchWechatAvatar } from '@/lib/api'
+import { ImageUploadButton } from '@/components/image-upload-button'
+import { X } from 'lucide-react'
 
 type ClubFormProps = {
   initialData?: ClubFormValues
@@ -303,38 +304,3 @@ export function ClubForm({ initialData, onSubmit, isSubmitting }: ClubFormProps)
   )
 }
 
-function ImageUploadButton({ onUploaded }: { onUploaded: (url: string) => void }) {
-  const [uploading, setUploading] = useState(false)
-
-  return (
-    <Button
-      type='button'
-      variant='outline'
-      size='sm'
-      disabled={uploading}
-      onClick={() => {
-        const input = document.createElement('input')
-        input.type = 'file'
-        input.accept = 'image/*'
-        input.multiple = true
-        input.onchange = async () => {
-          const files = input.files
-          if (!files) return
-          setUploading(true)
-          try {
-            for (const file of Array.from(files)) {
-              const { url } = await uploadFile(file)
-              onUploaded(url)
-            }
-          } finally {
-            setUploading(false)
-          }
-        }
-        input.click()
-      }}
-    >
-      {uploading ? <Loader2 className='mr-2 h-4 w-4 animate-spin' /> : <Upload className='mr-2 h-4 w-4' />}
-      {uploading ? '上传中...' : '上传图片'}
-    </Button>
-  )
-}
