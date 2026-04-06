@@ -13,7 +13,8 @@ import {
   FormMessage,
 } from '@/components/ui/form'
 import { clubFormSchema, type ClubFormValues } from '../data/schema'
-import { fetchWechatAvatar } from '@/lib/api'
+import { fetchWechatAvatar, uploadFile } from '@/lib/api'
+import { X, Upload, Loader2 } from 'lucide-react'
 
 type ClubFormProps = {
   initialData?: ClubFormValues
@@ -26,6 +27,7 @@ export function ClubForm({ initialData, onSubmit, isSubmitting }: ClubFormProps)
   const form = useForm<ClubFormValues>({
     resolver: zodResolver(clubFormSchema),
     defaultValues: initialData ?? {
+      orderPosters: [],
       name: '',
       logo: '',
       description: '',
@@ -178,6 +180,46 @@ export function ClubForm({ initialData, onSubmit, isSubmitting }: ClubFormProps)
         />
 
         <div className='space-y-4 border-t pt-4'>
+          <h3 className='text-sm font-medium'>订单海报</h3>
+          <FormField
+            control={form.control}
+            name='orderPosters'
+            render={({ field }) => (
+              <FormItem>
+                <FormControl>
+                  <div className='space-y-3'>
+                    {field.value && field.value.length > 0 && (
+                      <div className='grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4'>
+                        {field.value.map((url: string, index: number) => (
+                          <div key={url} className='group relative aspect-[3/4] overflow-hidden rounded-lg border'>
+                            <img src={url} alt={`海报 ${index + 1}`} className='h-full w-full object-cover' />
+                            <button
+                              type='button'
+                              className='absolute right-1 top-1 rounded-full bg-black/50 p-1 text-white opacity-0 transition-opacity group-hover:opacity-100'
+                              onClick={() => {
+                                const next = [...field.value!]
+                                next.splice(index, 1)
+                                field.onChange(next)
+                              }}
+                            >
+                              <X className='h-3 w-3' />
+                            </button>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                    <ImageUploadButton
+                      onUploaded={(url) => field.onChange([...(field.value ?? []), url])}
+                    />
+                  </div>
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        </div>
+
+        <div className='space-y-4 border-t pt-4'>
           <h3 className='text-sm font-medium'>工商信息</h3>
 
           <div className='grid gap-4 sm:grid-cols-2'>
@@ -258,5 +300,41 @@ export function ClubForm({ initialData, onSubmit, isSubmitting }: ClubFormProps)
         </div>
       </form>
     </Form>
+  )
+}
+
+function ImageUploadButton({ onUploaded }: { onUploaded: (url: string) => void }) {
+  const [uploading, setUploading] = useState(false)
+
+  return (
+    <Button
+      type='button'
+      variant='outline'
+      size='sm'
+      disabled={uploading}
+      onClick={() => {
+        const input = document.createElement('input')
+        input.type = 'file'
+        input.accept = 'image/*'
+        input.multiple = true
+        input.onchange = async () => {
+          const files = input.files
+          if (!files) return
+          setUploading(true)
+          try {
+            for (const file of Array.from(files)) {
+              const { url } = await uploadFile(file)
+              onUploaded(url)
+            }
+          } finally {
+            setUploading(false)
+          }
+        }
+        input.click()
+      }}
+    >
+      {uploading ? <Loader2 className='mr-2 h-4 w-4 animate-spin' /> : <Upload className='mr-2 h-4 w-4' />}
+      {uploading ? '上传中...' : '上传图片'}
+    </Button>
   )
 }
