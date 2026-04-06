@@ -11,6 +11,7 @@ export const serviceFormSchema = z.object({
   hasGuarantee: z.boolean().optional(),
   guaranteeHafuCoin: z.string().optional(),
   rules: z.string().optional(),
+  images: z.array(z.string()).optional(),
 })
 
 export type ServiceFormValues = z.infer<typeof serviceFormSchema>

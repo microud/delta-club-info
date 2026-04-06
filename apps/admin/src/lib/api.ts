@@ -76,6 +76,13 @@ export const updateClubService = (clubId: string, id: string, data: Partial<Club
 export const deleteClubService = (clubId: string, id: string) =>
   api.delete(`/clubs/${clubId}/services/${id}`)
 
+// Upload
+export const uploadFile = (file: File) => {
+  const formData = new FormData()
+  formData.append('file', file)
+  return api.post<{ url: string; key: string }>('/upload', formData).then((res) => res.data)
+}
+
 // AI Smart Import
 export const aiImportServices = (clubId: string, data: { files: File[]; textContent?: string }) => {
   const formData = new FormData()

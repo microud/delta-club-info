@@ -21,6 +21,7 @@ export const clubSchema = z.object({
   registeredCapital: z.string().nullable(),
   companyEstablishedAt: z.string().nullable(),
   businessStatus: z.string().nullable(),
+  orderPosters: z.array(z.string()),
   createdAt: z.string(),
   updatedAt: z.string(),
 })
@@ -43,6 +44,7 @@ export const clubFormSchema = z.object({
   registeredCapital: z.string().optional(),
   companyEstablishedAt: z.string().optional(),
   businessStatus: z.string().optional(),
+  orderPosters: z.array(z.string()).optional(),
 })
 
 export type ClubFormValues = z.infer<typeof clubFormSchema>
