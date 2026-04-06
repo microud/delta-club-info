@@ -10,3 +10,6 @@ export * from './crawl-task.schema';
 export * from './wechat-message.schema';
 export * from './parse-task.schema';
 export * from './ai-config.schema';
+export * from './user.schema';
+export * from './user-favorite.schema';
+export * from './announcement.schema';

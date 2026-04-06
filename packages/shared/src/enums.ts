@@ -58,3 +58,8 @@ export enum ParseTaskStatus {
   COMPLETED = 'completed',
   FAILED = 'failed',
 }
+
+export enum AnnouncementStatus {
+  DRAFT = 'draft',
+  PUBLISHED = 'published',
+}
