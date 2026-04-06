@@ -30,21 +30,29 @@ Club 表新增字段：
 |------|------|------|
 | orderPosters | text[] | 订单海报图片 URL 数组，默认空数组 |
 
-使用 PostgreSQL 原生数组类型，每个元素为 S3 存储的图片 URL。
+ClubService 表新增字段：
+
+| 字段 | 类型 | 说明 |
+|------|------|------|
+| images | text[] | 服务项辅助图片 URL 数组，默认空数组 |
+
+均使用 PostgreSQL 原生数组类型，每个元素为 S3 存储的图片 URL。
 
 #### 后端
 
 - Club schema 新增 `orderPosters` 字段（`text('order_posters').array()`，默认 `[]`）
-- Club CRUD 接口自然支持该字段的读写，无需新增接口
+- ClubService schema 新增 `images` 字段（`text('images').array()`，默认 `[]`）
+- 两者的 CRUD 接口自然支持该字段的读写，无需新增接口
 - 图片上传复用现有 `/admin/upload` 通用上传接口
-- 俱乐部详情 API 返回该字段（为小程序预留）
+- 俱乐部详情 API 返回这些字段（为小程序预留）
 
 #### Admin 前端
 
 - 俱乐部编辑表单（`club-form.tsx`）新增"订单海报"区域
-- 支持多张图片上传、预览、删除、排序
-- 上传调用现有 `/admin/upload` 接口获取 URL，保存时将 URL 数组写入 `orderPosters` 字段
-- 俱乐部列表页不展示该字段
+- 服务项编辑时支持添加辅助图片
+- 均支持多张图片上传、预览、删除、排序
+- 上传调用现有 `/admin/upload` 接口获取 URL，保存时将 URL 数组写入对应字段
+- 俱乐部列表页不展示这些字段
 
 #### 存储
 
