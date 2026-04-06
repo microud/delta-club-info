@@ -15,10 +15,13 @@
 | 后端 | NestJS (TypeScript) |
 | ORM | Drizzle |
 | 数据库 | PostgreSQL |
-| Admin 前端 | Vite + React + Shadcn/ui + Tailwind |
+| Admin 前端 | Vite + React + shadcn-admin + TanStack Router/Table/Query + Zustand |
+| 表单验证 | React Hook Form + Zod |
 | 小程序 | UniApp (Vue3 + Vite + TypeScript) |
+| 对象存储 | S3 兼容（Sealos Cloud ObjectStorage） |
 | 部署 | Sealos Cloud |
-| LLM | xAI Grok（抽象为 LLM Provider，可替换） |
+| AI SDK | Vercel AI SDK (`ai` + provider adapters) |
+| AI Providers | xAI Grok（视频/服务解析）、OpenAI、Anthropic（可切换） |
 | 内容审核 AI | 国内模型（通过 LLM Provider 接入） |
 
 ## 项目结构
@@ -27,7 +30,7 @@
 delta-club-info/
 ├── apps/
 │   ├── server/          # NestJS API (Admin + 小程序共用)
-│   ├── admin/           # Vite + React + Shadcn/ui + Tailwind
+│   ├── admin/           # Vite + React + shadcn-admin
 │   └── uniapp/          # UniApp (Vue3 + Vite + TS)（后期）
 ├── packages/
 │   └── shared/          # 共享类型定义、常量、工具函数
@@ -39,42 +42,49 @@ delta-club-info/
 ## 系统架构
 
 ```
-┌──────────────┐  ┌──────────────┐  ┌──────────────┐
-│   Admin SPA  │  │ UniApp 小程序 │  │  微信公众号   │
-│  (React)     │  │  (Vue3)      │  │  (后期)      │
-└──────┬───────┘  └──────┬───────┘  └──────┬───────┘
-       │                 │                 │
-       └────────┬────────┴────────┬────────┘
-                │                 │
-         ┌──────▼──────────────────▼──────┐
-         │        NestJS API Server        │
-         │                                 │
-         │  AdminModule    ClientModule    │
-         │  (JWT 鉴权)     (微信鉴权)      │
-         │                                 │
-         │  CrawlerModule  LLMModule       │
-         │  (定时爬虫)     (xAI/国内AI)    │
-         │                                 │
-         │  SharedModule                   │
-         │  (Entity, 通用 Service)         │
-         └──────────────┬──────────────────┘
-                        │
-                ┌───────▼───────┐
-                │  PostgreSQL    │
-                └───────────────┘
+┌──────────────┐  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐
+│   Admin SPA  │  │ UniApp 小程序 │  │  微信公众号   │  │  企业微信     │
+│  (React)     │  │  (Vue3)      │  │  (后期)      │  │  (Webhook)   │
+└──────┬───────┘  └──────┬───────┘  └──────┬───────┘  └──────┬───────┘
+       │                 │                 │                 │
+       └────────┬────────┴────────┬────────┴────────┬────────┘
+                │                 │                 │
+         ┌──────▼──────────────────▼──────────────────▼──────┐
+         │              NestJS API Server                     │
+         │                                                    │
+         │  AdminModule      ClientModule    WechatWorkModule │
+         │  (JWT 鉴权)       (微信鉴权)      (企微回调)       │
+         │                                                    │
+         │  CrawlerModule    AiParseModule   StorageModule    │
+         │  (定时爬虫)       (多Provider AI) (S3 对象存储)    │
+         │                                                    │
+         │  SharedModule                                      │
+         │  (Entity, 通用 Service)                            │
+         └──────────────────────┬─────────────────────────────┘
+                                │
+                ┌───────────────┼───────────────┐
+                │               │               │
+         ┌──────▼──────┐ ┌─────▼──────┐ ┌──────▼──────┐
+         │ PostgreSQL   │ │ S3 Storage │ │ AI APIs     │
+         └─────────────┘ └────────────┘ │ (xAI/OpenAI │
+                                        │  /Anthropic) │
+                                        └─────────────┘
 ```
 
 ### 关键架构决策
 
 - **单服务多模块**：AdminModule 和 ClientModule 共存于一个 NestJS 实例，路由隔离，通过不同的 Guard 做鉴权
-- **LLM Provider 抽象**：统一接口，xAI 用于视频解析和规则分析，国内模型用于评论内容审核，后续可替换
-- **爬虫内置**：作为 NestJS 模块，用 `@nestjs/schedule` 做定时任务
+- **AI Provider 抽象**：通过 Vercel AI SDK 统一接口，支持 xAI/OpenAI/Anthropic 多供应商切换，Admin 后台可配置
+- **爬虫内置**：作为 NestJS 模块，用 `@nestjs/schedule` + `SchedulerRegistry` 做动态定时任务
+- **企业微信 Webhook**：独立路由，签名验证鉴权，不走 AdminGuard
+- **S3 存储**：全局 StorageModule，统一管理文件上传和签名 URL
 
 ### API 路由约定
 
 ```
-/admin/*          — Admin 后台接口，AdminGuard (JWT) 鉴权
-/api/v1/*         — 小程序端接口，WechatAuthGuard 鉴权（部分接口允许匿名访问）
+/admin/*              — Admin 后台接口，AdminGuard (JWT) 鉴权
+/api/v1/*             — 小程序端接口，WechatAuthGuard 鉴权（部分接口允许匿名访问）
+/webhook/wechat-work  — 企业微信回调，签名验证鉴权
 ```
 
 RESTful 风格，示例：
@@ -89,27 +99,46 @@ PUT    /admin/clubs/:id
 DELETE /admin/clubs/:id
 GET    /admin/clubs/:id/services
 POST   /admin/clubs/:id/services
+POST   /admin/clubs/:id/services/ai-import     (AI 智能录入解析)
+POST   /admin/clubs/:id/services/batch          (批量创建服务)
+GET    /admin/clubs/:id/rules
+POST   /admin/clubs/:id/rules
+POST   /admin/clubs/fetch-wechat-avatar         (获取公众号头像)
+POST   /admin/upload                            (通用文件上传)
+GET    /admin/promotions
+POST   /admin/promotions
 GET    /admin/bloggers
+POST   /admin/bloggers
+GET    /admin/crawl-tasks
 POST   /admin/crawl-tasks/trigger
 GET    /admin/videos
-PUT    /admin/videos/:id/associate    (手动关联俱乐��)
+PUT    /admin/videos/:id/associate              (手动关联俱乐部)
+GET    /admin/parse-tasks
+GET    /admin/parse-tasks/:id
+PUT    /admin/parse-tasks/:id                   (审核确认)
+GET    /admin/ai-configs
+PUT    /admin/ai-configs/:id
 GET    /admin/system-configs
 PUT    /admin/system-configs/:key
 
+# Webhook
+GET    /webhook/wechat-work                     (URL 验证 echostr)
+POST   /webhook/wechat-work                     (消息接收)
+
 # Client (小程序)
 GET    /api/v1/auth/wechat-login
-GET    /api/v1/clubs                  (列表 + 筛选)
-GET    /api/v1/clubs/:id              (详情)
+GET    /api/v1/clubs                            (列表 + 筛选)
+GET    /api/v1/clubs/:id                        (详情)
 GET    /api/v1/clubs/:id/videos
 GET    /api/v1/clubs/:id/reviews
-POST   /api/v1/clubs/:id/reviews      (需登录)
-GET    /api/v1/clubs/compare           (对比)
-GET    /api/v1/clubs/graveyard         (墓碑)
-GET    /api/v1/promotions/home         (首页推广内容)
-GET    /api/v1/user/favorites          (需登录)
-POST   /api/v1/user/favorites/:clubId  (需登录)
-DELETE /api/v1/user/favorites/:clubId  (需登录)
-POST   /api/v1/reviews/:id/reactions   (需登录)
+POST   /api/v1/clubs/:id/reviews                (需登录)
+GET    /api/v1/clubs/compare                    (对比)
+GET    /api/v1/clubs/graveyard                  (墓碑)
+GET    /api/v1/promotions/home                  (首页推广内容)
+GET    /api/v1/user/favorites                   (需登录)
+POST   /api/v1/user/favorites/:clubId           (需登录)
+DELETE /api/v1/user/favorites/:clubId           (需登录)
+POST   /api/v1/reviews/:id/reactions            (需登录)
 ```
 
 ### 初始管理员
@@ -137,6 +166,15 @@ Stage 1 通过 seed 脚本创建初始管理员账号：
 | closedAt | date | 倒闭日期 (nullable) |
 | predecessorId | uuid | 前身俱乐部 ID (nullable, 自关联 Club) |
 | closureNote | text | 倒闭备注 (nullable) |
+| companyName | varchar(300) | 公司全称 (nullable) |
+| creditCode | varchar(18) | 统一社会信用代码 (nullable) |
+| legalPerson | varchar(100) | 法人 (nullable) |
+| registeredAddress | text | 注册地址 (nullable) |
+| businessScope | text | 经营范围 (nullable) |
+| registeredCapital | varchar(100) | 注册资本 (nullable) |
+| companyEstablishedAt | date | 公司成立日期 (nullable) |
+| businessStatus | varchar(50) | 经营状态 (nullable) |
+| orderPosters | text[] | 订单海报图片 URL 数组，默认空数组 |
 | createdAt | timestamp | |
 | updatedAt | timestamp | |
 
@@ -164,6 +202,7 @@ Stage 1 通过 seed 脚本创建初始管理员账号：
 | guaranteeHafuCoin | decimal | 保底哈夫币数 (护航趣味) |
 | rules | text | 规则描述 (护航趣味) |
 | sortOrder | int | 排序 |
+| images | text[] | 辅助图片 URL 数组，默认空数组 |
 | createdAt | timestamp | |
 | updatedAt | timestamp | |
 
@@ -203,6 +242,70 @@ Stage 1 通过 seed 脚本创建初始管理员账号：
 
 俱乐部推广排序值 = 所有当前生效订单的 dailyRate 之和。
 
+### WechatMessage (企业微信消息)
+
+| 字段 | 类型 | 说明 |
+|------|------|------|
+| id | uuid | 主键 |
+| msgId | varchar(64) | 企业微信消息 ID |
+| msgType | varchar(20) | text / image |
+| content | text | 文本内容 (text 类型, nullable) |
+| mediaUrl | varchar(500) | 图片 S3 存储路径 (image 类型, nullable) |
+| fromUser | varchar(100) | 发送者企业微信 ID |
+| rawPayload | jsonb | 原始消息体 |
+| createdAt | timestamp | 接收时间 |
+
+### ParseTask (AI 解析任务)
+
+| 字段 | 类型 | 说明 |
+|------|------|------|
+| id | uuid | 主键 |
+| status | enum | pending / parsing / completed / failed |
+| clubId | uuid | 人工确认时关联的俱乐部 (nullable) |
+| parsedResult | jsonb | AI 提取的结构化数据 (nullable) |
+| errorMessage | text | 失败原因 (nullable) |
+| createdAt | timestamp | |
+| updatedAt | timestamp | |
+
+parsedResult 结构：
+```json
+{
+  "clubName": "俱乐部名称",
+  "services": [
+    {
+      "name": "服务名称",
+      "tiers": [
+        { "price": 128, "guarantee": "788W", "note": "备注" }
+      ]
+    }
+  ],
+  "rules": [
+    { "content": "规则内容", "category": "分类" }
+  ]
+}
+```
+
+### ParseTaskMessage (解析任务-消息关联)
+
+| 字段 | 类型 | 说明 |
+|------|------|------|
+| parseTaskId | uuid | FK → parse_tasks |
+| wechatMessageId | uuid | FK → wechat_messages |
+
+联合主键：`(parseTaskId, wechatMessageId)`
+
+### AiConfig (AI 配置)
+
+| 字段 | 类型 | 说明 |
+|------|------|------|
+| id | uuid | 主键 |
+| provider | varchar | 供应商标识 (xai / openai / anthropic) |
+| apiKey | varchar | API Key（展示时脱敏） |
+| model | varchar | 模型名称 |
+| isActive | boolean | 是否启用 |
+| createdAt | timestamp | |
+| updatedAt | timestamp | |
+
 ### Video (视频)
 
 | 字段 | 类型 | 说明 |
@@ -218,7 +321,7 @@ Stage 1 通过 seed 脚本创建初始管理员账号：
 | authorName | varchar | 博主名称 |
 | authorId | varchar | 博主平台 ID |
 | category | enum | REVIEW / SENTIMENT (评测 vs 舆情) |
-| subtitleText | text | 字幕文本 (nullable) |
+| subtitleText | text | 字幕文本 (nullable, 暂不抓取) |
 | aiParsed | boolean | 是否已 AI 解析 |
 | aiClubMatch | varchar | AI 识别的俱乐部名 (nullable) |
 | aiSummary | text | AI 简要评价 (nullable) |
@@ -317,10 +420,13 @@ Stage 1 通过 seed 脚本创建初始管理员账号：
 
 预置配置项：
 - `crawler.frequency` — 爬虫抓取频率（分钟），默认 60
-- `llm.xai.apiKey` — xAI API Key
-- `llm.xai.model` — xAI 模型名
-- `llm.moderation.apiKey` — 内容审核 AI API Key
-- `llm.moderation.model` — 内容审核模型名
+- `wechat_work.corp_id` — 企业微信企业 ID
+- `wechat_work.agent_id` — 应用 AgentId
+- `wechat_work.secret` — 应用 Secret
+- `wechat_work.token` — 回调 Token
+- `wechat_work.encoding_aes_key` — 回调加密 Key
+
+敏感字段（secret、api_key 等）在 Admin 后台展示时做脱敏处理（仅显示末 4 位）。
 
 ### Blogger (监控博主)
 
@@ -342,9 +448,86 @@ Stage 1 通过 seed 脚本创建初始管理员账号：
 | targetId | varchar | 博主 ID 或搜索关键词 |
 | status | enum | RUNNING / SUCCESS / FAILED |
 | startedAt | timestamp | |
-| finishedAt | timestamp | |
+| finishedAt | timestamp | (nullable) |
 | videoCount | int | 本次抓取到的新视频数 |
 | errorMessage | text | 失败原因 (nullable) |
+
+## 企业微信集成
+
+### 配置
+1. 企业微信管理后台创建自建应用
+2. 回调 URL：`{server}/webhook/wechat-work`
+3. 设置 Token 和 EncodingAESKey
+4. 应用可见范围设为运营者
+
+### 消息接收流程
+
+```
+运营者转发图片/消息 → 企业微信 → POST /webhook/wechat-work
+                                      ↓
+                                验签 + 解密消息（企业微信加密方案）
+                                      ↓
+                                图片类型 → 调用企微媒体 API 下载 → 上传 S3
+                                文本类型 → 直接存储 content 字段
+                                      ↓
+                                存入 wechat_messages
+                                      ↓
+                                消息分组（同一用户 30 秒时间窗口内归为一组）
+                                      ↓
+                                创建 parse_task (status: pending)
+                                      ↓
+                                关联 parse_task_messages
+                                      ↓
+                                异步触发 AI 解析
+```
+
+### 后端模块
+
+`WechatWorkModule`：
+- **WechatWorkController**：处理回调请求（验签、解密），同时支持 GET（URL 验证）和 POST（消息接收）
+- **WechatWorkService**：消息处理、媒体文件下载、消息分组逻辑
+- 企业微信配置从 `system_configs` 表读取
+- 企微 REST API（access_token、媒体下载等）直接用 axios 调用
+
+## AI 解析模块
+
+### 技术选型
+- SDK：`ai` + `@ai-sdk/xai` + `@ai-sdk/openai` + `@ai-sdk/anthropic`
+- 默认模型：xAI `grok-4-1-fast-non-reasoning`（Vision，2M 上下文）
+- Admin 后台可配置 Provider 和模型
+
+### 解析流程
+1. parse_task 状态 → `parsing`
+2. 收集关联的 wechat_messages 中所有图片和文本
+3. 从 S3 下载图片为 Buffer
+4. 构造 prompt + 图片，调用 AI（structured output + Zod schema）
+5. 解析结果存入 `parse_tasks.parsedResult`
+6. 状态 → `completed`（成功）或 `failed`（失败）
+
+### 模块结构
+
+`AiParseModule`：
+- **AiParseService**：调用 AI API 进行图片/文本解析
+- **ParseTaskService**：管理解析任务生命周期（创建、状态流转、结果存储）
+
+## 存储模块
+
+### 环境变量
+
+| 变量 | 说明 |
+|------|------|
+| `S3_ENDPOINT` | 对象存储端点 |
+| `S3_REGION` | 区域 |
+| `S3_ACCESS_KEY_ID` | AK |
+| `S3_SECRET_ACCESS_KEY` | SK |
+| `S3_BUCKET` | 桶名 |
+
+### 模块结构
+
+`StorageModule`（全局）：
+- 封装 S3 Client（`@aws-sdk/client-s3`）
+- `upload(key, buffer, contentType)` → 返回存储 URL
+- `getSignedUrl(key)` → 生成临时访问链接
 
 ## 爬虫与 AI 解析流程
 
@@ -357,12 +540,12 @@ Stage 1 通过 seed 脚本创建初始管理员账号：
 | **默认频率** | 每小时 | 每小时 |
 | **AI 任务** | 匹配俱乐部 + 简要评价 | 匹配俱乐部 + 情感判断 |
 
-频率可在 Admin 后台配置。
+频率可在 Admin 后台配置，通过 SchedulerRegistry 动态更新。
 
 ### 抓取流程
 
 ```
-定时触发
+定时触发 (SchedulerRegistry 动态 Interval)
   │
   ├─ BloggerCrawl: 遍历 Blogger 列表 → 各平台 Adapter 抓新视频 → REVIEW
   │
@@ -375,7 +558,7 @@ Stage 1 通过 seed 脚本创建初始管理员账号：
   存入 Video 表 (aiParsed = false)
       │
       ▼
-  AI 解析 (输入: 标题 + 简介 + 字幕文本)
+  AI 解析 (输入: 标题 + 简介)
     - 识别关联俱乐部名 → 模糊匹配已有 Club
     - 提取简要评价
     - 判断情感倾向
@@ -385,21 +568,61 @@ Stage 1 通过 seed 脚本创建初始管理员账号：
   匹配不上俱乐部的 clubId = null, Admin 可手动关联
 ```
 
+### Adapter 模式
+
+```typescript
+interface CrawlerAdapter {
+  platform: VideoPlatform;
+  fetchBloggerVideos(bloggerId: string): Promise<RawVideo[]>;
+  searchVideos(keyword: string): Promise<RawVideo[]>;
+}
+```
+
+- `BilibiliAdapter`：调用 B 站公开接口实现
+- `DouyinAdapter`：接口已定义，方法抛出 NotImplemented（后续实现）
+
 ### 关键设计点
 
-- **Adapter 模式**：B 站和抖音各一个 Adapter，统一接口 `fetchNewVideos(bloggerId)` 和 `searchVideos(keyword)`，后续加平台只需加 Adapter
-- **字幕解析**：保留字幕抓取流程，视频标题/简介可能不含俱乐部名，字幕文本是重要的 AI 解析输入
-- **失败处理**：LLM 解析失败的视频保持 `aiParsed = false`，不阻塞流程，Admin 可查看失败列表
+- **动态频率**：从 SystemConfig 读取 `crawler.frequency`，Admin 修改后通过 SchedulerRegistry 实时更新 Interval
+- **字幕解析**：暂不实现，AI 解析仅用标题 + 简介作为输入
+- **失败处理**：LLM 解析失败的视频保持 `aiParsed = false`，不阻塞流程
+
+## AI 智能录入
+
+### 用户流程
+
+1. 俱乐部详情页 → Services Tab → 点击「智能录入」
+2. 弹出 Modal，输入阶段：上传多张图片（拖拽/粘贴/选择文件）+ 可选文本
+3. 图片即时上传到 S3，点击「开始解析」
+4. 解析结果阶段：AI 解析出的服务列表表格，可逐行编辑/删除，重复类型标黄
+5. 点击「确认导入」，批量创建服务
+
+### 后端接口
+
+- `POST /admin/clubs/:clubId/services/ai-import`：接收 imageKeys + textContent，调用 AiParseService，返回解析结果（不入库）
+- `POST /admin/clubs/:clubId/services/batch`：批量创建服务，复用 ClubServicesService
+- `POST /admin/upload`：通用文件上传，返回 S3 key
 
 ## Admin 后台功能
 
-### MVP 阶段 (优先)
+### 技术栈（基于 shadcn-admin）
+
+| 项目 | 选型 |
+|------|------|
+| 路由 | TanStack Router（文件式路由） |
+| 状态管理 | Zustand (auth) + useState (业务) |
+| 表单验证 | React Hook Form + Zod |
+| 数据表格 | TanStack Table（排序/筛选/列控制/批量操作） |
+| 布局 | 可折叠侧边栏 + 顶部 Header |
+| 主题 | Light Slate + Blue Primary (#2563eb)，支持暗色模式 |
+
+### 功能模块
 
 **1. 俱乐部管理**
-- 俱乐部 CRUD（名称、Logo、简介、公众号、小程序等）
-- 生命周期管理（发布、标记倒闭、关联前身俱乐部、填写成立日期）
-- 服务项管理（跑刀/陪玩/护航体验/护航标准/护航趣味，各自价格结构）
-- 规则管理（录入规则文本 → 调 AI 分析利弊 → 标注 sentiment）
+- 俱乐部 CRUD（基本信息 + 工商信息 + 生命周期管理）
+- 服务项管理（含 AI 智能录入）
+- 规则管理（录入规则文本 → AI 分析利弊 → 标注 sentiment）
+- 公众号头像一键获取
 - 推广订单管理（新增订单、查看当前 dailyRate 排名）
 
 **2. 博主管理**
@@ -416,25 +639,114 @@ Stage 1 通过 seed 脚本创建初始管理员账号：
 - 手动关联：AI 匹配不上的视频，手动指定俱乐部
 - 手动添加视频 URL → 触发抓取 + 解析
 
+**5. 解析任务管理**
+- 解析任务列表（按状态筛选）
+- 审核页面：左侧原始图片，右侧 AI 结构化结果（可编辑修正）
+- 确认后写入 club_services 和 club_rules
+
+**6. 系统设置**
+- AI Provider 配置（xAI / OpenAI / Anthropic，API Key + 模型选择）
+- 企业微信配置
+- 爬虫频率全局设置
+- 外观设置（主题切换）
+
 ### 后期补充
 
-**5. 评论管理**
+**7. 评论管理**
 - 评论列表（筛选：状态、俱乐部）
 - AI 审核失败的进入人工审核队列
 - 批量通过/拒绝
 
-**6. 用户管理**
+**8. 用户管理**
 - 微信用户列表，只读查看
 
-**7. 系统设置**
-- 管理员账号管理
-- LLM Provider 配置（API Key、模型选择）
-- 爬虫频率全局设置
-- Emoji 表情管理
+**9. Emoji 表情管理**
+- 管理可用的 Emoji 列表
 
 ### 认证
 
-Admin 登录使用账号密码 + JWT。
+Admin 登录使用账号密码 + JWT。Zustand store 管理 auth 状态。
+
+## NestJS 模块结构
+
+```
+server/src/
+├── database/
+│   └── schema/                    # Drizzle schema 定义
+│       ├── admin.schema.ts
+│       ├── club.schema.ts
+│       ├── club-service.schema.ts
+│       ├── club-rule.schema.ts
+│       ├── promotion-order.schema.ts
+│       ├── video.schema.ts
+│       ├── blogger.schema.ts
+│       ├── crawl-task.schema.ts
+│       ├── wechat-message.schema.ts
+│       ├── parse-task.schema.ts
+│       ├── ai-config.schema.ts
+│       └── system-config.schema.ts
+├── admin/                         # Admin 后台 API
+│   ├── auth/
+│   ├── clubs/
+│   ├── club-services/
+│   ├── club-rules/
+│   ├── promotions/
+│   ├── bloggers/
+│   ├── crawl-tasks/
+│   ├── videos/
+│   ├── parse-tasks/
+│   ├── ai-configs/
+│   ├── system-configs/
+│   └── upload/
+├── crawler/                       # 爬虫模块
+│   ├── crawler.module.ts
+│   ├── crawler.service.ts
+│   └── adapters/
+│       ├── crawler-adapter.interface.ts
+│       ├── bilibili.adapter.ts
+│       └── douyin.adapter.ts
+├── wechat-work/                   # 企业微信模块
+│   ├── wechat-work.module.ts
+│   ├── wechat-work.controller.ts
+│   └── wechat-work.service.ts
+├── ai-parse/                      # AI 解析模块
+│   ├── ai-parse.module.ts
+│   ├── ai-parse.service.ts
+│   └── parse-task.service.ts
+├── storage/                       # S3 存储模块（全局）
+│   ├── storage.module.ts
+│   └── storage.service.ts
+└── common/                        # 通用工具
+```
+
+## 依赖清单
+
+### 后端核心依赖
+
+| 包 | 用途 |
+|---|------|
+| `@aws-sdk/client-s3` | S3 兼容对象存储 |
+| `@aws-sdk/s3-request-presigner` | S3 签名 URL |
+| `ai` | Vercel AI SDK |
+| `@ai-sdk/xai` | xAI Grok provider |
+| `@ai-sdk/openai` | OpenAI provider |
+| `@ai-sdk/anthropic` | Anthropic provider |
+| `@wecom/crypto` | 企业微信加解密 |
+| `xml2js` | 解析企微 XML 消息体 |
+| `@nestjs/schedule` | 定时任务 |
+| `drizzle-orm` | ORM |
+| `bcrypt` | 密码哈希 |
+
+### 前端核心依赖
+
+| 包 | 用途 |
+|---|------|
+| `@tanstack/react-router` | 文件式路由 |
+| `@tanstack/react-query` | 数据获取 |
+| `@tanstack/react-table` | 高级数据表格 |
+| `react-hook-form` | 表单管理 |
+| `zod` | Schema 验证 |
+| `zustand` | Auth 状态管理 |
 
 ## 小程序端功能
 
@@ -495,24 +807,39 @@ Stage 依赖关系：`1 → 2 → 3 → 4 → 5 → 6`（严格顺序，每个 S
 - Monorepo 初始化（pnpm workspace + Turborepo）
 - NestJS server 搭建（项目结构、模块划分、环境配置）
 - Drizzle + PostgreSQL 接入（连接配置、migration 机制）
-- Admin 前端搭建（Vite + React + Shadcn/ui + Tailwind）
-- 前后端联调跑通（Admin 登录 + JWT 鉴权）
+- Admin 前端搭建（基于 shadcn-admin Fork，集成到 Monorepo）
+- 前后端联调跑通（Admin 登录 + JWT 鉴权 + Zustand auth store）
 - packages/shared 搭建（共享类型导出）
 - 初始管理员 seed 脚本
+- S3 StorageModule 搭建
 
-交付物：可登录的 Admin 空壳 + 可运行的 API server
+交付物：可登录的 Admin 空壳 + 可运行的 API server + S3 存储可用
 
 ### Stage 2: 俱乐部数据管理
 > 目标：完成俱乐部核心数据的录入和管理
 > 前置：Stage 1 完成
 
 - Club 表及关联表 schema（ClubService、ClubRule、PromotionOrder）
-- Admin - 俱乐部 CRUD（基本信息 + 生命周期管理）
+- Admin - 俱乐部 CRUD（基本信息 + 工商信息 + 生命周期管理）
 - Admin - 服务项管理（跑刀/陪玩/护航体验/护航标准/护航趣味）
 - Admin - 规则管理（录入规则文本）
 - Admin - 推广订单管理（新增、dailyRate 计算与排名）
 
 交付物：可以录入和管理完整俱乐部数据的 Admin 后台
+
+### Stage 2.5: 企业微信集成与 AI 解析
+> 目标：通过企微自动接收和解析俱乐部信息
+> 前置：Stage 2 完成
+
+- WechatMessage、ParseTask、ParseTaskMessage 表 schema
+- AiConfig 表 schema + Admin AI Provider 配置
+- WechatWorkModule（回调验签、消息存储、分组逻辑）
+- AiParseModule（多 Provider AI 解析、结构化输出）
+- Admin - 解析任务列表 + 审核页面
+- Admin - AI 智能录入（服务项批量导入）
+- 公众号头像一键获取
+
+交付物：企微消息自动接收 → AI 解析 → 人工审核入库
 
 ### Stage 3: 爬虫与视频采集
 > 目标：实现自动化视频抓取入库
@@ -520,19 +847,18 @@ Stage 依赖关系：`1 → 2 → 3 → 4 → 5 → 6`（严格顺序，每个 S
 
 - Blogger 表 schema + Admin 博主管理 CRUD
 - CrawlTask 表 schema + Admin 爬虫管理（记录、频率配置、手动触发）
-- 爬虫 Adapter 实现（B 站 + 抖音）
+- 爬虫 Adapter 实现（B 站实现 + 抖音接口预留）
 - BloggerCrawl 定时任务（按博主抓取 → REVIEW）
 - KeywordCrawl 定时任务（按俱乐部名搜索 → SENTIMENT）
-- Video 表 schema + 去重逻辑 + 字幕抓取
+- Video 表 schema + 去重逻辑
+- 动态定时任务调度（SchedulerRegistry）
 
 交付物：定时自动抓取视频并入库，Admin 可查看爬虫执行记录
 
-### Stage 4: LLM 集成
+### Stage 4: LLM 集成（视频解析）
 > 目标：AI 自动解析视频内容和俱乐部规则
 > 前置：Stage 3 完成（需要 Video 数据用于 AI 解析）
 
-- LLM Provider 抽象层（统一接口，支持切换模型/平台）
-- xAI Grok 接入（视频解析：匹配俱乐部 + 简要评价 + 情感判断）
 - 视频 AI 解析流程串联（爬虫入库 → 自动触发 AI 解析 → 更新 Video）
 - 俱乐部规则 AI 分析（录入规则 → AI 标注 sentiment）
 - Admin - 视频管理（列表、筛选、手动关联俱乐部、手动添加 URL）
