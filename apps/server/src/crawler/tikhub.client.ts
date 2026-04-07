@@ -164,7 +164,7 @@ export class TikHubClient {
     const data = await this.request('GET', '/api/v1/bilibili/web/fetch_user_post_videos', {
       params,
     });
-    this.logger.log(`fetchBilibiliUserPosts response: ${JSON.stringify(data).slice(0, 500)}`);
+    this.logger.log(`fetchBilibiliUserPosts response: ${JSON.stringify(data)}`);
     return data;
   }
 
