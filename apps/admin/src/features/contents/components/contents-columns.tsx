@@ -1,6 +1,11 @@
 import { type ColumnDef } from '@tanstack/react-table'
 import { ExternalLink } from 'lucide-react'
 import { Badge } from '@/components/ui/badge'
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from '@/components/ui/tooltip'
 import { type Content, platformLabels, contentTypeLabels, categoryLabels } from '../data/schema'
 
 export const contentsBaseColumns: ColumnDef<Content>[] = [
@@ -10,20 +15,28 @@ export const contentsBaseColumns: ColumnDef<Content>[] = [
     cell: ({ row }) => {
       const url = row.original.externalUrl
       const title = row.getValue<string>('title')
-      if (url) {
-        return (
-          <a
-            href={url}
-            target='_blank'
-            rel='noopener noreferrer'
-            className='flex items-center gap-1 font-medium hover:underline max-w-xs truncate'
-          >
-            {title}
-            <ExternalLink className='h-3 w-3 shrink-0' />
-          </a>
-        )
-      }
-      return <span className='font-medium max-w-xs truncate'>{title}</span>
+      return (
+        <Tooltip>
+          <TooltipTrigger asChild>
+            {url ? (
+              <a
+                href={url}
+                target='_blank'
+                rel='noopener noreferrer'
+                className='flex items-center gap-1 font-medium hover:underline max-w-xs'
+              >
+                <span className='truncate'>{title}</span>
+                <ExternalLink className='h-3 w-3 shrink-0' />
+              </a>
+            ) : (
+              <span className='block font-medium max-w-xs truncate'>{title}</span>
+            )}
+          </TooltipTrigger>
+          <TooltipContent side='bottom' className='max-w-sm'>
+            <p>{title}</p>
+          </TooltipContent>
+        </Tooltip>
+      )
     },
   },
   {
