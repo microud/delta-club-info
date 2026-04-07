@@ -161,7 +161,7 @@ export class TikHubClient {
   ): Promise<unknown> {
     const params = { uid, pn: pn ?? 1 };
     this.logger.log(`fetchBilibiliUserPosts request: ${JSON.stringify(params)}`);
-    const data = await this.request('GET', '/api/v1/bilibili/web/fetch_user_post_videos', {
+    const data = await this.request('GET', '/api/v1/bilibili/app/fetch_user_videos', {
       params,
     });
     this.logger.log(`fetchBilibiliUserPosts response: ${JSON.stringify(data)}`);
