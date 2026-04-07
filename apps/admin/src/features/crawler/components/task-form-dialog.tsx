@@ -17,8 +17,9 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
-import { createCrawlTask, getBloggers, getClubs } from '@/lib/api'
+import { createCrawlTask, updateCrawlTask, getBloggers, getClubs } from '@/lib/api'
 import { platformLabels } from '../data/schema'
+import type { CrawlTask } from '../data/schema'
 
 type Blogger = {
   id: string
@@ -42,7 +43,8 @@ type Club = {
 type Props = {
   open: boolean
   onOpenChange: (open: boolean) => void
-  onCreated: () => void
+  onSaved: () => void
+  task?: CrawlTask | null
 }
 
 const TASK_TYPES = [
@@ -63,7 +65,9 @@ const PLATFORMS = [
   { value: 'WECHAT_CHANNELS', label: '视频号' },
 ]
 
-export function CreateTaskDialog({ open, onOpenChange, onCreated }: Props) {
+export function TaskFormDialog({ open, onOpenChange, onSaved, task }: Props) {
+  const isEdit = !!task
+
   const [taskType, setTaskType] = useState('')
   const [category, setCategory] = useState('')
   const [platform, setPlatform] = useState('')
@@ -75,23 +79,27 @@ export function CreateTaskDialog({ open, onOpenChange, onCreated }: Props) {
   const [clubs, setClubs] = useState<Club[]>([])
   const [loading, setLoading] = useState(false)
 
-  // Reset when dialog opens
+  // Initialize form when dialog opens
   useEffect(() => {
-    if (open) {
+    if (!open) return
+    if (task) {
+      setTaskType(task.taskType)
+      setCategory(task.category)
+      setPlatform(task.platform)
+      setTargetId(task.targetId)
+      setCronExpression(task.cronExpression)
+    } else {
       setTaskType('')
       setCategory('')
       setPlatform('')
       setTargetId('')
       setCronExpression('0 */1 * * *')
     }
-  }, [open])
+  }, [open, task])
 
   // Fetch targets when task type changes
   useEffect(() => {
-    if (!taskType) return
-    setTargetId('')
-    setPlatform('')
-    setCategory('')
+    if (!taskType || !open) return
 
     const fetchTargets = async () => {
       setLoading(true)
@@ -111,30 +119,27 @@ export function CreateTaskDialog({ open, onOpenChange, onCreated }: Props) {
       }
     }
     fetchTargets()
-  }, [taskType])
+  }, [taskType, open])
 
-  // For BLOGGER_POSTS, derive available platforms and categories from selected blogger's accounts
-  const selectedBlogger = taskType === 'BLOGGER_POSTS'
-    ? bloggers.find((b) => b.accounts.some((a) => a.id === targetId))
+  // For BLOGGER_POSTS: derive platform from selected account
+  const selectedAccount = taskType === 'BLOGGER_POSTS'
+    ? bloggers.flatMap((b) => b.accounts).find((a) => a.id === targetId)
     : null
-  const selectedAccount = selectedBlogger?.accounts.find((a) => a.id === targetId)
 
-  // Build account options: grouped by blogger
-  const accountOptions = bloggers.flatMap((b) =>
-    b.accounts.map((a) => ({
-      id: a.id,
-      label: `${b.name} - ${platformLabels[a.platform] ?? a.platform}${a.platformUsername ? ` (${a.platformUsername})` : ''}`,
-      platform: a.platform,
-      crawlCategories: a.crawlCategories,
-    }))
-  )
-
-  // When account is selected, auto-set platform
   useEffect(() => {
     if (selectedAccount) {
       setPlatform(selectedAccount.platform)
     }
   }, [selectedAccount])
+
+  // Build account options grouped by blogger
+  const accountOptions = bloggers.flatMap((b) =>
+    b.accounts.map((a) => ({
+      id: a.id,
+      label: `${b.name} - ${platformLabels[a.platform] ?? a.platform}${a.platformUsername ? ` (${a.platformUsername})` : ''}`,
+      platform: a.platform,
+    }))
+  )
 
   const handleSave = async () => {
     const finalPlatform = taskType === 'MP_ARTICLES' ? 'WECHAT_MP' : platform
@@ -145,18 +150,24 @@ export function CreateTaskDialog({ open, onOpenChange, onCreated }: Props) {
     }
     try {
       setSaving(true)
-      await createCrawlTask({
+      const payload = {
         taskType,
         category: finalCategory,
         platform: finalPlatform,
         targetId,
-        cronExpression: cronExpression || undefined,
-      })
-      toast.success('爬虫任务创建成功')
+        cronExpression: cronExpression || '0 */1 * * *',
+      }
+      if (isEdit) {
+        await updateCrawlTask(task.id, payload)
+        toast.success('任务已更新')
+      } else {
+        await createCrawlTask(payload)
+        toast.success('任务创建成功')
+      }
       onOpenChange(false)
-      onCreated()
+      onSaved()
     } catch {
-      toast.error('创建失败')
+      toast.error(isEdit ? '更新失败' : '创建失败')
     } finally {
       setSaving(false)
     }
@@ -166,9 +177,9 @@ export function CreateTaskDialog({ open, onOpenChange, onCreated }: Props) {
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className='sm:max-w-lg'>
         <DialogHeader>
-          <DialogTitle>新建爬虫任务</DialogTitle>
+          <DialogTitle>{isEdit ? '编辑爬虫任务' : '新建爬虫任务'}</DialogTitle>
           <DialogDescription>
-            创建一个新的定时爬虫任务。
+            {isEdit ? '修改爬虫任务的配置。' : '创建一个新的定时爬虫任务。'}
           </DialogDescription>
         </DialogHeader>
 
@@ -176,7 +187,18 @@ export function CreateTaskDialog({ open, onOpenChange, onCreated }: Props) {
           {/* Task Type */}
           <div>
             <label className='text-sm font-medium'>任务类型</label>
-            <Select value={taskType} onValueChange={setTaskType}>
+            <Select
+              value={taskType}
+              onValueChange={(v) => {
+                setTaskType(v)
+                // Reset dependent fields when type changes (unless editing and type unchanged)
+                if (!task || v !== task.taskType) {
+                  setTargetId('')
+                  setPlatform('')
+                  setCategory('')
+                }
+              }}
+            >
               <SelectTrigger className='mt-1'>
                 <SelectValue placeholder='选择任务类型' />
               </SelectTrigger>
@@ -222,8 +244,8 @@ export function CreateTaskDialog({ open, onOpenChange, onCreated }: Props) {
             </div>
           )}
 
-          {/* Platform (for non-blogger types) */}
-          {taskType && taskType !== 'BLOGGER_POSTS' && taskType !== 'MP_ARTICLES' && (
+          {/* Platform (for KEYWORD_SEARCH) */}
+          {taskType === 'KEYWORD_SEARCH' && (
             <div>
               <label className='text-sm font-medium'>平台</label>
               <Select value={platform} onValueChange={setPlatform}>
@@ -285,11 +307,8 @@ export function CreateTaskDialog({ open, onOpenChange, onCreated }: Props) {
 
         <DialogFooter>
           <Button variant='outline' onClick={() => onOpenChange(false)}>取消</Button>
-          <Button
-            onClick={handleSave}
-            disabled={saving}
-          >
-            {saving ? '创建中...' : '创建'}
+          <Button onClick={handleSave} disabled={saving}>
+            {saving ? '保存中...' : '保存'}
           </Button>
         </DialogFooter>
       </DialogContent>

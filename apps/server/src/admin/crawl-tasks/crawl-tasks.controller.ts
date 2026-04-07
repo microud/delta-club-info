@@ -56,27 +56,18 @@ export class AdminCrawlTasksController {
     return this.crawlTasksService.deleteTask(id);
   }
 
-  @Post('batch-trigger')
-  async batchTrigger(
-    @Body() body: { taskType: string; targetIds: string[] },
-  ) {
-    const tasks = await this.crawlTasksService.findTasksByTarget(
-      body.taskType,
-      body.targetIds,
-    );
-    for (const task of tasks) {
-      this.crawlerService.executeTask(task.id);
-    }
-    return {
-      message: `${tasks.length} crawl tasks triggered`,
-      triggeredCount: tasks.length,
-    };
-  }
-
-  @Patch(':id')
+@Patch(':id')
   async updateTask(
     @Param('id') id: string,
-    @Body() body: { cronExpression?: string; isActive?: boolean },
+    @Body()
+    body: {
+      taskType?: string;
+      category?: string;
+      platform?: string;
+      targetId?: string;
+      cronExpression?: string;
+      isActive?: boolean;
+    },
   ) {
     const task = await this.crawlTasksService.updateTask(id, body);
 

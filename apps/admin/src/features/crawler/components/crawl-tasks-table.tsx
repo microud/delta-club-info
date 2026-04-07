@@ -31,13 +31,13 @@ import { crawlTasksColumns } from './crawl-tasks-columns'
 type CrawlTasksTableProps = {
   data: CrawlTask[]
   onToggle: (task: CrawlTask) => void
-  onEditCron: (task: CrawlTask) => void
+  onEdit: (task: CrawlTask) => void
   onTrigger: (task: CrawlTask) => void
   onViewRuns: (task: CrawlTask) => void
   onDelete: (task: CrawlTask) => void
 }
 
-export function CrawlTasksTable({ data, onToggle, onEditCron, onTrigger, onViewRuns, onDelete }: CrawlTasksTableProps) {
+export function CrawlTasksTable({ data, onToggle, onEdit, onTrigger, onViewRuns, onDelete }: CrawlTasksTableProps) {
   const columns = [
     ...crawlTasksColumns,
     {
@@ -51,16 +51,16 @@ export function CrawlTasksTable({ data, onToggle, onEditCron, onTrigger, onViewR
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align='end'>
-            <DropdownMenuItem onClick={() => onViewRuns(row.original)}>
-              查看执行记录
+            <DropdownMenuItem onClick={() => onEdit(row.original)}>
+              <Pencil className='mr-2 h-4 w-4' />
+              编辑
             </DropdownMenuItem>
             <DropdownMenuItem onClick={() => onTrigger(row.original)}>
               <Play className='mr-2 h-4 w-4' />
               手动触发
             </DropdownMenuItem>
-            <DropdownMenuItem onClick={() => onEditCron(row.original)}>
-              <Pencil className='mr-2 h-4 w-4' />
-              修改 Cron
+            <DropdownMenuItem onClick={() => onViewRuns(row.original)}>
+              查看执行记录
             </DropdownMenuItem>
             <DropdownMenuItem onClick={() => onToggle(row.original)}>
               <Power className='mr-2 h-4 w-4' />
