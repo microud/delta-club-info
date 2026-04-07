@@ -159,18 +159,14 @@ export class TikHubClient {
     uid: string,
     page?: number,
   ): Promise<unknown> {
-    const params = {
-      user_id: uid,
-      post_filter: 'archive',
-      page: page ?? 1,
-      ps: 1000,
-    };
-    this.logger.log(`fetchBilibiliUserPosts request: ${JSON.stringify(params)}`);
-    const data = await this.request('GET', '/api/v1/bilibili/app/fetch_user_videos', {
-      params,
+    return this.request('GET', '/api/v1/bilibili/app/fetch_user_videos', {
+      params: {
+        user_id: uid,
+        post_filter: 'archive',
+        page: page ?? 1,
+        ps: 1000,
+      },
     });
-    this.logger.log(`fetchBilibiliUserPosts response: ${JSON.stringify(data)}`);
-    return data;
   }
 
   async searchBilibiliVideos(
