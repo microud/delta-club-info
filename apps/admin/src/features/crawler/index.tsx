@@ -183,7 +183,6 @@ export default function CrawlerPage() {
       <BatchTriggerDialog
         open={batchOpen}
         onOpenChange={setBatchOpen}
-        tasks={tasks}
         onTriggered={fetchTasks}
       />
 

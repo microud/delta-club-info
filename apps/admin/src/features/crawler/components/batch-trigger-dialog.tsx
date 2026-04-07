@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { toast } from 'sonner'
 import { Play } from 'lucide-react'
 import { Button } from '@/components/ui/button'
@@ -18,9 +18,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
-import { Badge } from '@/components/ui/badge'
-import { batchTriggerCrawlTasks } from '@/lib/api'
-import { type CrawlTask, platformLabels, categoryLabels } from '../data/schema'
+import { batchTriggerCrawlTasks, getBloggers, getClubs } from '@/lib/api'
+import { platformLabels } from '../data/schema'
 
 const TASK_TYPES = [
   { value: 'BLOGGER_POSTS', label: '博主抓取' },
@@ -28,19 +27,35 @@ const TASK_TYPES = [
   { value: 'MP_ARTICLES', label: '公众号文章' },
 ]
 
+type Blogger = {
+  id: string
+  name: string
+  isActive: boolean
+  accounts: Array<{ id: string; platform: string; platformUsername?: string }>
+}
+
+type Club = {
+  id: string
+  name: string
+  wechatMpGhid?: string | null
+}
+
 type Props = {
   open: boolean
   onOpenChange: (open: boolean) => void
-  tasks: CrawlTask[]
   onTriggered: () => void
 }
 
-export function BatchTriggerDialog({ open, onOpenChange, tasks, onTriggered }: Props) {
+export function BatchTriggerDialog({ open, onOpenChange, onTriggered }: Props) {
   const [taskType, setTaskType] = useState<string>('')
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set())
   const [triggering, setTriggering] = useState(false)
+  const [loading, setLoading] = useState(false)
 
-  // Reset state when dialog opens
+  const [bloggers, setBloggers] = useState<Blogger[]>([])
+  const [clubs, setClubs] = useState<Club[]>([])
+
+  // Reset state and fetch data when dialog opens
   useEffect(() => {
     if (open) {
       setTaskType('')
@@ -48,21 +63,57 @@ export function BatchTriggerDialog({ open, onOpenChange, tasks, onTriggered }: P
     }
   }, [open])
 
-  // Filter active tasks by selected type
-  const filteredTasks = useMemo(() => {
-    if (!taskType) return []
-    return tasks.filter((t) => t.taskType === taskType && t.isActive)
-  }, [tasks, taskType])
+  // Fetch targets when task type changes
+  useEffect(() => {
+    if (!taskType) return
 
-  const allSelected = filteredTasks.length > 0 && filteredTasks.every((t) => selectedIds.has(t.id))
+    const fetchTargets = async () => {
+      setLoading(true)
+      setSelectedIds(new Set())
+      try {
+        if (taskType === 'BLOGGER_POSTS') {
+          const data = await getBloggers()
+          setBloggers((data as Blogger[]).filter((b) => b.isActive))
+        } else {
+          const data = await getClubs({ pageSize: 500 })
+          const allClubs = ((data as unknown as { items: Club[] }).items ?? data) as Club[]
+          if (taskType === 'MP_ARTICLES') {
+            setClubs(allClubs.filter((c) => c.wechatMpGhid))
+          } else {
+            setClubs(allClubs)
+          }
+        }
+      } catch {
+        toast.error('获取目标列表失败')
+      } finally {
+        setLoading(false)
+      }
+    }
+    fetchTargets()
+  }, [taskType])
+
+  const targets = taskType === 'BLOGGER_POSTS'
+    ? bloggers.map((b) => ({
+        id: b.id,
+        name: b.name,
+        detail: b.accounts.map((a) => platformLabels[a.platform] ?? a.platform).join('、'),
+      }))
+    : clubs.map((c) => ({
+        id: c.id,
+        name: c.name,
+        detail: taskType === 'MP_ARTICLES' ? (c.wechatMpGhid ?? '') : '',
+      }))
+
+  const allSelected = targets.length > 0 && targets.every((t) => selectedIds.has(t.id))
 
   const handleSelectAll = useCallback(() => {
-    if (allSelected) {
-      setSelectedIds(new Set())
-    } else {
-      setSelectedIds(new Set(filteredTasks.map((t) => t.id)))
-    }
-  }, [allSelected, filteredTasks])
+    setSelectedIds((prev) => {
+      if (targets.every((t) => prev.has(t.id))) {
+        return new Set()
+      }
+      return new Set(targets.map((t) => t.id))
+    })
+  }, [targets])
 
   const handleToggle = useCallback((id: string) => {
     setSelectedIds((prev) => {
@@ -78,11 +129,11 @@ export function BatchTriggerDialog({ open, onOpenChange, tasks, onTriggered }: P
 
   const handleTrigger = async () => {
     const ids = Array.from(selectedIds)
-    if (ids.length === 0) return
+    if (ids.length === 0 || !taskType) return
     try {
       setTriggering(true)
-      await batchTriggerCrawlTasks(ids)
-      toast.success(`已触发 ${ids.length} 个任务，稍后刷新查看结果`)
+      const result = await batchTriggerCrawlTasks(taskType, ids) as { triggeredCount: number }
+      toast.success(`已触发 ${result.triggeredCount} 个爬虫任务，稍后刷新查看结果`)
       onOpenChange(false)
       setTimeout(onTriggered, 3000)
     } catch {
@@ -91,6 +142,8 @@ export function BatchTriggerDialog({ open, onOpenChange, tasks, onTriggered }: P
       setTriggering(false)
     }
   }
+
+  const targetLabel = taskType === 'BLOGGER_POSTS' ? '博主' : '俱乐部'
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -105,7 +158,7 @@ export function BatchTriggerDialog({ open, onOpenChange, tasks, onTriggered }: P
         <div className='space-y-4'>
           <div>
             <label className='text-sm font-medium'>爬虫类型</label>
-            <Select value={taskType} onValueChange={(v) => { setTaskType(v); setSelectedIds(new Set()) }}>
+            <Select value={taskType} onValueChange={setTaskType}>
               <SelectTrigger className='mt-1'>
                 <SelectValue placeholder='选择爬虫类型' />
               </SelectTrigger>
@@ -121,42 +174,41 @@ export function BatchTriggerDialog({ open, onOpenChange, tasks, onTriggered }: P
             <div>
               <div className='flex items-center justify-between mb-2'>
                 <label className='text-sm font-medium'>
-                  选择任务 ({selectedIds.size}/{filteredTasks.length})
+                  选择{targetLabel} ({selectedIds.size}/{targets.length})
                 </label>
-                {filteredTasks.length > 0 && (
+                {targets.length > 0 && (
                   <Button variant='ghost' size='sm' onClick={handleSelectAll}>
                     {allSelected ? '取消全选' : '全选'}
                   </Button>
                 )}
               </div>
 
-              {filteredTasks.length === 0 ? (
+              {loading ? (
+                <p className='text-sm text-muted-foreground py-4 text-center'>加载中...</p>
+              ) : targets.length === 0 ? (
                 <p className='text-sm text-muted-foreground py-4 text-center'>
-                  没有该类型的活跃任务
+                  没有可用的{targetLabel}
                 </p>
               ) : (
                 <div className='max-h-64 overflow-y-auto space-y-1 rounded-md border p-2'>
-                  {filteredTasks.map((task) => (
+                  {targets.map((target) => (
                     <label
-                      key={task.id}
+                      key={target.id}
                       className='flex items-center gap-3 rounded-md px-2 py-2 hover:bg-accent cursor-pointer'
                     >
                       <Checkbox
-                        checked={selectedIds.has(task.id)}
-                        onCheckedChange={() => handleToggle(task.id)}
+                        checked={selectedIds.has(target.id)}
+                        onCheckedChange={() => handleToggle(target.id)}
                       />
                       <div className='flex-1 min-w-0'>
                         <div className='text-sm font-medium truncate'>
-                          {task.targetName ?? task.targetId}
+                          {target.name}
                         </div>
-                        <div className='flex gap-1 mt-0.5'>
-                          <Badge variant='outline' className='text-xs'>
-                            {platformLabels[task.platform] ?? task.platform}
-                          </Badge>
-                          <Badge variant='secondary' className='text-xs'>
-                            {categoryLabels[task.category] ?? task.category}
-                          </Badge>
-                        </div>
+                        {target.detail && (
+                          <div className='text-xs text-muted-foreground mt-0.5'>
+                            {target.detail}
+                          </div>
+                        )}
                       </div>
                     </label>
                   ))}

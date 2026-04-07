@@ -1,6 +1,6 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { NodePgDatabase } from 'drizzle-orm/node-postgres';
-import { eq, desc, inArray, sql } from 'drizzle-orm';
+import { eq, desc, inArray, and } from 'drizzle-orm';
 import { DRIZZLE } from '../../database/database.module';
 import * as schema from '../../database/schema';
 
@@ -55,6 +55,31 @@ export class AdminCrawlTasksService {
       ...t,
       targetName: nameMap.get(t.targetId) ?? null,
     }));
+  }
+
+  async findTasksByTarget(taskType: string, targetIds: string[]) {
+    let resolvedTargetIds = targetIds;
+
+    // For BLOGGER_POSTS, targetIds are blogger IDs — resolve to blogger_account IDs
+    if (taskType === 'BLOGGER_POSTS' && targetIds.length > 0) {
+      const accounts = await this.db
+        .select({ id: schema.bloggerAccounts.id })
+        .from(schema.bloggerAccounts)
+        .where(inArray(schema.bloggerAccounts.bloggerId, targetIds));
+      resolvedTargetIds = accounts.map((a) => a.id);
+    }
+
+    if (resolvedTargetIds.length === 0) return [];
+
+    return this.db
+      .select()
+      .from(schema.crawlTasks)
+      .where(
+        and(
+          eq(schema.crawlTasks.taskType, taskType as any),
+          inArray(schema.crawlTasks.targetId, resolvedTargetIds),
+        ),
+      );
   }
 
   async findTaskRuns(taskId?: string) {
