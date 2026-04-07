@@ -18,6 +18,7 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { createCrawlTask, updateCrawlTask, getBloggers, getClubs } from '@/lib/api'
+import type { PaginatedResponse } from '@delta-club/shared'
 import { platformLabels } from '../data/schema'
 import type { CrawlTask } from '../data/schema'
 
@@ -109,7 +110,7 @@ export function TaskFormDialog({ open, onOpenChange, onSaved, task }: Props) {
           setBloggers((data as Blogger[]).filter((b) => b.isActive))
         } else {
           const data = await getClubs({ pageSize: 500 })
-          const allClubs = ((data as unknown as { items: Club[] }).items ?? data) as Club[]
+          const allClubs = (data as PaginatedResponse<Club>).data
           setClubs(taskType === 'MP_ARTICLES' ? allClubs.filter((c) => c.wechatMpGhid) : allClubs)
         }
       } catch {
