@@ -1,6 +1,7 @@
 import {
   Body,
   Controller,
+  Delete,
   Get,
   Param,
   Patch,
@@ -30,6 +31,29 @@ export class AdminCrawlTasksController {
   @Get('runs')
   findRuns(@Query('taskId') taskId?: string) {
     return this.crawlTasksService.findTaskRuns(taskId);
+  }
+
+  @Post()
+  async createTask(
+    @Body()
+    body: {
+      taskType: string;
+      category: string;
+      platform: string;
+      targetId: string;
+      cronExpression?: string;
+    },
+  ) {
+    const task = await this.crawlTasksService.createTask(body);
+    // Register cron job for the new task
+    this.crawlerSchedulerService.registerTask(task.id, task.cronExpression);
+    return task;
+  }
+
+  @Delete(':id')
+  async deleteTask(@Param('id') id: string) {
+    this.crawlerSchedulerService.unregisterTask(id);
+    return this.crawlTasksService.deleteTask(id);
   }
 
   @Post('batch-trigger')

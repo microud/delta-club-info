@@ -82,6 +82,34 @@ export class AdminCrawlTasksService {
       );
   }
 
+  async createTask(data: {
+    taskType: string;
+    category: string;
+    platform: string;
+    targetId: string;
+    cronExpression?: string;
+  }) {
+    const [task] = await this.db
+      .insert(schema.crawlTasks)
+      .values({
+        taskType: data.taskType as any,
+        category: data.category,
+        platform: data.platform as any,
+        targetId: data.targetId,
+        cronExpression: data.cronExpression ?? '0 */1 * * *',
+      })
+      .returning();
+    return task;
+  }
+
+  async deleteTask(id: string) {
+    const [task] = await this.db
+      .delete(schema.crawlTasks)
+      .where(eq(schema.crawlTasks.id, id))
+      .returning();
+    return task;
+  }
+
   async findTaskRuns(taskId?: string) {
     const query = this.db
       .select()

@@ -160,6 +160,13 @@ export const updateCrawlTask = (id: string, data: { cronExpression?: string; isA
 export const triggerCrawlTask = (id: string) =>
   api.post(`/crawl-tasks/${id}/trigger`).then((res) => res.data)
 
+export const createCrawlTask = (data: {
+  taskType: string; category: string; platform: string; targetId: string; cronExpression?: string
+}) => api.post('/crawl-tasks', data).then((res) => res.data)
+
+export const deleteCrawlTask = (id: string) =>
+  api.delete(`/crawl-tasks/${id}`).then((res) => res.data)
+
 export const batchTriggerCrawlTasks = (taskType: string, targetIds: string[]) =>
   api.post('/crawl-tasks/batch-trigger', { taskType, targetIds }).then((res) => res.data)
 

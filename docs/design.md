@@ -119,9 +119,11 @@ POST   /admin/contents/:id/link-club            (手动关联俱乐部)
 POST   /admin/contents/merge                    (合并内容组)
 POST   /admin/contents/:id/split                (从内容组拆分)
 GET    /admin/crawl-tasks                       (爬虫任务列表，含目标名称)
+POST   /admin/crawl-tasks                       (新建爬虫任务)
 GET    /admin/crawl-tasks/runs                  (爬虫运行记录)
-POST   /admin/crawl-tasks/batch-trigger         (批量触发多个任务)
+POST   /admin/crawl-tasks/batch-trigger         (按类型+目标批量触发)
 PATCH  /admin/crawl-tasks/:id                   (更新任务配置)
+DELETE /admin/crawl-tasks/:id                   (删除爬虫任务)
 POST   /admin/crawl-tasks/:id/trigger           (手动触发单个任务)
 GET    /admin/parse-tasks
 GET    /admin/parse-tasks/:id
@@ -760,9 +762,9 @@ interface PlatformAdapter {
 - 启用/停用
 
 **3. 爬虫管理**
-- 采集任务列表（CrawlTask），支持按平台/类型/状态筛选，展示目标名称（博主名/俱乐部名）
-- 单个任务可编辑 cron 表达式、启用/停用
-- 手动批量执行：选择爬虫类型（博主抓取/关键词搜索/公众号文章）→ 多选目标 → 批量触发
+- 采集任务 CRUD：新建时选择任务类型、目标（博主账号/俱乐部）、平台、分类、Cron 表达式；创建后自动注册定时任务
+- 采集任务列表（CrawlTask），展示目标名称（博主名/俱乐部名），支持编辑 Cron、启用/停用、删除
+- 手动批量执行：选择爬虫类型（博主抓取/关键词搜索/公众号文章）→ 多选目标（博主/俱乐部）→ 批量触发关联任务
 - 执行记录列表（CrawlTaskRun）
 - 手动触发单个任务
 

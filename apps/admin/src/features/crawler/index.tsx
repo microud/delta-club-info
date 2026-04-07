@@ -15,12 +15,13 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { Play } from 'lucide-react'
-import { getCrawlTasks, getCrawlTaskRuns, updateCrawlTask, triggerCrawlTask } from '@/lib/api'
+import { Play, Plus } from 'lucide-react'
+import { getCrawlTasks, getCrawlTaskRuns, updateCrawlTask, triggerCrawlTask, deleteCrawlTask } from '@/lib/api'
 import { type CrawlTask, type CrawlTaskRun } from './data/schema'
 import { CrawlTasksTable } from './components/crawl-tasks-table'
 import { CrawlTaskRuns } from './components/crawl-task-runs'
 import { BatchTriggerDialog } from './components/batch-trigger-dialog'
+import { CreateTaskDialog } from './components/create-task-dialog'
 
 export default function CrawlerPage() {
   const [tasks, setTasks] = useState<CrawlTask[]>([])
@@ -36,6 +37,9 @@ export default function CrawlerPage() {
 
   // Batch trigger dialog
   const [batchOpen, setBatchOpen] = useState(false)
+
+  // Create task dialog
+  const [createOpen, setCreateOpen] = useState(false)
 
   // Runs view
   const [runsTaskId, setRunsTaskId] = useState<string | undefined>(undefined)
@@ -111,6 +115,16 @@ export default function CrawlerPage() {
     }
   }
 
+  const handleDelete = async (task: CrawlTask) => {
+    try {
+      await deleteCrawlTask(task.id)
+      toast.success('任务已删除')
+      fetchTasks()
+    } catch {
+      toast.error('删除失败')
+    }
+  }
+
   const handleViewRuns = (task: CrawlTask) => {
     setRunsTaskId(task.id)
     setActiveTab('runs')
@@ -133,7 +147,11 @@ export default function CrawlerPage() {
             <p className='text-muted-foreground'>管理爬虫任务和查看执行记录</p>
           </div>
           <div className='flex gap-2'>
-            <Button onClick={() => setBatchOpen(true)}>
+            <Button onClick={() => setCreateOpen(true)}>
+              <Plus className='mr-2 h-4 w-4' />
+              新建任务
+            </Button>
+            <Button variant='secondary' onClick={() => setBatchOpen(true)}>
               <Play className='mr-2 h-4 w-4' />
               手动执行
             </Button>
@@ -163,6 +181,7 @@ export default function CrawlerPage() {
                 onEditCron={handleEditCron}
                 onTrigger={handleTrigger}
                 onViewRuns={handleViewRuns}
+                onDelete={handleDelete}
               />
             )}
           </TabsContent>
@@ -178,6 +197,13 @@ export default function CrawlerPage() {
           </TabsContent>
         </Tabs>
       </Main>
+
+      {/* Create Task Dialog */}
+      <CreateTaskDialog
+        open={createOpen}
+        onOpenChange={setCreateOpen}
+        onCreated={fetchTasks}
+      />
 
       {/* Batch Trigger Dialog */}
       <BatchTriggerDialog

@@ -8,7 +8,7 @@ import {
   getSortedRowModel,
   useReactTable,
 } from '@tanstack/react-table'
-import { MoreHorizontal, Pencil, Play, Power } from 'lucide-react'
+import { MoreHorizontal, Pencil, Play, Power, Trash2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import {
   DropdownMenu,
@@ -34,9 +34,10 @@ type CrawlTasksTableProps = {
   onEditCron: (task: CrawlTask) => void
   onTrigger: (task: CrawlTask) => void
   onViewRuns: (task: CrawlTask) => void
+  onDelete: (task: CrawlTask) => void
 }
 
-export function CrawlTasksTable({ data, onToggle, onEditCron, onTrigger, onViewRuns }: CrawlTasksTableProps) {
+export function CrawlTasksTable({ data, onToggle, onEditCron, onTrigger, onViewRuns, onDelete }: CrawlTasksTableProps) {
   const columns = [
     ...crawlTasksColumns,
     {
@@ -64,6 +65,13 @@ export function CrawlTasksTable({ data, onToggle, onEditCron, onTrigger, onViewR
             <DropdownMenuItem onClick={() => onToggle(row.original)}>
               <Power className='mr-2 h-4 w-4' />
               {row.original.isActive ? '停用' : '启用'}
+            </DropdownMenuItem>
+            <DropdownMenuItem
+              className='text-destructive focus:text-destructive'
+              onClick={() => onDelete(row.original)}
+            >
+              <Trash2 className='mr-2 h-4 w-4' />
+              删除
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
