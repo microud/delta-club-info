@@ -27,6 +27,7 @@ export const clubs = pgTable('clubs', {
   establishedAt: date('established_at'),
   closedAt: date('closed_at'),
   predecessorId: uuid('predecessor_id'),
+  wechatMpGhid: varchar('wechat_mp_ghid', { length: 100 }),
   closureNote: text('closure_note'),
   companyName: varchar('company_name', { length: 300 }),
   creditCode: varchar('credit_code', { length: 18 }),

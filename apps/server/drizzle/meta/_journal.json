@@ -64,6 +64,13 @@
       "when": 1775503874387,
       "tag": "0008_famous_cable",
       "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "7",
+      "when": 1775567811108,
+      "tag": "0009_add-content-blogger-accounts-crawl-tasks-v2",
+      "breakpoints": true
     }
   ]
 }
