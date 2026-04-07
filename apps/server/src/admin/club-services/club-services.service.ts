@@ -36,6 +36,7 @@ export class ClubServicesService {
         hasGuarantee: dto.hasGuarantee,
         guaranteeHafuCoin: dto.guaranteeHafuCoin?.toString(),
         rules: dto.rules,
+        images: dto.images ?? [],
         sortOrder: dto.sortOrder ?? 0,
       })
       .returning();
@@ -53,6 +54,7 @@ export class ClubServicesService {
     if (dto.guaranteeHafuCoin !== undefined) values.guaranteeHafuCoin = dto.guaranteeHafuCoin?.toString();
     if (dto.rules !== undefined) values.rules = dto.rules;
     if (dto.sortOrder !== undefined) values.sortOrder = dto.sortOrder;
+    if (dto.images !== undefined) values.images = dto.images;
 
     const [service] = await this.db
       .update(schema.clubServices)

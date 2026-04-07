@@ -7,17 +7,21 @@ import {
 } from '@aws-sdk/client-s3';
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 
+export type BucketType = 'public' | 'private';
+
 @Injectable()
 export class StorageService {
   private readonly client: S3Client;
-  private readonly bucket: string;
+  private readonly endpoint: string;
+  private readonly publicBucket: string;
+  private readonly privateBucket: string;
 
   constructor(private readonly config: ConfigService) {
     const rawEndpoint = this.config.getOrThrow<string>('S3_ENDPOINT');
-    const endpoint = rawEndpoint.startsWith('http') ? rawEndpoint : `https://${rawEndpoint}`;
+    this.endpoint = rawEndpoint.startsWith('http') ? rawEndpoint : `https://${rawEndpoint}`;
 
     this.client = new S3Client({
-      endpoint,
+      endpoint: this.endpoint,
       region: this.config.get('S3_REGION', 'us-east-1'),
       credentials: {
         accessKeyId: this.config.getOrThrow('S3_ACCESS_KEY_ID'),
@@ -25,13 +29,18 @@ export class StorageService {
       },
       forcePathStyle: true,
     });
-    this.bucket = this.config.getOrThrow('S3_BUCKET');
+    this.publicBucket = this.config.getOrThrow('S3_PUBLIC_BUCKET');
+    this.privateBucket = this.config.getOrThrow('S3_PRIVATE_BUCKET');
   }
 
-  async upload(key: string, buffer: Buffer, contentType: string): Promise<string> {
+  private getBucket(type: BucketType): string {
+    return type === 'public' ? this.publicBucket : this.privateBucket;
+  }
+
+  async upload(key: string, buffer: Buffer, contentType: string, bucket: BucketType = 'private'): Promise<string> {
     await this.client.send(
       new PutObjectCommand({
-        Bucket: this.bucket,
+        Bucket: this.getBucket(bucket),
         Key: key,
         Body: buffer,
         ContentType: contentType,
@@ -43,14 +52,12 @@ export class StorageService {
   async getSignedUrl(key: string, expiresIn = 3600): Promise<string> {
     return getSignedUrl(
       this.client,
-      new GetObjectCommand({ Bucket: this.bucket, Key: key }),
+      new GetObjectCommand({ Bucket: this.privateBucket, Key: key }),
       { expiresIn },
     );
   }
 
   getPublicUrl(key: string): string {
-    const rawEndpoint = this.config.getOrThrow<string>('S3_ENDPOINT');
-    const endpoint = rawEndpoint.startsWith('http') ? rawEndpoint : `https://${rawEndpoint}`;
-    return `${endpoint}/${this.bucket}/${key}`;
+    return `${this.endpoint}/${this.publicBucket}/${key}`;
   }
 }

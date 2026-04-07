@@ -24,6 +24,7 @@ import { Route as AuthenticatedParseTasksRouteRouteImport } from './routes/_auth
 import { Route as AuthenticatedCrawlerRouteRouteImport } from './routes/_authenticated/crawler/route'
 import { Route as AuthenticatedClubsRouteRouteImport } from './routes/_authenticated/clubs/route'
 import { Route as AuthenticatedBloggersRouteRouteImport } from './routes/_authenticated/bloggers/route'
+import { Route as AuthenticatedAnnouncementsRouteRouteImport } from './routes/_authenticated/announcements/route'
 import { Route as AuthenticatedSettingsIndexRouteImport } from './routes/_authenticated/settings/index'
 import { Route as AuthenticatedParseTasksIndexRouteImport } from './routes/_authenticated/parse-tasks/index'
 import { Route as AuthenticatedClubsIndexRouteImport } from './routes/_authenticated/clubs/index'
@@ -113,6 +114,12 @@ const AuthenticatedBloggersRouteRoute =
     path: '/bloggers',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedAnnouncementsRouteRoute =
+  AuthenticatedAnnouncementsRouteRouteImport.update({
+    id: '/announcements',
+    path: '/announcements',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedSettingsIndexRoute =
   AuthenticatedSettingsIndexRouteImport.update({
     id: '/',
@@ -162,6 +169,7 @@ const AuthenticatedClubsIdRouteRoute =
 
 export interface FileRoutesByFullPath {
   '/': typeof AuthenticatedIndexRoute
+  '/announcements': typeof AuthenticatedAnnouncementsRouteRoute
   '/bloggers': typeof AuthenticatedBloggersRouteRoute
   '/clubs': typeof AuthenticatedClubsRouteRouteWithChildren
   '/crawler': typeof AuthenticatedCrawlerRouteRoute
@@ -185,6 +193,7 @@ export interface FileRoutesByFullPath {
   '/settings/': typeof AuthenticatedSettingsIndexRoute
 }
 export interface FileRoutesByTo {
+  '/announcements': typeof AuthenticatedAnnouncementsRouteRoute
   '/bloggers': typeof AuthenticatedBloggersRouteRoute
   '/crawler': typeof AuthenticatedCrawlerRouteRoute
   '/promotions': typeof AuthenticatedPromotionsRouteRoute
@@ -208,6 +217,7 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
+  '/_authenticated/announcements': typeof AuthenticatedAnnouncementsRouteRoute
   '/_authenticated/bloggers': typeof AuthenticatedBloggersRouteRoute
   '/_authenticated/clubs': typeof AuthenticatedClubsRouteRouteWithChildren
   '/_authenticated/crawler': typeof AuthenticatedCrawlerRouteRoute
@@ -235,6 +245,7 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/announcements'
     | '/bloggers'
     | '/clubs'
     | '/crawler'
@@ -258,6 +269,7 @@ export interface FileRouteTypes {
     | '/settings/'
   fileRoutesByTo: FileRoutesByTo
   to:
+    | '/announcements'
     | '/bloggers'
     | '/crawler'
     | '/promotions'
@@ -280,6 +292,7 @@ export interface FileRouteTypes {
   id:
     | '__root__'
     | '/_authenticated'
+    | '/_authenticated/announcements'
     | '/_authenticated/bloggers'
     | '/_authenticated/clubs'
     | '/_authenticated/crawler'
@@ -421,6 +434,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedBloggersRouteRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/announcements': {
+      id: '/_authenticated/announcements'
+      path: '/announcements'
+      fullPath: '/announcements'
+      preLoaderRoute: typeof AuthenticatedAnnouncementsRouteRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/settings/': {
       id: '/_authenticated/settings/'
       path: '/'
@@ -531,6 +551,7 @@ const AuthenticatedSettingsRouteRouteWithChildren =
   )
 
 interface AuthenticatedRouteRouteChildren {
+  AuthenticatedAnnouncementsRouteRoute: typeof AuthenticatedAnnouncementsRouteRoute
   AuthenticatedBloggersRouteRoute: typeof AuthenticatedBloggersRouteRoute
   AuthenticatedClubsRouteRoute: typeof AuthenticatedClubsRouteRouteWithChildren
   AuthenticatedCrawlerRouteRoute: typeof AuthenticatedCrawlerRouteRoute
@@ -543,6 +564,7 @@ interface AuthenticatedRouteRouteChildren {
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
+  AuthenticatedAnnouncementsRouteRoute: AuthenticatedAnnouncementsRouteRoute,
   AuthenticatedBloggersRouteRoute: AuthenticatedBloggersRouteRoute,
   AuthenticatedClubsRouteRoute: AuthenticatedClubsRouteRouteWithChildren,
   AuthenticatedCrawlerRouteRoute: AuthenticatedCrawlerRouteRoute,

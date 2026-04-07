@@ -96,7 +96,7 @@ export class ClubsService {
     const imgResponse = await axios.get(avatarUrl, { responseType: 'arraybuffer' });
     const buffer = Buffer.from(imgResponse.data);
     const key = `club-logos/${wechatOfficialAccount}-${Date.now()}.jpg`;
-    await this.storageService.upload(key, buffer, 'image/jpeg');
+    await this.storageService.upload(key, buffer, 'image/jpeg', 'public');
 
     return this.storageService.getPublicUrl(key);
   }

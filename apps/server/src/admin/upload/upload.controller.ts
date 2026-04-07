@@ -34,7 +34,7 @@ export class UploadController {
     }
     const ext = file.originalname.split('.').pop() || 'bin';
     const key = `uploads/${randomUUID()}.${ext}`;
-    await this.storageService.upload(key, file.buffer, file.mimetype);
+    await this.storageService.upload(key, file.buffer, file.mimetype, 'public');
     const url = this.storageService.getPublicUrl(key);
     return { url, key };
   }

@@ -4,8 +4,10 @@ import { ParseTaskService } from './parse-task.service';
 import { ParseTaskController } from './parse-task.controller';
 import { SystemConfigsService } from '../admin/system-configs/system-configs.service';
 import { AiConfigsService } from '../admin/ai-configs/ai-configs.service';
+import { StorageModule } from '../storage/storage.module';
 
 @Module({
+  imports: [StorageModule],
   controllers: [ParseTaskController],
   providers: [AiParseService, ParseTaskService, SystemConfigsService, AiConfigsService],
   exports: [ParseTaskService, AiParseService],

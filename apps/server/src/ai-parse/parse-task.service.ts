@@ -4,6 +4,7 @@ import { eq, desc, inArray } from 'drizzle-orm';
 import { DRIZZLE } from '../database/database.module';
 import * as schema from '../database/schema';
 import { AiParseService } from './ai-parse.service';
+import { StorageService } from '../storage/storage.service';
 
 @Injectable()
 export class ParseTaskService {
@@ -12,6 +13,7 @@ export class ParseTaskService {
   constructor(
     @Inject(DRIZZLE) private readonly db: NodePgDatabase<typeof schema>,
     private readonly aiParseService: AiParseService,
+    private readonly storageService: StorageService,
   ) {}
 
   async findAll(status?: string) {
@@ -50,7 +52,17 @@ export class ParseTaskService {
             .where(inArray(schema.wechatMessages.id, messageIds))
         : [];
 
-    return { ...task, messages };
+    const messagesWithUrls = await Promise.all(
+      messages.map(async (msg) => {
+        if (msg.msgType === 'image' && msg.mediaUrl) {
+          const signedUrl = await this.storageService.getSignedUrl(msg.mediaUrl);
+          return { ...msg, mediaUrl: signedUrl };
+        }
+        return msg;
+      }),
+    );
+
+    return { ...task, messages: messagesWithUrls };
   }
 
   async triggerParse(taskId: string): Promise<void> {
