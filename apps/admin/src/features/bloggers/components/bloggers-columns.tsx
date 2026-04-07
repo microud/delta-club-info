@@ -11,18 +11,6 @@ export const bloggersColumns: ColumnDef<Blogger>[] = [
     ),
   },
   {
-    accessorKey: 'platform',
-    header: '平台',
-    cell: ({ row }) => {
-      const platform = row.getValue<string>('platform')
-      return <Badge variant='outline'>{platformLabels[platform] ?? platform}</Badge>
-    },
-  },
-  {
-    accessorKey: 'externalId',
-    header: '平台用户 ID',
-  },
-  {
     accessorKey: 'isActive',
     header: '状态',
     cell: ({ row }) => {
@@ -31,6 +19,26 @@ export const bloggersColumns: ColumnDef<Blogger>[] = [
         <Badge variant={active ? 'default' : 'secondary'}>
           {active ? '启用' : '停用'}
         </Badge>
+      )
+    },
+  },
+  {
+    id: 'accountCount',
+    header: '账号数',
+    cell: ({ row }) => row.original.accounts.length,
+  },
+  {
+    id: 'platforms',
+    header: '平台',
+    cell: ({ row }) => {
+      const platforms = [...new Set(row.original.accounts.map((a) => a.platform))]
+      if (platforms.length === 0) return <span className='text-muted-foreground'>-</span>
+      return (
+        <div className='flex gap-1 flex-wrap'>
+          {platforms.map((p) => (
+            <Badge key={p} variant='outline'>{platformLabels[p] ?? p}</Badge>
+          ))}
+        </div>
       )
     },
   },

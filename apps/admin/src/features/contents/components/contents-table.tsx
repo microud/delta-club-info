@@ -17,14 +17,14 @@ import {
   TableRow,
 } from '@/components/ui/table'
 import { DataTablePagination } from '@/components/data-table'
-import { type Video } from '../data/schema'
-import { videosColumns } from './videos-columns'
+import { type Content } from '../data/schema'
+import { contentsColumns } from './contents-columns'
 
-type VideosTableProps = {
-  data: Video[]
+type ContentsTableProps = {
+  data: Content[]
 }
 
-export function VideosTable({ data }: VideosTableProps) {
+export function ContentsTable({ data }: ContentsTableProps) {
   const [sorting, setSorting] = useState<SortingState>([])
   const [pagination, setPagination] = useState<PaginationState>({
     pageIndex: 0,
@@ -33,7 +33,7 @@ export function VideosTable({ data }: VideosTableProps) {
 
   const table = useReactTable({
     data,
-    columns: videosColumns,
+    columns: contentsColumns,
     state: { sorting, pagination },
     onSortingChange: setSorting,
     onPaginationChange: setPagination,
@@ -72,8 +72,8 @@ export function VideosTable({ data }: VideosTableProps) {
               ))
             ) : (
               <TableRow>
-                <TableCell colSpan={videosColumns.length} className='h-24 text-center'>
-                  暂无视频
+                <TableCell colSpan={contentsColumns.length} className='h-24 text-center'>
+                  暂无内容
                 </TableCell>
               </TableRow>
             )}

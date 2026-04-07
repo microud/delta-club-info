@@ -4,7 +4,7 @@ import {
   Megaphone,
   UserSearch,
   Bot,
-  Video,
+  FileText,
   ScanText,
   Smartphone,
   Bell,
@@ -42,9 +42,9 @@ export const sidebarData: SidebarData = {
           icon: Bot,
         },
         {
-          title: '视频列表',
+          title: '内容管理',
           url: '/videos',
-          icon: Video,
+          icon: FileText,
         },
         {
           title: '消息解析',

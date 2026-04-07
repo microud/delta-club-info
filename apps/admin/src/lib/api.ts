@@ -7,9 +7,6 @@ import type {
   ClubRuleDto,
   PromotionOrderDto,
   PaginatedResponse,
-  BloggerDto,
-  CrawlTaskDto,
-  VideoDto,
   ParseTaskDto,
   AiConfigDto,
   CreateAiConfigDto,
@@ -127,36 +124,54 @@ export const getPromotionRanking = () =>
 
 // Bloggers
 export const getBloggers = () =>
-  api.get<BloggerDto[]>('/bloggers').then((res) => res.data)
+  api.get('/bloggers').then((res) => res.data)
 
-export const createBlogger = (data: { platform: string; externalId: string; name: string }) =>
-  api.post<BloggerDto>('/bloggers', data).then((res) => res.data)
+export const createBlogger = (data: { name: string; avatar?: string }) =>
+  api.post('/bloggers', data).then((res) => res.data)
 
-export const updateBlogger = (id: string, data: { name?: string; isActive?: boolean }) =>
-  api.patch<BloggerDto>(`/bloggers/${id}`, data).then((res) => res.data)
+export const updateBlogger = (id: string, data: { name?: string; avatar?: string; isActive?: boolean }) =>
+  api.patch(`/bloggers/${id}`, data).then((res) => res.data)
 
 export const deleteBlogger = (id: string) =>
   api.delete(`/bloggers/${id}`)
 
+// Blogger Accounts
+export const addBloggerAccount = (bloggerId: string, data: {
+  platform: string; platformUserId: string; platformUsername?: string; crawlCategories: string[]
+}) => api.post(`/bloggers/${bloggerId}/accounts`, data).then((res) => res.data)
+
+export const updateBloggerAccount = (accountId: string, data: {
+  platformUsername?: string; crawlCategories?: string[]
+}) => api.patch(`/bloggers/accounts/${accountId}`, data).then((res) => res.data)
+
+export const deleteBloggerAccount = (accountId: string) =>
+  api.delete(`/bloggers/accounts/${accountId}`)
+
 // Crawl Tasks
 export const getCrawlTasks = () =>
-  api.get<CrawlTaskDto[]>('/crawl-tasks').then((res) => res.data)
+  api.get('/crawl-tasks').then((res) => res.data)
 
-export const triggerCrawl = () =>
-  api.post('/crawl-tasks/trigger').then((res) => res.data)
+export const getCrawlTaskRuns = (taskId?: string) =>
+  api.get('/crawl-tasks/runs', { params: { taskId } }).then((res) => res.data)
 
-export const getCrawlConfig = () =>
-  api.get<{ enabled: boolean; frequency: number }>('/crawl-tasks/config').then((res) => res.data)
+export const updateCrawlTask = (id: string, data: { cronExpression?: string; isActive?: boolean }) =>
+  api.patch(`/crawl-tasks/${id}`, data).then((res) => res.data)
 
-export const updateCrawlFrequency = (frequency: number) =>
-  api.post<{ frequency: number }>('/crawl-tasks/frequency', { frequency }).then((res) => res.data)
+export const triggerCrawlTask = (id: string) =>
+  api.post(`/crawl-tasks/${id}/trigger`).then((res) => res.data)
 
-export const setCrawlEnabled = (enabled: boolean) =>
-  api.post<{ enabled: boolean }>('/crawl-tasks/enabled', { enabled }).then((res) => res.data)
+// Contents
+export const getContents = (params?: { platform?: string; contentType?: string; category?: string; aiParsed?: string }) =>
+  api.get('/contents', { params }).then((res) => res.data)
 
-// Videos
-export const getVideos = (params?: { platform?: string; category?: string }) =>
-  api.get<VideoDto[]>('/videos', { params }).then((res) => res.data)
+export const linkContentClub = (contentId: string, clubId: string) =>
+  api.post(`/contents/${contentId}/link-club`, { clubId }).then((res) => res.data)
+
+export const mergeContentGroup = (contentIds: string[], primaryId: string) =>
+  api.post('/contents/merge', { contentIds, primaryId }).then((res) => res.data)
+
+export const splitContentFromGroup = (contentId: string) =>
+  api.post(`/contents/${contentId}/split`).then((res) => res.data)
 
 // Parse Tasks
 export const getParseTasks = (status?: string) =>

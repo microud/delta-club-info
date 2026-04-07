@@ -1,66 +1,64 @@
 import { type ColumnDef } from '@tanstack/react-table'
 import { Badge } from '@/components/ui/badge'
-import { type CrawlTask, taskTypeLabels, taskStatusLabels } from '../data/schema'
-
-const statusVariant: Record<string, 'default' | 'secondary' | 'destructive'> = {
-  RUNNING: 'default',
-  SUCCESS: 'secondary',
-  FAILED: 'destructive',
-}
+import { type CrawlTask, taskTypeLabels, platformLabels, categoryLabels } from '../data/schema'
 
 export const crawlTasksColumns: ColumnDef<CrawlTask>[] = [
   {
-    accessorKey: 'type',
+    accessorKey: 'taskType',
     header: '类型',
     cell: ({ row }) => {
-      const type = row.getValue<string>('type')
+      const type = row.getValue<string>('taskType')
       return <Badge variant='outline'>{taskTypeLabels[type] ?? type}</Badge>
     },
   },
   {
+    accessorKey: 'category',
+    header: '分类',
+    cell: ({ row }) => {
+      const c = row.getValue<string>('category')
+      return <Badge variant='secondary'>{categoryLabels[c] ?? c}</Badge>
+    },
+  },
+  {
+    accessorKey: 'platform',
+    header: '平台',
+    cell: ({ row }) => {
+      const p = row.getValue<string>('platform')
+      return <Badge variant='outline'>{platformLabels[p] ?? p}</Badge>
+    },
+  },
+  {
     accessorKey: 'targetId',
-    header: '目标',
+    header: '目标 ID',
     cell: ({ row }) => (
-      <span className='max-w-48 truncate'>{row.getValue<string>('targetId')}</span>
+      <span className='max-w-48 truncate font-mono text-sm'>{row.getValue<string>('targetId')}</span>
     ),
   },
   {
-    accessorKey: 'status',
+    accessorKey: 'cronExpression',
+    header: 'Cron 表达式',
+    cell: ({ row }) => (
+      <code className='text-sm'>{row.getValue<string>('cronExpression')}</code>
+    ),
+  },
+  {
+    accessorKey: 'isActive',
     header: '状态',
     cell: ({ row }) => {
-      const status = row.getValue<string>('status')
+      const active = row.getValue<boolean>('isActive')
       return (
-        <Badge variant={statusVariant[status] ?? 'secondary'}>
-          {taskStatusLabels[status] ?? status}
+        <Badge variant={active ? 'default' : 'secondary'}>
+          {active ? '启用' : '停用'}
         </Badge>
       )
     },
   },
   {
-    accessorKey: 'videoCount',
-    header: '新视频数',
-  },
-  {
-    accessorKey: 'startedAt',
-    header: '开始时间',
-    cell: ({ row }) => new Date(row.getValue<string>('startedAt')).toLocaleString(),
-  },
-  {
-    accessorKey: 'finishedAt',
-    header: '完成时间',
+    accessorKey: 'lastRunAt',
+    header: '上次执行',
     cell: ({ row }) => {
-      const val = row.getValue<string | null>('finishedAt')
-      return val ? new Date(val).toLocaleString() : '—'
-    },
-  },
-  {
-    accessorKey: 'errorMessage',
-    header: '错误信息',
-    cell: ({ row }) => {
-      const msg = row.getValue<string | null>('errorMessage')
-      return msg ? (
-        <span className='text-destructive max-w-48 truncate'>{msg}</span>
-      ) : '—'
+      const val = row.getValue<string | null>('lastRunAt')
+      return val ? new Date(val).toLocaleString() : '-'
     },
   },
 ]

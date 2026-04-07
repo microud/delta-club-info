@@ -10,13 +10,6 @@ import {
   FormLabel,
   FormMessage,
 } from '@/components/ui/form'
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select'
 import { bloggerFormSchema, type BloggerFormValues } from '../data/schema'
 
 type BloggerFormProps = {
@@ -28,9 +21,8 @@ export function BloggerForm({ onSubmit, isSubmitting }: BloggerFormProps) {
   const form = useForm<BloggerFormValues>({
     resolver: zodResolver(bloggerFormSchema),
     defaultValues: {
-      platform: 'BILIBILI',
-      externalId: '',
       name: '',
+      avatar: '',
     },
   })
 
@@ -39,33 +31,12 @@ export function BloggerForm({ onSubmit, isSubmitting }: BloggerFormProps) {
       <form onSubmit={form.handleSubmit(onSubmit)} className='space-y-4'>
         <FormField
           control={form.control}
-          name='platform'
+          name='name'
           render={({ field }) => (
             <FormItem>
-              <FormLabel>平台</FormLabel>
-              <Select onValueChange={field.onChange} defaultValue={field.value}>
-                <FormControl>
-                  <SelectTrigger>
-                    <SelectValue placeholder='选择平台' />
-                  </SelectTrigger>
-                </FormControl>
-                <SelectContent>
-                  <SelectItem value='BILIBILI'>B站</SelectItem>
-                  <SelectItem value='DOUYIN'>抖音</SelectItem>
-                </SelectContent>
-              </Select>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        <FormField
-          control={form.control}
-          name='externalId'
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>平台用户 ID</FormLabel>
+              <FormLabel>博主名称</FormLabel>
               <FormControl>
-                <Input placeholder='例如: 12345678' {...field} />
+                <Input placeholder='博主昵称' {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -73,12 +44,12 @@ export function BloggerForm({ onSubmit, isSubmitting }: BloggerFormProps) {
         />
         <FormField
           control={form.control}
-          name='name'
+          name='avatar'
           render={({ field }) => (
             <FormItem>
-              <FormLabel>博主名称</FormLabel>
+              <FormLabel>头像 URL (可选)</FormLabel>
               <FormControl>
-                <Input placeholder='博主昵称' {...field} />
+                <Input placeholder='https://...' {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>

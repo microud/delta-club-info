@@ -12,10 +12,18 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog'
-import { getBloggers, createBlogger, updateBlogger, deleteBlogger } from '@/lib/api'
-import { type Blogger, type BloggerFormValues } from './data/schema'
+import {
+  getBloggers,
+  createBlogger,
+  updateBlogger,
+  deleteBlogger,
+  addBloggerAccount,
+  deleteBloggerAccount,
+} from '@/lib/api'
+import { type Blogger, type BloggerFormValues, type BloggerAccount, type BloggerAccountFormValues } from './data/schema'
 import { BloggersTable } from './components/bloggers-table'
 import { BloggerForm } from './components/blogger-form'
+import { BloggerAccountForm } from './components/blogger-account-form'
 import { BloggersDeleteDialog } from './components/bloggers-delete-dialog'
 
 export default function BloggersPage() {
@@ -25,6 +33,12 @@ export default function BloggersPage() {
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [deleteOpen, setDeleteOpen] = useState(false)
   const [deleteTarget, setDeleteTarget] = useState<Blogger | null>(null)
+
+  // Account management
+  const [accountOpen, setAccountOpen] = useState(false)
+  const [accountTarget, setAccountTarget] = useState<Blogger | null>(null)
+  const [deleteAccountOpen, setDeleteAccountOpen] = useState(false)
+  const [deleteAccountTarget, setDeleteAccountTarget] = useState<BloggerAccount | null>(null)
 
   const fetchBloggers = useCallback(async () => {
     try {
@@ -79,6 +93,35 @@ export default function BloggersPage() {
     }
   }
 
+  const handleAddAccount = async (data: BloggerAccountFormValues) => {
+    if (!accountTarget) return
+    try {
+      setIsSubmitting(true)
+      await addBloggerAccount(accountTarget.id, data)
+      toast.success('账号添加成功')
+      setAccountOpen(false)
+      setAccountTarget(null)
+      fetchBloggers()
+    } catch {
+      toast.error('添加账号失败')
+    } finally {
+      setIsSubmitting(false)
+    }
+  }
+
+  const handleDeleteAccount = async () => {
+    if (!deleteAccountTarget) return
+    try {
+      await deleteBloggerAccount(deleteAccountTarget.id)
+      toast.success('账号已删除')
+      setDeleteAccountOpen(false)
+      setDeleteAccountTarget(null)
+      fetchBloggers()
+    } catch {
+      toast.error('删除账号失败')
+    }
+  }
+
   return (
     <>
       <Header fixed>
@@ -92,7 +135,7 @@ export default function BloggersPage() {
         <div className='flex flex-wrap items-end justify-between gap-2'>
           <div>
             <h2 className='text-2xl font-bold tracking-tight'>博主管理</h2>
-            <p className='text-muted-foreground'>管理监控博主列表</p>
+            <p className='text-muted-foreground'>管理监控博主及其平台账号</p>
           </div>
           <Button onClick={() => setCreateOpen(true)}>添加博主</Button>
         </div>
@@ -106,10 +149,13 @@ export default function BloggersPage() {
             data={bloggers}
             onToggle={handleToggle}
             onDelete={(b) => { setDeleteTarget(b); setDeleteOpen(true) }}
+            onAddAccount={(b) => { setAccountTarget(b); setAccountOpen(true) }}
+            onDeleteAccount={(a) => { setDeleteAccountTarget(a); setDeleteAccountOpen(true) }}
           />
         )}
       </Main>
 
+      {/* Create Blogger Dialog */}
       <Dialog open={createOpen} onOpenChange={setCreateOpen}>
         <DialogContent className='sm:max-w-lg'>
           <DialogHeader>
@@ -120,11 +166,33 @@ export default function BloggersPage() {
         </DialogContent>
       </Dialog>
 
+      {/* Add Account Dialog */}
+      <Dialog open={accountOpen} onOpenChange={(open) => { setAccountOpen(open); if (!open) setAccountTarget(null) }}>
+        <DialogContent className='sm:max-w-lg'>
+          <DialogHeader>
+            <DialogTitle>添加平台账号</DialogTitle>
+            <DialogDescription>
+              为博主 <strong>{accountTarget?.name}</strong> 添加平台账号。
+            </DialogDescription>
+          </DialogHeader>
+          <BloggerAccountForm onSubmit={handleAddAccount} isSubmitting={isSubmitting} />
+        </DialogContent>
+      </Dialog>
+
+      {/* Delete Blogger Dialog */}
       <BloggersDeleteDialog
         open={deleteOpen}
         onOpenChange={setDeleteOpen}
         bloggerName={deleteTarget?.name ?? ''}
         onConfirm={handleDelete}
+      />
+
+      {/* Delete Account Dialog */}
+      <BloggersDeleteDialog
+        open={deleteAccountOpen}
+        onOpenChange={setDeleteAccountOpen}
+        bloggerName={deleteAccountTarget ? `账号 ${deleteAccountTarget.platformUserId}` : ''}
+        onConfirm={handleDeleteAccount}
       />
     </>
   )
