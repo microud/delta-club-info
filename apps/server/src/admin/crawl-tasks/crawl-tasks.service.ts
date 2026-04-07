@@ -1,6 +1,6 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { NodePgDatabase } from 'drizzle-orm/node-postgres';
-import { eq, desc } from 'drizzle-orm';
+import { eq, desc, inArray, sql } from 'drizzle-orm';
 import { DRIZZLE } from '../../database/database.module';
 import * as schema from '../../database/schema';
 
@@ -11,10 +11,50 @@ export class AdminCrawlTasksService {
   ) {}
 
   async findAllTasks() {
-    return this.db
+    const tasks = await this.db
       .select()
       .from(schema.crawlTasks)
       .orderBy(desc(schema.crawlTasks.createdAt));
+
+    // Resolve target names: BLOGGER_POSTS → blogger name, KEYWORD_SEARCH/MP_ARTICLES → club name
+    const bloggerAccountIds = tasks
+      .filter((t) => t.taskType === 'BLOGGER_POSTS')
+      .map((t) => t.targetId);
+    const clubIds = tasks
+      .filter((t) => t.taskType === 'KEYWORD_SEARCH' || t.taskType === 'MP_ARTICLES')
+      .map((t) => t.targetId);
+
+    const nameMap = new Map<string, string>();
+
+    if (bloggerAccountIds.length > 0) {
+      const accounts = await this.db
+        .select({
+          accountId: schema.bloggerAccounts.id,
+          bloggerName: schema.bloggers.name,
+          platformUsername: schema.bloggerAccounts.platformUsername,
+        })
+        .from(schema.bloggerAccounts)
+        .innerJoin(schema.bloggers, eq(schema.bloggerAccounts.bloggerId, schema.bloggers.id))
+        .where(inArray(schema.bloggerAccounts.id, bloggerAccountIds));
+      for (const a of accounts) {
+        nameMap.set(a.accountId, a.bloggerName + (a.platformUsername ? ` (${a.platformUsername})` : ''));
+      }
+    }
+
+    if (clubIds.length > 0) {
+      const clubRows = await this.db
+        .select({ id: schema.clubs.id, name: schema.clubs.name })
+        .from(schema.clubs)
+        .where(inArray(schema.clubs.id, clubIds));
+      for (const c of clubRows) {
+        nameMap.set(c.id, c.name);
+      }
+    }
+
+    return tasks.map((t) => ({
+      ...t,
+      targetName: nameMap.get(t.targetId) ?? null,
+    }));
   }
 
   async findTaskRuns(taskId?: string) {

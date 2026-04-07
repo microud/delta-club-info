@@ -118,8 +118,9 @@ GET    /admin/contents                          (内容列表，支持筛选)
 POST   /admin/contents/:id/link-club            (手动关联俱乐部)
 POST   /admin/contents/merge                    (合并内容组)
 POST   /admin/contents/:id/split                (从内容组拆分)
-GET    /admin/crawl-tasks                       (爬虫任务列表)
+GET    /admin/crawl-tasks                       (爬虫任务列表，含目标名称)
 GET    /admin/crawl-tasks/runs                  (爬虫运行记录)
+POST   /admin/crawl-tasks/batch-trigger         (批量触发多个任务)
 PATCH  /admin/crawl-tasks/:id                   (更新任务配置)
 POST   /admin/crawl-tasks/:id/trigger           (手动触发单个任务)
 GET    /admin/parse-tasks
@@ -759,8 +760,9 @@ interface PlatformAdapter {
 - 启用/停用
 
 **3. 爬虫管理**
-- 采集任务列表（CrawlTask），支持按平台/类型/状态筛选
+- 采集任务列表（CrawlTask），支持按平台/类型/状态筛选，展示目标名称（博主名/俱乐部名）
 - 单个任务可编辑 cron 表达式、启用/停用
+- 手动批量执行：选择爬虫类型（博主抓取/关键词搜索/公众号文章）→ 多选目标 → 批量触发
 - 执行记录列表（CrawlTaskRun）
 - 手动触发单个任务
 
@@ -984,7 +986,7 @@ Stage 依赖关系：`1 → 2 → 3 → 4 → 5 → 6`（严格顺序，每个 S
 > 前置：Stage 2 完成（需要 Club 数据用于关键词搜索和公众号采集）
 
 - Blogger、BloggerAccount 表 schema + Admin 博主管理（多平台账号、采集分类配置）
-- CrawlTask、CrawlTaskRun 表 schema + Admin 爬虫管理（任务列表、cron 配置、手动触发、执行记录）
+- CrawlTask、CrawlTaskRun 表 schema + Admin 爬虫管理（任务列表含目标名称、cron 配置、手动单任务触发、批量触发、执行记录）
 - Content 表 schema（替代 Video）+ 去重逻辑
 - Club 表新增 wechatMpGhid 字段
 - TikHubClient 封装（认证、限流、重试）

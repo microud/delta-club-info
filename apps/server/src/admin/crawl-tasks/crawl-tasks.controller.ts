@@ -32,6 +32,14 @@ export class AdminCrawlTasksController {
     return this.crawlTasksService.findTaskRuns(taskId);
   }
 
+  @Post('batch-trigger')
+  batchTrigger(@Body() body: { taskIds: string[] }) {
+    for (const taskId of body.taskIds) {
+      this.crawlerService.executeTask(taskId);
+    }
+    return { message: `${body.taskIds.length} crawl tasks triggered` };
+  }
+
   @Patch(':id')
   async updateTask(
     @Param('id') id: string,

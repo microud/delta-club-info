@@ -6,6 +6,7 @@ export const crawlTaskSchema = z.object({
   category: z.string(),
   platform: z.string(),
   targetId: z.string(),
+  targetName: z.string().nullable().optional(),
   cronExpression: z.string(),
   isActive: z.boolean(),
   lastRunAt: z.string().nullable(),
@@ -29,7 +30,10 @@ export type CrawlTaskRun = z.infer<typeof crawlTaskRunSchema>
 
 export const taskTypeLabels: Record<string, string> = {
   BLOGGER: '博主抓取',
+  BLOGGER_POSTS: '博主抓取',
   KEYWORD: '关键词搜索',
+  KEYWORD_SEARCH: '关键词搜索',
+  MP_ARTICLES: '公众号文章',
 }
 
 export const platformLabels: Record<string, string> = {

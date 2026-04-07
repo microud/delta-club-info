@@ -160,6 +160,9 @@ export const updateCrawlTask = (id: string, data: { cronExpression?: string; isA
 export const triggerCrawlTask = (id: string) =>
   api.post(`/crawl-tasks/${id}/trigger`).then((res) => res.data)
 
+export const batchTriggerCrawlTasks = (taskIds: string[]) =>
+  api.post('/crawl-tasks/batch-trigger', { taskIds }).then((res) => res.data)
+
 // Contents
 export const getContents = (params?: { platform?: string; contentType?: string; category?: string; aiParsed?: string }) =>
   api.get('/contents', { params }).then((res) => res.data)

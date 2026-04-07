@@ -15,10 +15,12 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { Play } from 'lucide-react'
 import { getCrawlTasks, getCrawlTaskRuns, updateCrawlTask, triggerCrawlTask } from '@/lib/api'
 import { type CrawlTask, type CrawlTaskRun } from './data/schema'
 import { CrawlTasksTable } from './components/crawl-tasks-table'
 import { CrawlTaskRuns } from './components/crawl-task-runs'
+import { BatchTriggerDialog } from './components/batch-trigger-dialog'
 
 export default function CrawlerPage() {
   const [tasks, setTasks] = useState<CrawlTask[]>([])
@@ -31,6 +33,9 @@ export default function CrawlerPage() {
   const [cronTarget, setCronTarget] = useState<CrawlTask | null>(null)
   const [cronValue, setCronValue] = useState('')
   const [cronSaving, setCronSaving] = useState(false)
+
+  // Batch trigger dialog
+  const [batchOpen, setBatchOpen] = useState(false)
 
   // Runs view
   const [runsTaskId, setRunsTaskId] = useState<string | undefined>(undefined)
@@ -127,9 +132,15 @@ export default function CrawlerPage() {
             <h2 className='text-2xl font-bold tracking-tight'>爬虫管理</h2>
             <p className='text-muted-foreground'>管理爬虫任务和查看执行记录</p>
           </div>
-          <Button variant='outline' onClick={() => { fetchTasks(); if (activeTab === 'runs') fetchRuns(runsTaskId) }}>
-            刷新
-          </Button>
+          <div className='flex gap-2'>
+            <Button onClick={() => setBatchOpen(true)}>
+              <Play className='mr-2 h-4 w-4' />
+              手动执行
+            </Button>
+            <Button variant='outline' onClick={() => { fetchTasks(); if (activeTab === 'runs') fetchRuns(runsTaskId) }}>
+              刷新
+            </Button>
+          </div>
         </div>
 
         <Tabs value={activeTab} onValueChange={setActiveTab}>
@@ -167,6 +178,14 @@ export default function CrawlerPage() {
           </TabsContent>
         </Tabs>
       </Main>
+
+      {/* Batch Trigger Dialog */}
+      <BatchTriggerDialog
+        open={batchOpen}
+        onOpenChange={setBatchOpen}
+        tasks={tasks}
+        onTriggered={fetchTasks}
+      />
 
       {/* Edit Cron Dialog */}
       <Dialog open={cronOpen} onOpenChange={(open) => { setCronOpen(open); if (!open) setCronTarget(null) }}>

@@ -28,11 +28,21 @@ export const crawlTasksColumns: ColumnDef<CrawlTask>[] = [
     },
   },
   {
-    accessorKey: 'targetId',
-    header: '目标 ID',
-    cell: ({ row }) => (
-      <span className='max-w-48 truncate font-mono text-sm'>{row.getValue<string>('targetId')}</span>
-    ),
+    accessorKey: 'targetName',
+    header: '目标',
+    cell: ({ row }) => {
+      const name = row.getValue<string | null>('targetName')
+      const id = row.original.targetId
+      return (
+        <div className='max-w-48 truncate'>
+          {name ? (
+            <span className='text-sm'>{name}</span>
+          ) : (
+            <span className='font-mono text-sm text-muted-foreground'>{id}</span>
+          )}
+        </div>
+      )
+    },
   },
   {
     accessorKey: 'cronExpression',
