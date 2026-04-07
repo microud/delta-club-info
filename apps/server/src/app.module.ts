@@ -7,6 +7,7 @@ import { ClientModule } from './client/client.module';
 import { CrawlerModule } from './crawler/crawler.module';
 import { WechatWorkModule } from './wechat-work/wechat-work.module';
 import { AiParseModule } from './ai-parse/ai-parse.module';
+import { ImageProxyController } from './common/proxy/image-proxy.controller';
 
 @Module({
   imports: [
@@ -22,5 +23,6 @@ import { AiParseModule } from './ai-parse/ai-parse.module';
     WechatWorkModule,
     AiParseModule,
   ],
+  controllers: [ImageProxyController],
 })
 export class AppModule {}

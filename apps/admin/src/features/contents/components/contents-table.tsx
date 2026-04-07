@@ -164,12 +164,16 @@ export function ContentsTable({ data, onRefresh }: ContentsTableProps) {
   )
 }
 
+function proxyImageUrl(url: string) {
+  return `/proxy/image?url=${encodeURIComponent(url)}`
+}
+
 function ContentDetail({ content }: { content: Content }) {
   return (
     <div className='flex gap-4'>
       {content.coverUrl && (
         <img
-          src={content.coverUrl}
+          src={proxyImageUrl(content.coverUrl)}
           alt={content.title}
           className='h-28 w-auto rounded-md object-cover shrink-0'
         />
