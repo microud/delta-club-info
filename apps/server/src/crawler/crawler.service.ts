@@ -179,12 +179,8 @@ export class CrawlerService {
         break;
       }
 
-      // Check if there are more pages
-      const pagination = this.bilibiliAdapter.extractUserPostsPagination(rawData);
-      if (!pagination || page * pagination.pageSize >= pagination.total) break;
-
       page++;
-      this.logger.debug(`Bilibili pagination: fetching page ${page} (total: ${pagination.total})`);
+      this.logger.debug(`Bilibili pagination: fetching page ${page}`);
     }
 
     return { rawContents: allContents, itemsCreated: totalCreated };

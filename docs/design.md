@@ -708,7 +708,7 @@ interface PlatformAdapter {
 
 手动触发任务时，可通过 `POST /admin/crawl-tasks/:id/trigger` 传入 `{ fullSync: true }` 指定全量同步；定时调度默认为增量同步。
 
-目前分页采集已在 B 站平台实现（Web API，每页 20 条），其他平台暂为单次获取。
+目前分页采集已在 B 站平台实现（App API，逐页获取直到空页），其他平台暂为单次获取。
 
 ### 关键设计点
 
