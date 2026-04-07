@@ -157,12 +157,12 @@ export class TikHubClient {
 
   async fetchBilibiliUserPosts(
     uid: string,
-    page?: number,
+    pn?: number,
   ): Promise<unknown> {
     return this.request('GET', '/api/v1/bilibili/web/fetch_user_post_videos', {
       params: {
         uid,
-        ...(page !== undefined && { page }),
+        pn: pn ?? 1,
       },
     });
   }
@@ -175,8 +175,9 @@ export class TikHubClient {
     return this.request('GET', '/api/v1/bilibili/web/fetch_general_search', {
       params: {
         keyword,
-        ...(page !== undefined && { page }),
-        ...(pageSize !== undefined && { page_size: pageSize }),
+        order: 'totalrank',
+        page: page ?? 1,
+        page_size: pageSize ?? 20,
       },
     });
   }
