@@ -769,7 +769,9 @@ interface PlatformAdapter {
 
 **4. 内容管理（原视频管理）**
 - 内容列表（筛选：平台、内容类型、分类、聚合状态、是否已关联俱乐部、AI 解析状态）
-- 手动关联俱乐部
+- 每行操作列（MoreHorizontal 三点菜单）：
+  - 关联俱乐部：弹出 Dialog，内含 Combobox 搜索选择俱乐部，调用 `POST /admin/contents/:id/link-club`
+  - AI 解析：占位（需求待定，按钮 disabled）
 - 手动合并/拆分 ContentGroup
 - 手动添加内容 URL
 

@@ -113,7 +113,7 @@ export default function ContentsPage() {
             <p className='text-muted-foreground'>加载中...</p>
           </div>
         ) : (
-          <ContentsTable data={contents} />
+          <ContentsTable data={contents} onRefresh={fetchContents} />
         )}
       </Main>
     </>

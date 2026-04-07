@@ -3,7 +3,7 @@ import { ExternalLink } from 'lucide-react'
 import { Badge } from '@/components/ui/badge'
 import { type Content, platformLabels, contentTypeLabels, categoryLabels } from '../data/schema'
 
-export const contentsColumns: ColumnDef<Content>[] = [
+export const contentsBaseColumns: ColumnDef<Content>[] = [
   {
     accessorKey: 'title',
     header: '标题',
