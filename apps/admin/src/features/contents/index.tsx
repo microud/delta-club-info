@@ -11,17 +11,25 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
-import { getContents } from '@/lib/api'
+import { getBloggers, getContents } from '@/lib/api'
 import { type Content } from './data/schema'
 import { ContentsTable } from './components/contents-table'
 
+type Blogger = { id: string; name: string }
+
 export default function ContentsPage() {
   const [contents, setContents] = useState<Content[]>([])
+  const [bloggers, setBloggers] = useState<Blogger[]>([])
   const [loading, setLoading] = useState(true)
   const [platform, setPlatform] = useState<string>('')
   const [contentType, setContentType] = useState<string>('')
   const [category, setCategory] = useState<string>('')
   const [aiParsed, setAiParsed] = useState<string>('')
+  const [bloggerId, setBloggerId] = useState<string>('')
+
+  useEffect(() => {
+    getBloggers().then((data: Blogger[]) => setBloggers(data)).catch(() => {})
+  }, [])
 
   const fetchContents = useCallback(async () => {
     try {
@@ -31,6 +39,7 @@ export default function ContentsPage() {
       if (contentType) params.contentType = contentType
       if (category) params.category = category
       if (aiParsed) params.aiParsed = aiParsed
+      if (bloggerId) params.bloggerId = bloggerId
       const data = await getContents(params)
       setContents(data as Content[])
     } catch {
@@ -38,7 +47,7 @@ export default function ContentsPage() {
     } finally {
       setLoading(false)
     }
-  }, [platform, contentType, category, aiParsed])
+  }, [platform, contentType, category, aiParsed, bloggerId])
 
   useEffect(() => {
     fetchContents()
@@ -103,6 +112,17 @@ export default function ContentsPage() {
                 <SelectItem value='all'>全部</SelectItem>
                 <SelectItem value='true'>已解析</SelectItem>
                 <SelectItem value='false'>未解析</SelectItem>
+              </SelectContent>
+            </Select>
+            <Select value={bloggerId} onValueChange={(v) => setBloggerId(v === 'all' ? '' : v)}>
+              <SelectTrigger className='w-32'>
+                <SelectValue placeholder='博主' />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value='all'>全部博主</SelectItem>
+                {bloggers.map((b) => (
+                  <SelectItem key={b.id} value={b.id}>{b.name}</SelectItem>
+                ))}
               </SelectContent>
             </Select>
           </div>

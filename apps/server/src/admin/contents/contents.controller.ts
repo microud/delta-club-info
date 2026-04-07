@@ -22,6 +22,7 @@ export class AdminContentsController {
     @Query('category') category?: string,
     @Query('aiParsed') aiParsed?: string,
     @Query('hasClub') hasClub?: string,
+    @Query('bloggerId') bloggerId?: string,
   ) {
     return this.contentsService.findAll({
       platform,
@@ -29,6 +30,7 @@ export class AdminContentsController {
       category,
       aiParsed,
       hasClub,
+      bloggerId,
     });
   }
 

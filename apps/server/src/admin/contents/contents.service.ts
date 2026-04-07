@@ -17,6 +17,7 @@ export class AdminContentsService {
     category?: string;
     aiParsed?: string;
     hasClub?: string;
+    bloggerId?: string;
   }) {
     const conditions: SQL[] = [];
 
@@ -54,6 +55,9 @@ export class AdminContentsService {
     } else if (filters.hasClub === 'false') {
       conditions.push(isNull(schema.contents.clubId));
     }
+    if (filters.bloggerId) {
+      conditions.push(eq(schema.contents.bloggerId, filters.bloggerId));
+    }
 
     const where = conditions.length > 0 ? and(...conditions) : undefined;
 
@@ -61,16 +65,19 @@ export class AdminContentsService {
       .select({
         content: schema.contents,
         clubName: schema.clubs.name,
+        bloggerName: schema.bloggers.name,
       })
       .from(schema.contents)
       .leftJoin(schema.clubs, eq(schema.contents.clubId, schema.clubs.id))
+      .leftJoin(schema.bloggers, eq(schema.contents.bloggerId, schema.bloggers.id))
       .where(where)
-      .orderBy(desc(schema.contents.createdAt))
+      .orderBy(desc(schema.contents.publishedAt))
       .limit(200);
 
     return items.map((item) => ({
       ...item.content,
       clubName: item.clubName,
+      bloggerName: item.bloggerName,
     }));
   }
 

@@ -171,7 +171,7 @@ export const deleteCrawlTask = (id: string) =>
 
 
 // Contents
-export const getContents = (params?: { platform?: string; contentType?: string; category?: string; aiParsed?: string }) =>
+export const getContents = (params?: { platform?: string; contentType?: string; category?: string; aiParsed?: string; bloggerId?: string }) =>
   api.get('/contents', { params }).then((res) => res.data)
 
 export const linkContentClub = (contentId: string, clubId: string) =>

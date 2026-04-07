@@ -35,6 +35,7 @@ export const contentSchema = z.object({
   bloggerId: z.string().nullable(),
   clubId: z.string().nullable(),
   clubName: z.string().nullable(),
+  bloggerName: z.string().nullable(),
   groupId: z.string().nullable(),
   isPrimary: z.boolean(),
   groupPlatforms: z.array(z.string()).nullable(),
