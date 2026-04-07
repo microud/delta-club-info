@@ -1,196 +1,233 @@
-import { Inject, Injectable, Logger, OnModuleInit } from '@nestjs/common';
-import { SchedulerRegistry } from '@nestjs/schedule';
+import { Inject, Injectable, Logger } from '@nestjs/common';
 import { NodePgDatabase } from 'drizzle-orm/node-postgres';
 import { eq } from 'drizzle-orm';
 import { DRIZZLE } from '../database/database.module';
 import * as schema from '../database/schema';
+import { TikHubClient } from './tikhub.client';
+import { CrawlTaskService } from './crawl-task.service';
+import { PlatformAdapter, RawContent } from './adapters/platform-adapter.interface';
 import { BilibiliAdapter } from './adapters/bilibili.adapter';
 import { DouyinAdapter } from './adapters/douyin.adapter';
-import { CrawlerAdapter, RawVideo } from './adapters/crawler-adapter.interface';
-import { CrawlTaskService } from './crawl-task.service';
-import { SystemConfigsService } from '../admin/system-configs/system-configs.service';
-
-const INTERVAL_NAME = 'crawler-interval';
-const DEFAULT_FREQUENCY_MINUTES = 60;
+import { XiaohongshuAdapter } from './adapters/xiaohongshu.adapter';
+import { WechatChannelsAdapter } from './adapters/wechat-channels.adapter';
+import { WechatMpAdapter } from './adapters/wechat-mp.adapter';
 
 @Injectable()
-export class CrawlerService implements OnModuleInit {
+export class CrawlerService {
   private readonly logger = new Logger(CrawlerService.name);
-  private readonly adapters: Map<string, CrawlerAdapter>;
-  private isRunning = false;
+  private readonly adapters: Map<string, PlatformAdapter>;
 
   constructor(
     @Inject(DRIZZLE) private readonly db: NodePgDatabase<typeof schema>,
-    private readonly schedulerRegistry: SchedulerRegistry,
+    private readonly tikHub: TikHubClient,
     private readonly crawlTaskService: CrawlTaskService,
-    private readonly systemConfigsService: SystemConfigsService,
-    bilibiliAdapter: BilibiliAdapter,
-    douyinAdapter: DouyinAdapter,
+    private readonly bilibiliAdapter: BilibiliAdapter,
+    private readonly douyinAdapter: DouyinAdapter,
+    private readonly xiaohongshuAdapter: XiaohongshuAdapter,
+    private readonly wechatChannelsAdapter: WechatChannelsAdapter,
+    private readonly wechatMpAdapter: WechatMpAdapter,
   ) {
-    this.adapters = new Map<string, CrawlerAdapter>([
+    this.adapters = new Map<string, PlatformAdapter>([
       ['BILIBILI', bilibiliAdapter],
       ['DOUYIN', douyinAdapter],
+      ['XIAOHONGSHU', xiaohongshuAdapter],
+      ['WECHAT_CHANNELS', wechatChannelsAdapter],
+      ['WECHAT_MP', wechatMpAdapter],
     ]);
   }
 
-  async onModuleInit() {
-    await this.syncSchedule();
-  }
-
-  async getFrequency(): Promise<number> {
-    const raw = await this.systemConfigsService.getValue('crawler.frequency');
-    return raw ? parseInt(raw, 10) || DEFAULT_FREQUENCY_MINUTES : DEFAULT_FREQUENCY_MINUTES;
-  }
-
-  async getEnabled(): Promise<boolean> {
-    const raw = await this.systemConfigsService.getValue('crawler.enabled');
-    return raw === 'true';
-  }
-
-  async setEnabled(enabled: boolean) {
-    await this.systemConfigsService.upsert(
-      'crawler.enabled',
-      String(enabled),
-      '爬虫定时任务开关',
-    );
-    await this.syncSchedule();
-  }
-
-  /**
-   * 根据 enabled 和 frequency 同步定时任务状态：
-   * enabled=true → 注册/更新 interval
-   * enabled=false → 删除 interval
-   */
-  private async syncSchedule() {
-    // 先清除已有 interval
-    try {
-      this.schedulerRegistry.deleteInterval(INTERVAL_NAME);
-    } catch {
-      // No existing interval
-    }
-
-    const enabled = await this.getEnabled();
-    if (!enabled) {
-      this.logger.log('Crawler is disabled, no interval registered');
+  async executeTask(taskId: string) {
+    const task = await this.crawlTaskService.getTask(taskId);
+    if (!task) {
+      this.logger.error(`Task ${taskId} not found`);
       return;
     }
 
-    const raw = await this.systemConfigsService.getValue('crawler.frequency');
-    const minutes = raw ? parseInt(raw, 10) : DEFAULT_FREQUENCY_MINUTES;
-    const ms = (isNaN(minutes) || minutes < 1 ? DEFAULT_FREQUENCY_MINUTES : minutes) * 60 * 1000;
+    const run = await this.crawlTaskService.createRun(task.id);
 
-    const interval = setInterval(() => this.runAll(), ms);
-    this.schedulerRegistry.addInterval(INTERVAL_NAME, interval);
-    this.logger.log(`Crawler scheduled every ${ms / 60000} minutes`);
-  }
-
-  async updateFrequency(minutes: number) {
-    await this.systemConfigsService.upsert(
-      'crawler.frequency',
-      String(minutes),
-      '爬虫抓取频率（分钟）',
-    );
-    await this.syncSchedule();
-  }
-
-  async runAll() {
-    if (this.isRunning) {
-      this.logger.warn('Crawler already running, skipping');
-      return;
-    }
-    this.isRunning = true;
     try {
-      await this.runBloggerCrawl();
-      await this.runKeywordCrawl();
-    } finally {
-      this.isRunning = false;
+      let rawContents: RawContent[];
+
+      switch (task.taskType) {
+        case 'BLOGGER_POSTS':
+          rawContents = await this.fetchBloggerPosts(task);
+          break;
+        case 'KEYWORD_SEARCH':
+          rawContents = await this.searchByKeyword(task);
+          break;
+        case 'MP_ARTICLES':
+          rawContents = await this.fetchMpArticles(task);
+          break;
+        default:
+          throw new Error(`Unknown task type: ${task.taskType}`);
+      }
+
+      const itemsCreated = await this.saveContents(rawContents, task.category);
+
+      await this.crawlTaskService.finishRun(run.id, {
+        status: 'SUCCESS',
+        itemsFetched: rawContents.length,
+        itemsCreated,
+      });
+      await this.crawlTaskService.updateTaskLastRun(task.id);
+
+      this.logger.log(
+        `Task ${task.id} (${task.taskType}): fetched=${rawContents.length}, created=${itemsCreated}`,
+      );
+    } catch (error) {
+      const msg = error instanceof Error ? error.message : String(error);
+      await this.crawlTaskService.finishRun(run.id, {
+        status: 'FAILED',
+        itemsFetched: 0,
+        itemsCreated: 0,
+        errorMessage: msg,
+      });
+      await this.crawlTaskService.updateTaskLastRun(task.id);
+      this.logger.error(`Task ${task.id} failed: ${msg}`, error);
     }
   }
 
-  private async runBloggerCrawl() {
-    const activeBloggers = await this.db
+  private async fetchBloggerPosts(
+    task: typeof schema.crawlTasks.$inferSelect,
+  ): Promise<RawContent[]> {
+    const [account] = await this.db
       .select()
-      .from(schema.bloggers)
-      .where(eq(schema.bloggers.isActive, true));
+      .from(schema.bloggerAccounts)
+      .where(eq(schema.bloggerAccounts.id, task.targetId));
 
-    for (const blogger of activeBloggers) {
-      const task = await this.crawlTaskService.createTask('BLOGGER', blogger.externalId);
-      try {
-        const adapter = this.adapters.get(blogger.platform);
-        if (!adapter) {
-          await this.crawlTaskService.finishTask(task.id, 'FAILED', 0, `No adapter for ${blogger.platform}`);
-          continue;
-        }
-
-        const rawVideos = await adapter.fetchBloggerVideos(blogger.externalId);
-        const count = await this.saveVideos(rawVideos, blogger.platform as 'BILIBILI' | 'DOUYIN', 'REVIEW');
-        await this.crawlTaskService.finishTask(task.id, 'SUCCESS', count);
-        this.logger.log(`BloggerCrawl: ${blogger.name} → ${count} new videos`);
-      } catch (error) {
-        const msg = error instanceof Error ? error.message : String(error);
-        await this.crawlTaskService.finishTask(task.id, 'FAILED', 0, msg);
-        this.logger.error(`BloggerCrawl failed for ${blogger.name}`, error);
-      }
+    if (!account) {
+      throw new Error(`BloggerAccount not found: ${task.targetId}`);
     }
+
+    const adapter = this.adapters.get(task.platform);
+    if (!adapter) {
+      throw new Error(`No adapter for platform: ${task.platform}`);
+    }
+
+    let rawData: unknown;
+    switch (task.platform) {
+      case 'BILIBILI':
+        rawData = await this.tikHub.fetchBilibiliUserPosts(account.platformUserId);
+        break;
+      case 'DOUYIN':
+        rawData = await this.tikHub.fetchDouyinUserPosts(account.platformUserId);
+        break;
+      case 'XIAOHONGSHU':
+        rawData = await this.tikHub.fetchXiaohongshuUserNotes(account.platformUserId);
+        break;
+      case 'WECHAT_CHANNELS':
+        rawData = await this.tikHub.fetchWechatChannelsUserPosts(account.platformUserId);
+        break;
+      default:
+        throw new Error(`Platform ${task.platform} does not support BLOGGER_POSTS`);
+    }
+
+    const contents = adapter.normalizeUserPosts(rawData);
+
+    // Update account lastCrawledAt
+    await this.db
+      .update(schema.bloggerAccounts)
+      .set({ lastCrawledAt: new Date(), updatedAt: new Date() })
+      .where(eq(schema.bloggerAccounts.id, account.id));
+
+    return contents;
   }
 
-  private async runKeywordCrawl() {
-    const publishedClubs = await this.db
-      .select({ id: schema.clubs.id, name: schema.clubs.name })
+  private async searchByKeyword(
+    task: typeof schema.crawlTasks.$inferSelect,
+  ): Promise<RawContent[]> {
+    const [club] = await this.db
+      .select()
       .from(schema.clubs)
-      .where(eq(schema.clubs.status, 'published'));
+      .where(eq(schema.clubs.id, task.targetId));
 
-    for (const club of publishedClubs) {
-      const task = await this.crawlTaskService.createTask('KEYWORD', club.name);
-      try {
-        const adapter = this.adapters.get('BILIBILI');
-        if (!adapter) {
-          await this.crawlTaskService.finishTask(task.id, 'FAILED', 0, 'No BILIBILI adapter');
-          continue;
-        }
-
-        const rawVideos = await adapter.searchVideos(club.name);
-        const count = await this.saveVideos(rawVideos, 'BILIBILI', 'SENTIMENT');
-        await this.crawlTaskService.finishTask(task.id, 'SUCCESS', count);
-        this.logger.log(`KeywordCrawl: "${club.name}" → ${count} new videos`);
-      } catch (error) {
-        const msg = error instanceof Error ? error.message : String(error);
-        await this.crawlTaskService.finishTask(task.id, 'FAILED', 0, msg);
-        this.logger.error(`KeywordCrawl failed for "${club.name}"`, error);
-      }
+    if (!club) {
+      throw new Error(`Club not found: ${task.targetId}`);
     }
+
+    const adapter = this.adapters.get(task.platform);
+    if (!adapter) {
+      throw new Error(`No adapter for platform: ${task.platform}`);
+    }
+
+    let rawData: unknown;
+    switch (task.platform) {
+      case 'BILIBILI':
+        rawData = await this.tikHub.searchBilibiliVideos(club.name);
+        break;
+      case 'DOUYIN':
+        rawData = await this.tikHub.searchDouyinVideos(club.name);
+        break;
+      case 'XIAOHONGSHU':
+        rawData = await this.tikHub.searchXiaohongshuNotes(club.name);
+        break;
+      case 'WECHAT_CHANNELS':
+        rawData = await this.tikHub.searchWechatChannelsVideos(club.name);
+        break;
+      default:
+        throw new Error(`Platform ${task.platform} does not support KEYWORD_SEARCH`);
+    }
+
+    return adapter.normalizeSearchResults(rawData);
   }
 
-  private async saveVideos(
-    rawVideos: RawVideo[],
-    platform: 'BILIBILI' | 'DOUYIN',
-    category: 'REVIEW' | 'SENTIMENT',
+  private async fetchMpArticles(
+    task: typeof schema.crawlTasks.$inferSelect,
+  ): Promise<RawContent[]> {
+    const [club] = await this.db
+      .select()
+      .from(schema.clubs)
+      .where(eq(schema.clubs.id, task.targetId));
+
+    if (!club) {
+      throw new Error(`Club not found: ${task.targetId}`);
+    }
+
+    if (!club.wechatMpGhid) {
+      throw new Error(`Club ${club.name} has no wechatMpGhid configured`);
+    }
+
+    const rawData = await this.tikHub.fetchWechatMpArticles(club.wechatMpGhid);
+    return this.wechatMpAdapter.normalizeUserPosts(rawData);
+  }
+
+  private async saveContents(
+    rawContents: RawContent[],
+    category: string,
   ): Promise<number> {
-    let count = 0;
-    for (const raw of rawVideos) {
+    let created = 0;
+
+    for (const raw of rawContents) {
       try {
-        await this.db
-          .insert(schema.videos)
+        const result = await this.db
+          .insert(schema.contents)
           .values({
-            platform,
+            platform: raw.platform as typeof schema.contents.$inferInsert.platform,
+            contentType: raw.contentType,
+            category: category as typeof schema.contents.$inferInsert.category,
             externalId: raw.externalId,
+            externalUrl: raw.externalUrl,
             title: raw.title,
+            description: raw.description,
             coverUrl: raw.coverUrl,
-            videoUrl: raw.videoUrl,
-            description: raw.description ?? null,
             authorName: raw.authorName,
-            authorId: raw.authorId,
-            category,
             publishedAt: raw.publishedAt,
           })
           .onConflictDoNothing({
-            target: [schema.videos.platform, schema.videos.externalId],
-          });
-        count++;
+            target: [schema.contents.platform, schema.contents.externalId],
+          })
+          .returning({ id: schema.contents.id });
+
+        if (result.length > 0) {
+          created++;
+        }
       } catch (error) {
-        this.logger.debug(`Video ${raw.externalId} already exists, skipping`);
+        this.logger.debug(
+          `Failed to insert content ${raw.externalId}: ${error instanceof Error ? error.message : error}`,
+        );
       }
     }
-    return count;
+
+    return created;
   }
 }

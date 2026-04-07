@@ -264,6 +264,9 @@ importers:
       class-validator:
         specifier: ^0.14
         version: 0.14.4
+      cron:
+        specifier: ^4.4.0
+        version: 4.4.0
       drizzle-orm:
         specifier: ^0.44
         version: 0.44.7(@opentelemetry/api@1.9.0)(@types/pg@8.20.0)(pg@8.20.0)
