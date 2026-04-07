@@ -11,11 +11,18 @@ export class ImageProxyController {
     }
 
     try {
-      const response = await axios.get(url, {
+      // Upgrade HTTP to HTTPS for CDNs that support it
+      const fetchUrl = url.replace(/^http:\/\//, 'https://');
+
+      // Derive Referer from the image host to bypass hotlink protection
+      const hostname = new URL(fetchUrl).hostname;
+      const referer = `https://${hostname}/`;
+
+      const response = await axios.get(fetchUrl, {
         responseType: 'arraybuffer',
         timeout: 10000,
         headers: {
-          Referer: '',
+          Referer: referer,
           'User-Agent':
             'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
         },
