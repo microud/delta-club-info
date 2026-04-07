@@ -41,12 +41,40 @@ export enum AiModerationStatus {
   PENDING_MANUAL = 'PENDING_MANUAL',
 }
 
-export enum CrawlTaskType {
-  BLOGGER = 'BLOGGER',
-  KEYWORD = 'KEYWORD',
+// Deprecated: use CrawlTaskRunStatus instead
+export enum CrawlTaskStatus {
+  RUNNING = 'RUNNING',
+  SUCCESS = 'SUCCESS',
+  FAILED = 'FAILED',
 }
 
-export enum CrawlTaskStatus {
+export enum ContentPlatform {
+  BILIBILI = 'BILIBILI',
+  DOUYIN = 'DOUYIN',
+  XIAOHONGSHU = 'XIAOHONGSHU',
+  WECHAT_CHANNELS = 'WECHAT_CHANNELS',
+  WECHAT_MP = 'WECHAT_MP',
+}
+
+export enum ContentType {
+  VIDEO = 'VIDEO',
+  NOTE = 'NOTE',
+  ARTICLE = 'ARTICLE',
+}
+
+export enum ContentCategory {
+  REVIEW = 'REVIEW',
+  SENTIMENT = 'SENTIMENT',
+  ANNOUNCEMENT = 'ANNOUNCEMENT',
+}
+
+export enum CrawlTaskType {
+  BLOGGER_POSTS = 'BLOGGER_POSTS',
+  KEYWORD_SEARCH = 'KEYWORD_SEARCH',
+  MP_ARTICLES = 'MP_ARTICLES',
+}
+
+export enum CrawlTaskRunStatus {
   RUNNING = 'RUNNING',
   SUCCESS = 'SUCCESS',
   FAILED = 'FAILED',

@@ -82,23 +82,78 @@ export interface PromotionOrderDto {
 }
 
 export interface BloggerDto {
-  id: string;
-  platform: string;
-  externalId: string;
-  name: string;
-  isActive: boolean;
-  createdAt: string;
+  id: string
+  name: string
+  avatar: string | null
+  isActive: boolean
+  accounts: BloggerAccountDto[]
+  createdAt: string
+  updatedAt: string
+}
+
+export interface BloggerAccountDto {
+  id: string
+  bloggerId: string
+  platform: string
+  platformUserId: string
+  platformUsername: string | null
+  crawlCategories: string[]
+  lastCrawledAt: string | null
+  createdAt: string
+  updatedAt: string
+}
+
+export interface ContentDto {
+  id: string
+  platform: string
+  contentType: string
+  category: string
+  externalId: string
+  externalUrl: string | null
+  title: string
+  description: string | null
+  coverUrl: string | null
+  authorName: string | null
+  publishedAt: string | null
+  bloggerId: string | null
+  bloggerName: string | null
+  clubId: string | null
+  clubName: string | null
+  groupId: string | null
+  isPrimary: boolean
+  groupPlatforms: string[] | null
+  aiParsed: boolean
+  aiSummary: string | null
+  aiSentiment: string | null
+  aiClubMatch: string | null
+  createdAt: string
+  updatedAt: string
 }
 
 export interface CrawlTaskDto {
-  id: string;
-  type: string;
-  targetId: string;
-  status: string;
-  startedAt: string;
-  finishedAt: string | null;
-  videoCount: number;
-  errorMessage: string | null;
+  id: string
+  taskType: string
+  category: string
+  platform: string
+  targetId: string
+  targetName?: string
+  cronExpression: string
+  isActive: boolean
+  lastRunAt: string | null
+  nextRunAt: string | null
+  createdAt: string
+  updatedAt: string
+}
+
+export interface CrawlTaskRunDto {
+  id: string
+  crawlTaskId: string
+  status: string
+  startedAt: string
+  finishedAt: string | null
+  itemsFetched: number
+  itemsCreated: number
+  errorMessage: string | null
 }
 
 export interface VideoDto {
