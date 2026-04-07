@@ -1,12 +1,6 @@
-import { IsString, IsEnum } from 'class-validator';
+import { IsString, IsOptional } from 'class-validator';
 
 export class CreateBloggerDto {
-  @IsEnum(['BILIBILI', 'DOUYIN'])
-  platform: string;
-
-  @IsString()
-  externalId: string;
-
-  @IsString()
-  name: string;
+  @IsString() name: string;
+  @IsString() @IsOptional() avatar?: string;
 }

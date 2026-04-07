@@ -18,8 +18,8 @@ import { BloggersController } from './bloggers/bloggers.controller';
 import { BloggersService } from './bloggers/bloggers.service';
 import { AdminCrawlTasksController } from './crawl-tasks/crawl-tasks.controller';
 import { AdminCrawlTasksService } from './crawl-tasks/crawl-tasks.service';
-import { AdminVideosController } from './videos/videos.controller';
-import { AdminVideosService } from './videos/videos.service';
+import { AdminContentsController } from './contents/contents.controller';
+import { AdminContentsService } from './contents/contents.service';
 import { AiConfigsController } from './ai-configs/ai-configs.controller';
 import { AiConfigsService } from './ai-configs/ai-configs.service';
 import { UploadController } from './upload/upload.controller';
@@ -49,7 +49,7 @@ import { AiParseModule } from '../ai-parse/ai-parse.module';
     SystemConfigsController,
     BloggersController,
     AdminCrawlTasksController,
-    AdminVideosController,
+    AdminContentsController,
     AiConfigsController,
     UploadController,
     AnnouncementsController,
@@ -64,7 +64,7 @@ import { AiParseModule } from '../ai-parse/ai-parse.module';
     SystemConfigsService,
     BloggersService,
     AdminCrawlTasksService,
-    AdminVideosService,
+    AdminContentsService,
     AiConfigsService,
     AnnouncementsService,
   ],

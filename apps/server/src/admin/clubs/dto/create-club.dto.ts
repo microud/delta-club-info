@@ -40,6 +40,10 @@ export class CreateClubDto {
 
   @IsOptional()
   @IsString()
+  wechatMpGhid?: string;
+
+  @IsOptional()
+  @IsString()
   companyName?: string;
 
   @IsOptional()

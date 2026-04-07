@@ -50,6 +50,10 @@ export class UpdateClubDto {
 
   @IsOptional()
   @IsString()
+  wechatMpGhid?: string;
+
+  @IsOptional()
+  @IsString()
   companyName?: string;
 
   @IsOptional()

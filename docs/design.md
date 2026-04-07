@@ -109,10 +109,19 @@ GET    /admin/promotions
 POST   /admin/promotions
 GET    /admin/bloggers
 POST   /admin/bloggers
-GET    /admin/crawl-tasks
-POST   /admin/crawl-tasks/trigger
-GET    /admin/videos
-PUT    /admin/videos/:id/associate              (手动关联俱乐部)
+PATCH  /admin/bloggers/:id
+DELETE /admin/bloggers/:id
+POST   /admin/bloggers/:id/accounts             (添加博主账号)
+PATCH  /admin/bloggers/accounts/:accountId      (更新博主账号)
+DELETE /admin/bloggers/accounts/:accountId      (删除博主账号)
+GET    /admin/contents                          (内容列表，支持筛选)
+POST   /admin/contents/:id/link-club            (手动关联俱乐部)
+POST   /admin/contents/merge                    (合并内容组)
+POST   /admin/contents/:id/split                (从内容组拆分)
+GET    /admin/crawl-tasks                       (爬虫任务列表)
+GET    /admin/crawl-tasks/runs                  (爬虫运行记录)
+PATCH  /admin/crawl-tasks/:id                   (更新任务配置)
+POST   /admin/crawl-tasks/:id/trigger           (手动触发单个任务)
 GET    /admin/parse-tasks
 GET    /admin/parse-tasks/:id
 PUT    /admin/parse-tasks/:id                   (审核确认)

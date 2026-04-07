@@ -2,12 +2,16 @@ import {
   Body,
   Controller,
   Get,
+  Param,
+  Patch,
   Post,
+  Query,
   UseGuards,
 } from '@nestjs/common';
 import { AdminGuard } from '../../common/guards/admin.guard';
 import { AdminCrawlTasksService } from './crawl-tasks.service';
 import { CrawlerService } from '../../crawler/crawler.service';
+import { CrawlerSchedulerService } from '../../crawler/crawler-scheduler.service';
 
 @Controller('admin/crawl-tasks')
 @UseGuards(AdminGuard)
@@ -15,36 +19,44 @@ export class AdminCrawlTasksController {
   constructor(
     private readonly crawlTasksService: AdminCrawlTasksService,
     private readonly crawlerService: CrawlerService,
+    private readonly crawlerSchedulerService: CrawlerSchedulerService,
   ) {}
 
   @Get()
-  findAll() {
-    return this.crawlTasksService.findAll();
+  findAllTasks() {
+    return this.crawlTasksService.findAllTasks();
   }
 
-  @Post('trigger')
-  trigger() {
-    this.crawlerService.runAll();
-    return { message: 'Crawl triggered' };
+  @Get('runs')
+  findRuns(@Query('taskId') taskId?: string) {
+    return this.crawlTasksService.findTaskRuns(taskId);
   }
 
-  @Get('config')
-  async getConfig() {
-    return {
-      enabled: await this.crawlerService.getEnabled(),
-      frequency: await this.crawlerService.getFrequency(),
-    };
+  @Patch(':id')
+  async updateTask(
+    @Param('id') id: string,
+    @Body() body: { cronExpression?: string; isActive?: boolean },
+  ) {
+    const task = await this.crawlTasksService.updateTask(id, body);
+
+    if (task) {
+      if (body.isActive === false) {
+        this.crawlerSchedulerService.unregisterTask(id);
+      } else if (body.cronExpression || body.isActive === true) {
+        this.crawlerSchedulerService.updateTaskSchedule(
+          id,
+          task.cronExpression,
+        );
+      }
+    }
+
+    return task;
   }
 
-  @Post('frequency')
-  async updateFrequency(@Body() body: { frequency: number }) {
-    await this.crawlerService.updateFrequency(body.frequency);
-    return { frequency: body.frequency };
-  }
-
-  @Post('enabled')
-  async setEnabled(@Body() body: { enabled: boolean }) {
-    await this.crawlerService.setEnabled(body.enabled);
-    return { enabled: body.enabled };
+  @Post(':id/trigger')
+  trigger(@Param('id') id: string) {
+    // Fire-and-forget
+    this.crawlerService.executeTask(id);
+    return { message: 'Crawl task triggered' };
   }
 }
