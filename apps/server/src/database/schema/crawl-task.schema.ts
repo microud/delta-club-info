@@ -10,20 +10,7 @@ import {
 } from 'drizzle-orm/pg-core';
 import { contentPlatformEnum } from './blogger.schema';
 
-// OLD enums - kept for backward compatibility
 export const crawlTaskTypeEnum = pgEnum('crawl_task_type', [
-  'BLOGGER',
-  'KEYWORD',
-]);
-
-export const crawlTaskStatusEnum = pgEnum('crawl_task_status', [
-  'RUNNING',
-  'SUCCESS',
-  'FAILED',
-]);
-
-// NEW enums with different Postgres names
-export const crawlTaskTypeV2Enum = pgEnum('crawl_task_type_v2', [
   'BLOGGER_POSTS',
   'KEYWORD_SEARCH',
   'MP_ARTICLES',
@@ -35,24 +22,9 @@ export const crawlTaskRunStatusEnum = pgEnum('crawl_task_run_status', [
   'FAILED',
 ]);
 
-// OLD table - kept as crawlTasksOld for backward compatibility
-export const crawlTasksOld = pgTable('crawl_tasks', {
+export const crawlTasks = pgTable('crawl_tasks', {
   id: uuid('id').primaryKey().defaultRandom(),
-  type: crawlTaskTypeEnum('type').notNull(),
-  targetId: varchar('target_id', { length: 500 }).notNull(),
-  status: crawlTaskStatusEnum('status').notNull().default('RUNNING'),
-  startedAt: timestamp('started_at', { withTimezone: true })
-    .notNull()
-    .defaultNow(),
-  finishedAt: timestamp('finished_at', { withTimezone: true }),
-  videoCount: integer('video_count').notNull().default(0),
-  errorMessage: text('error_message'),
-});
-
-// NEW crawl_tasks_v2 table
-export const crawlTasks = pgTable('crawl_tasks_v2', {
-  id: uuid('id').primaryKey().defaultRandom(),
-  taskType: crawlTaskTypeV2Enum('task_type').notNull(),
+  taskType: crawlTaskTypeEnum('task_type').notNull(),
   category: varchar('category', { length: 50 }).notNull(),
   platform: contentPlatformEnum('platform').notNull(),
   targetId: varchar('target_id', { length: 500 }).notNull(),

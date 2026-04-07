@@ -11,7 +11,12 @@ import {
 } from 'drizzle-orm/pg-core';
 import { clubs } from './club.schema';
 import { bloggers, contentPlatformEnum } from './blogger.schema';
-import { aiSentimentEnum } from './video.schema';
+
+export const aiSentimentEnum = pgEnum('ai_sentiment', [
+  'POSITIVE',
+  'NEGATIVE',
+  'NEUTRAL',
+]);
 
 export const contentTypeEnum = pgEnum('content_type', [
   'VIDEO',

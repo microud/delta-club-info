@@ -8,13 +8,7 @@ import {
   pgEnum,
 } from 'drizzle-orm/pg-core';
 
-// OLD platform enum - kept for backward compatibility (video.schema.ts still uses it)
-export const videoPlatformEnum = pgEnum('video_platform', [
-  'BILIBILI',
-  'DOUYIN',
-]);
-
-// NEW platform enum with 5 values
+// Platform enum with 5 values
 export const contentPlatformEnum = pgEnum('content_platform', [
   'BILIBILI',
   'DOUYIN',

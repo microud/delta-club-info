@@ -1,7 +1,15 @@
+-- Drop old crawl tables and enums (historical data can be discarded)
+DROP TABLE IF EXISTS "crawl_tasks" CASCADE;--> statement-breakpoint
+DROP TYPE IF EXISTS "crawl_task_type";--> statement-breakpoint
+DROP TYPE IF EXISTS "crawl_task_status";--> statement-breakpoint
+-- Drop old videos table and enums
+DROP TABLE IF EXISTS "videos" CASCADE;--> statement-breakpoint
+DROP TYPE IF EXISTS "video_platform";--> statement-breakpoint
+DROP TYPE IF EXISTS "video_category";--> statement-breakpoint
 CREATE TYPE "public"."content_platform" AS ENUM('BILIBILI', 'DOUYIN', 'XIAOHONGSHU', 'WECHAT_CHANNELS', 'WECHAT_MP');--> statement-breakpoint
 CREATE TYPE "public"."crawl_category" AS ENUM('REVIEW', 'SENTIMENT');--> statement-breakpoint
 CREATE TYPE "public"."crawl_task_run_status" AS ENUM('RUNNING', 'SUCCESS', 'FAILED');--> statement-breakpoint
-CREATE TYPE "public"."crawl_task_type_v2" AS ENUM('BLOGGER_POSTS', 'KEYWORD_SEARCH', 'MP_ARTICLES');--> statement-breakpoint
+CREATE TYPE "public"."crawl_task_type" AS ENUM('BLOGGER_POSTS', 'KEYWORD_SEARCH', 'MP_ARTICLES');--> statement-breakpoint
 CREATE TYPE "public"."content_category" AS ENUM('REVIEW', 'SENTIMENT', 'ANNOUNCEMENT');--> statement-breakpoint
 CREATE TYPE "public"."content_type" AS ENUM('VIDEO', 'NOTE', 'ARTICLE');--> statement-breakpoint
 CREATE TABLE "blogger_accounts" (
@@ -27,9 +35,9 @@ CREATE TABLE "crawl_task_runs" (
 	"error_message" text
 );
 --> statement-breakpoint
-CREATE TABLE "crawl_tasks_v2" (
+CREATE TABLE "crawl_tasks" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
-	"task_type" "crawl_task_type_v2" NOT NULL,
+	"task_type" "crawl_task_type" NOT NULL,
 	"category" varchar(50) NOT NULL,
 	"platform" "content_platform" NOT NULL,
 	"target_id" varchar(500) NOT NULL,
@@ -70,7 +78,7 @@ ALTER TABLE "clubs" ADD COLUMN "wechat_mp_ghid" varchar(100);--> statement-break
 ALTER TABLE "bloggers" ADD COLUMN "avatar" varchar(1000);--> statement-breakpoint
 ALTER TABLE "bloggers" ADD COLUMN "updated_at" timestamp with time zone DEFAULT now() NOT NULL;--> statement-breakpoint
 ALTER TABLE "blogger_accounts" ADD CONSTRAINT "blogger_accounts_blogger_id_bloggers_id_fk" FOREIGN KEY ("blogger_id") REFERENCES "public"."bloggers"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
-ALTER TABLE "crawl_task_runs" ADD CONSTRAINT "crawl_task_runs_crawl_task_id_crawl_tasks_v2_id_fk" FOREIGN KEY ("crawl_task_id") REFERENCES "public"."crawl_tasks_v2"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "crawl_task_runs" ADD CONSTRAINT "crawl_task_runs_crawl_task_id_crawl_tasks_id_fk" FOREIGN KEY ("crawl_task_id") REFERENCES "public"."crawl_tasks"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "contents" ADD CONSTRAINT "contents_blogger_id_bloggers_id_fk" FOREIGN KEY ("blogger_id") REFERENCES "public"."bloggers"("id") ON DELETE set null ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "contents" ADD CONSTRAINT "contents_club_id_clubs_id_fk" FOREIGN KEY ("club_id") REFERENCES "public"."clubs"("id") ON DELETE set null ON UPDATE no action;--> statement-breakpoint
 CREATE UNIQUE INDEX "blogger_accounts_platform_user_id_idx" ON "blogger_accounts" USING btree ("platform","platform_user_id");--> statement-breakpoint
