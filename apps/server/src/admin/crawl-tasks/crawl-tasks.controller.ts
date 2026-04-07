@@ -86,9 +86,9 @@ export class AdminCrawlTasksController {
   }
 
   @Post(':id/trigger')
-  trigger(@Param('id') id: string) {
+  trigger(@Param('id') id: string, @Body() body?: { fullSync?: boolean }) {
     // Fire-and-forget
-    this.crawlerService.executeTask(id);
+    this.crawlerService.executeTask(id, body?.fullSync ?? false);
     return { message: 'Crawl task triggered' };
   }
 }

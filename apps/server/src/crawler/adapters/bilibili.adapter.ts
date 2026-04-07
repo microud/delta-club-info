@@ -6,32 +6,47 @@ export class BilibiliAdapter implements PlatformAdapter {
   platform = 'BILIBILI';
 
   normalizeUserPosts(raw: unknown): RawContent[] {
-    const outerData = (raw as Record<string, unknown>)?.data as Record<string, unknown> | undefined;
-    if (!outerData) return [];
+    const data = (raw as Record<string, unknown>)?.data as Record<string, unknown> | undefined;
+    if (!data) return [];
 
-    // App API: data.data.item[]
-    const innerData = outerData.data as Record<string, unknown> | undefined;
-    const items = innerData?.item as Record<string, unknown>[] | undefined;
-    if (!Array.isArray(items)) return [];
+    // Web API: data.list.vlist[]
+    const listObj = data.list as Record<string, unknown> | undefined;
+    const vlist = (listObj?.vlist ?? listObj) as Record<string, unknown>[] | undefined;
+    if (!Array.isArray(vlist)) return [];
 
-    return items.map((item) => ({
+    return vlist.map((item) => ({
       platform: this.platform,
-      externalId: String(item.bvid ?? item.param ?? ''),
+      externalId: String(item.bvid ?? item.aid ?? ''),
       externalUrl: item.bvid
         ? `https://www.bilibili.com/video/${item.bvid}`
         : null,
       contentType: 'VIDEO' as const,
       title: String(item.title ?? ''),
-      description: item.subtitle ? String(item.subtitle) : null,
-      coverUrl: item.cover
-        ? String(item.cover).replace(/^\/\//, 'https://')
+      description: item.description ? String(item.description) : null,
+      coverUrl: item.pic
+        ? String(item.pic).replace(/^\/\//, 'https://')
         : null,
       authorName: item.author ? String(item.author) : null,
-      authorPlatformId: null,
-      publishedAt: item.ctime
-        ? new Date((item.ctime as number) * 1000)
+      authorPlatformId: item.mid ? String(item.mid) : null,
+      publishedAt: item.created
+        ? new Date((item.created as number) * 1000)
         : null,
     }));
+  }
+
+  /**
+   * Extract pagination info from web API response.
+   */
+  extractUserPostsPagination(raw: unknown): { total: number; pageSize: number; currentPage: number } | null {
+    const data = (raw as Record<string, unknown>)?.data as Record<string, unknown> | undefined;
+    if (!data) return null;
+    const page = data.page as Record<string, unknown> | undefined;
+    if (!page) return null;
+    return {
+      total: Number(page.count ?? 0),
+      pageSize: Number(page.ps ?? 20),
+      currentPage: Number(page.pn ?? 1),
+    };
   }
 
   normalizeSearchResults(raw: unknown): RawContent[] {

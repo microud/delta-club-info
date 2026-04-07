@@ -157,14 +157,12 @@ export class TikHubClient {
 
   async fetchBilibiliUserPosts(
     uid: string,
-    page?: number,
+    pn?: number,
   ): Promise<unknown> {
-    return this.request('GET', '/api/v1/bilibili/app/fetch_user_videos', {
+    return this.request('GET', '/api/v1/bilibili/web/fetch_user_post_videos', {
       params: {
-        user_id: uid,
-        post_filter: 'archive',
-        page: page ?? 1,
-        ps: 1000,
+        uid,
+        pn: pn ?? 1,
       },
     });
   }

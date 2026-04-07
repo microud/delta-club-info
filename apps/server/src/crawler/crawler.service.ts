@@ -36,7 +36,7 @@ export class CrawlerService {
     ]);
   }
 
-  async executeTask(taskId: string) {
+  async executeTask(taskId: string, fullSync = false) {
     const task = await this.crawlTaskService.getTask(taskId);
     if (!task) {
       this.logger.error(`Task ${taskId} not found`);
@@ -46,33 +46,37 @@ export class CrawlerService {
     const run = await this.crawlTaskService.createRun(task.id);
 
     try {
-      let rawContents: RawContent[];
+      let result: { rawContents: RawContent[]; itemsCreated: number };
 
       switch (task.taskType) {
         case 'BLOGGER_POSTS':
-          rawContents = await this.fetchBloggerPosts(task);
+          result = await this.fetchBloggerPosts(task, fullSync);
           break;
-        case 'KEYWORD_SEARCH':
-          rawContents = await this.searchByKeyword(task);
+        case 'KEYWORD_SEARCH': {
+          const contents = await this.searchByKeyword(task);
+          const created = await this.saveContents(contents, task.category);
+          result = { rawContents: contents, itemsCreated: created };
           break;
-        case 'MP_ARTICLES':
-          rawContents = await this.fetchMpArticles(task);
+        }
+        case 'MP_ARTICLES': {
+          const contents = await this.fetchMpArticles(task);
+          const created = await this.saveContents(contents, task.category);
+          result = { rawContents: contents, itemsCreated: created };
           break;
+        }
         default:
           throw new Error(`Unknown task type: ${task.taskType}`);
       }
 
-      const itemsCreated = await this.saveContents(rawContents, task.category);
-
       await this.crawlTaskService.finishRun(run.id, {
         status: 'SUCCESS',
-        itemsFetched: rawContents.length,
-        itemsCreated,
+        itemsFetched: result.rawContents.length,
+        itemsCreated: result.itemsCreated,
       });
       await this.crawlTaskService.updateTaskLastRun(task.id);
 
       this.logger.log(
-        `Task ${task.id} (${task.taskType}): fetched=${rawContents.length}, created=${itemsCreated}`,
+        `Task ${task.id} (${task.taskType}): fetched=${result.rawContents.length}, created=${result.itemsCreated}, mode=${fullSync ? 'full' : 'incremental'}`,
       );
     } catch (error) {
       const msg = error instanceof Error ? error.message : String(error);
@@ -89,7 +93,8 @@ export class CrawlerService {
 
   private async fetchBloggerPosts(
     task: typeof schema.crawlTasks.$inferSelect,
-  ): Promise<RawContent[]> {
+    fullSync: boolean,
+  ): Promise<{ rawContents: RawContent[]; itemsCreated: number }> {
     const [account] = await this.db
       .select()
       .from(schema.bloggerAccounts)
@@ -104,25 +109,34 @@ export class CrawlerService {
       throw new Error(`No adapter for platform: ${task.platform}`);
     }
 
-    let rawData: unknown;
-    switch (task.platform) {
-      case 'BILIBILI':
-        rawData = await this.tikHub.fetchBilibiliUserPosts(account.platformUserId);
-        break;
-      case 'DOUYIN':
-        rawData = await this.tikHub.fetchDouyinUserPosts(account.platformUserId);
-        break;
-      case 'XIAOHONGSHU':
-        rawData = await this.tikHub.fetchXiaohongshuUserNotes(account.platformUserId);
-        break;
-      case 'WECHAT_CHANNELS':
-        rawData = await this.tikHub.fetchWechatChannelsUserPosts(account.platformUserId);
-        break;
-      default:
-        throw new Error(`Platform ${task.platform} does not support BLOGGER_POSTS`);
-    }
+    let result: { rawContents: RawContent[]; itemsCreated: number };
 
-    const contents = adapter.normalizeUserPosts(rawData);
+    if (task.platform === 'BILIBILI') {
+      result = await this.fetchBilibiliUserPostsPaginated(
+        account.platformUserId,
+        task.category,
+        fullSync,
+      );
+    } else {
+      let rawData: unknown;
+      switch (task.platform) {
+        case 'DOUYIN':
+          rawData = await this.tikHub.fetchDouyinUserPosts(account.platformUserId);
+          break;
+        case 'XIAOHONGSHU':
+          rawData = await this.tikHub.fetchXiaohongshuUserNotes(account.platformUserId);
+          break;
+        case 'WECHAT_CHANNELS':
+          rawData = await this.tikHub.fetchWechatChannelsUserPosts(account.platformUserId);
+          break;
+        default:
+          throw new Error(`Platform ${task.platform} does not support BLOGGER_POSTS`);
+      }
+
+      const contents = adapter.normalizeUserPosts(rawData);
+      const created = await this.saveContents(contents, task.category);
+      result = { rawContents: contents, itemsCreated: created };
+    }
 
     // Update account lastCrawledAt
     await this.db
@@ -130,7 +144,50 @@ export class CrawlerService {
       .set({ lastCrawledAt: new Date(), updatedAt: new Date() })
       .where(eq(schema.bloggerAccounts.id, account.id));
 
-    return contents;
+    return result;
+  }
+
+  /**
+   * Fetch Bilibili user posts with pagination.
+   * - Full sync: traverse all pages
+   * - Incremental sync: stop when a page yields no new items (all already exist)
+   */
+  private async fetchBilibiliUserPostsPaginated(
+    uid: string,
+    category: string,
+    fullSync: boolean,
+  ): Promise<{ rawContents: RawContent[]; itemsCreated: number }> {
+    const allContents: RawContent[] = [];
+    let totalCreated = 0;
+    let page = 1;
+
+    while (true) {
+      const rawData = await this.tikHub.fetchBilibiliUserPosts(uid, page);
+      const contents = this.bilibiliAdapter.normalizeUserPosts(rawData);
+
+      if (contents.length === 0) break;
+
+      allContents.push(...contents);
+      const created = await this.saveContents(contents, category);
+      totalCreated += created;
+
+      // Incremental: stop when all items on this page already exist
+      if (!fullSync && created === 0) {
+        this.logger.log(
+          `Bilibili incremental sync: page ${page} has no new items, stopping`,
+        );
+        break;
+      }
+
+      // Check if there are more pages
+      const pagination = this.bilibiliAdapter.extractUserPostsPagination(rawData);
+      if (!pagination || page * pagination.pageSize >= pagination.total) break;
+
+      page++;
+      this.logger.debug(`Bilibili pagination: fetching page ${page} (total: ${pagination.total})`);
+    }
+
+    return { rawContents: allContents, itemsCreated: totalCreated };
   }
 
   private async searchByKeyword(
