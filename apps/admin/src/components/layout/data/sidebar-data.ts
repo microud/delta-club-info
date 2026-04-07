@@ -8,6 +8,7 @@ import {
   ScanText,
   Smartphone,
   Bell,
+  Globe,
 } from 'lucide-react'
 import { type SidebarData } from '../types'
 
@@ -70,6 +71,11 @@ export const sidebarData: SidebarData = {
           title: 'AI 配置',
           url: '/settings/ai',
           icon: Bot,
+        },
+        {
+          title: 'TikHub 配置',
+          url: '/settings/tikhub',
+          icon: Globe,
         },
       ],
     },

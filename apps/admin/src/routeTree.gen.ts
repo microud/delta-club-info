@@ -29,6 +29,7 @@ import { Route as AuthenticatedSettingsIndexRouteImport } from './routes/_authen
 import { Route as AuthenticatedParseTasksIndexRouteImport } from './routes/_authenticated/parse-tasks/index'
 import { Route as AuthenticatedClubsIndexRouteImport } from './routes/_authenticated/clubs/index'
 import { Route as AuthenticatedSettingsWechatWorkRouteImport } from './routes/_authenticated/settings/wechat-work'
+import { Route as AuthenticatedSettingsTikhubRouteImport } from './routes/_authenticated/settings/tikhub'
 import { Route as AuthenticatedSettingsAiRouteImport } from './routes/_authenticated/settings/ai'
 import { Route as AuthenticatedErrorsErrorRouteImport } from './routes/_authenticated/errors/$error'
 import { Route as AuthenticatedParseTasksIdRouteRouteImport } from './routes/_authenticated/parse-tasks/$id/route'
@@ -143,6 +144,12 @@ const AuthenticatedSettingsWechatWorkRoute =
     path: '/wechat-work',
     getParentRoute: () => AuthenticatedSettingsRouteRoute,
   } as any)
+const AuthenticatedSettingsTikhubRoute =
+  AuthenticatedSettingsTikhubRouteImport.update({
+    id: '/tikhub',
+    path: '/tikhub',
+    getParentRoute: () => AuthenticatedSettingsRouteRoute,
+  } as any)
 const AuthenticatedSettingsAiRoute = AuthenticatedSettingsAiRouteImport.update({
   id: '/ai',
   path: '/ai',
@@ -187,6 +194,7 @@ export interface FileRoutesByFullPath {
   '/parse-tasks/$id': typeof AuthenticatedParseTasksIdRouteRoute
   '/errors/$error': typeof AuthenticatedErrorsErrorRoute
   '/settings/ai': typeof AuthenticatedSettingsAiRoute
+  '/settings/tikhub': typeof AuthenticatedSettingsTikhubRoute
   '/settings/wechat-work': typeof AuthenticatedSettingsWechatWorkRoute
   '/clubs/': typeof AuthenticatedClubsIndexRoute
   '/parse-tasks/': typeof AuthenticatedParseTasksIndexRoute
@@ -209,6 +217,7 @@ export interface FileRoutesByTo {
   '/parse-tasks/$id': typeof AuthenticatedParseTasksIdRouteRoute
   '/errors/$error': typeof AuthenticatedErrorsErrorRoute
   '/settings/ai': typeof AuthenticatedSettingsAiRoute
+  '/settings/tikhub': typeof AuthenticatedSettingsTikhubRoute
   '/settings/wechat-work': typeof AuthenticatedSettingsWechatWorkRoute
   '/clubs': typeof AuthenticatedClubsIndexRoute
   '/parse-tasks': typeof AuthenticatedParseTasksIndexRoute
@@ -236,6 +245,7 @@ export interface FileRoutesById {
   '/_authenticated/parse-tasks/$id': typeof AuthenticatedParseTasksIdRouteRoute
   '/_authenticated/errors/$error': typeof AuthenticatedErrorsErrorRoute
   '/_authenticated/settings/ai': typeof AuthenticatedSettingsAiRoute
+  '/_authenticated/settings/tikhub': typeof AuthenticatedSettingsTikhubRoute
   '/_authenticated/settings/wechat-work': typeof AuthenticatedSettingsWechatWorkRoute
   '/_authenticated/clubs/': typeof AuthenticatedClubsIndexRoute
   '/_authenticated/parse-tasks/': typeof AuthenticatedParseTasksIndexRoute
@@ -263,6 +273,7 @@ export interface FileRouteTypes {
     | '/parse-tasks/$id'
     | '/errors/$error'
     | '/settings/ai'
+    | '/settings/tikhub'
     | '/settings/wechat-work'
     | '/clubs/'
     | '/parse-tasks/'
@@ -285,6 +296,7 @@ export interface FileRouteTypes {
     | '/parse-tasks/$id'
     | '/errors/$error'
     | '/settings/ai'
+    | '/settings/tikhub'
     | '/settings/wechat-work'
     | '/clubs'
     | '/parse-tasks'
@@ -311,6 +323,7 @@ export interface FileRouteTypes {
     | '/_authenticated/parse-tasks/$id'
     | '/_authenticated/errors/$error'
     | '/_authenticated/settings/ai'
+    | '/_authenticated/settings/tikhub'
     | '/_authenticated/settings/wechat-work'
     | '/_authenticated/clubs/'
     | '/_authenticated/parse-tasks/'
@@ -469,6 +482,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedSettingsWechatWorkRouteImport
       parentRoute: typeof AuthenticatedSettingsRouteRoute
     }
+    '/_authenticated/settings/tikhub': {
+      id: '/_authenticated/settings/tikhub'
+      path: '/tikhub'
+      fullPath: '/settings/tikhub'
+      preLoaderRoute: typeof AuthenticatedSettingsTikhubRouteImport
+      parentRoute: typeof AuthenticatedSettingsRouteRoute
+    }
     '/_authenticated/settings/ai': {
       id: '/_authenticated/settings/ai'
       path: '/ai'
@@ -534,6 +554,7 @@ const AuthenticatedParseTasksRouteRouteWithChildren =
 
 interface AuthenticatedSettingsRouteRouteChildren {
   AuthenticatedSettingsAiRoute: typeof AuthenticatedSettingsAiRoute
+  AuthenticatedSettingsTikhubRoute: typeof AuthenticatedSettingsTikhubRoute
   AuthenticatedSettingsWechatWorkRoute: typeof AuthenticatedSettingsWechatWorkRoute
   AuthenticatedSettingsIndexRoute: typeof AuthenticatedSettingsIndexRoute
 }
@@ -541,6 +562,7 @@ interface AuthenticatedSettingsRouteRouteChildren {
 const AuthenticatedSettingsRouteRouteChildren: AuthenticatedSettingsRouteRouteChildren =
   {
     AuthenticatedSettingsAiRoute: AuthenticatedSettingsAiRoute,
+    AuthenticatedSettingsTikhubRoute: AuthenticatedSettingsTikhubRoute,
     AuthenticatedSettingsWechatWorkRoute: AuthenticatedSettingsWechatWorkRoute,
     AuthenticatedSettingsIndexRoute: AuthenticatedSettingsIndexRoute,
   }
