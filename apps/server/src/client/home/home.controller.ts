@@ -14,7 +14,8 @@ export class HomeController {
   getFeed(
     @Query('page', new DefaultValuePipe(1), ParseIntPipe) page: number,
     @Query('pageSize', new DefaultValuePipe(20), ParseIntPipe) pageSize: number,
+    @Query('category') category?: string,
   ) {
-    return this.homeService.getFeed(page, pageSize);
+    return this.homeService.getFeed(page, pageSize, category);
   }
 }

@@ -1,6 +1,6 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { NodePgDatabase } from 'drizzle-orm/node-postgres';
-import { and, eq, lte, gte, desc, count, sql } from 'drizzle-orm';
+import { and, eq, lte, gte, desc, count, sql, SQL } from 'drizzle-orm';
 import { DRIZZLE } from '../../database/database.module';
 import * as schema from '../../database/schema';
 
@@ -54,73 +54,90 @@ export class HomeService {
     return banners;
   }
 
-  async getFeed(page = 1, pageSize = 20) {
+  async getFeed(page = 1, pageSize = 20, category?: string) {
     const offset = (page - 1) * pageSize;
 
-    // Fetch videos with club name
-    const videoRows = await this.db
-      .select({
-        id: schema.videos.id,
-        title: schema.videos.title,
-        coverUrl: schema.videos.coverUrl,
-        authorName: schema.videos.authorName,
-        platform: schema.videos.platform,
-        category: schema.videos.category,
-        clubId: schema.videos.clubId,
-        clubName: schema.clubs.name,
-        publishedAt: schema.videos.publishedAt,
-      })
-      .from(schema.videos)
-      .leftJoin(schema.clubs, eq(schema.videos.clubId, schema.clubs.id));
-
-    // Fetch published announcements
-    const announcementRows = await this.db
-      .select({
-        id: schema.announcements.id,
-        title: schema.announcements.title,
-        content: schema.announcements.content,
-        publishedAt: schema.announcements.publishedAt,
-      })
-      .from(schema.announcements)
-      .where(eq(schema.announcements.status, 'published'));
-
-    // Build unified feed items
     type FeedItem = {
       id: string;
-      type: 'video' | 'announcement';
+      type: 'content' | 'announcement';
       title: string;
-      coverUrl?: string;
-      authorName?: string;
-      platform?: string;
-      category?: string;
+      coverUrl?: string | null;
+      authorName?: string | null;
+      platform?: string | null;
+      contentType?: string | null;
+      category?: string | null;
       clubId?: string | null;
       clubName?: string | null;
+      groupPlatforms?: string[] | null;
       content?: string;
       publishedAt: Date | null;
     };
 
-    const videoItems: FeedItem[] = videoRows.map((v) => ({
-      id: v.id,
-      type: 'video' as const,
-      title: v.title,
-      coverUrl: v.coverUrl,
-      authorName: v.authorName,
-      platform: v.platform,
-      category: v.category,
-      clubId: v.clubId,
-      clubName: v.clubName,
-      publishedAt: v.publishedAt,
+    // Build content query conditions
+    const contentConditions: SQL[] = [eq(schema.contents.isPrimary, true)];
+    if (category) {
+      contentConditions.push(
+        eq(schema.contents.category, category as 'REVIEW' | 'SENTIMENT' | 'ANNOUNCEMENT'),
+      );
+    }
+
+    // Fetch contents
+    const contentRows = await this.db
+      .select({
+        id: schema.contents.id,
+        title: schema.contents.title,
+        coverUrl: schema.contents.coverUrl,
+        authorName: schema.contents.authorName,
+        platform: schema.contents.platform,
+        contentType: schema.contents.contentType,
+        category: schema.contents.category,
+        clubId: schema.contents.clubId,
+        clubName: schema.clubs.name,
+        groupPlatforms: schema.contents.groupPlatforms,
+        publishedAt: schema.contents.publishedAt,
+      })
+      .from(schema.contents)
+      .leftJoin(schema.clubs, eq(schema.contents.clubId, schema.clubs.id))
+      .where(and(...contentConditions));
+
+    const contentItems: FeedItem[] = contentRows.map((c) => ({
+      id: c.id,
+      type: 'content' as const,
+      title: c.title,
+      coverUrl: c.coverUrl,
+      authorName: c.authorName,
+      platform: c.platform,
+      contentType: c.contentType,
+      category: c.category,
+      clubId: c.clubId,
+      clubName: c.clubName,
+      groupPlatforms: c.groupPlatforms,
+      publishedAt: c.publishedAt,
     }));
 
-    const announcementItems: FeedItem[] = announcementRows.map((a) => ({
-      id: a.id,
-      type: 'announcement' as const,
-      title: a.title,
-      content: a.content ? a.content.slice(0, 100) : '',
-      publishedAt: a.publishedAt,
-    }));
+    // Include system announcements for 'all' (no category) and 'ANNOUNCEMENT' tab
+    let announcementItems: FeedItem[] = [];
+    if (!category || category === 'ANNOUNCEMENT') {
+      const announcementRows = await this.db
+        .select({
+          id: schema.announcements.id,
+          title: schema.announcements.title,
+          content: schema.announcements.content,
+          publishedAt: schema.announcements.publishedAt,
+        })
+        .from(schema.announcements)
+        .where(eq(schema.announcements.status, 'published'));
 
-    const merged = [...videoItems, ...announcementItems];
+      announcementItems = announcementRows.map((a) => ({
+        id: a.id,
+        type: 'announcement' as const,
+        title: a.title,
+        content: a.content ? a.content.slice(0, 100) : '',
+        publishedAt: a.publishedAt,
+      }));
+    }
+
+    const merged = [...contentItems, ...announcementItems];
 
     // Sort by publishedAt desc (nulls last)
     merged.sort((a, b) => {

@@ -37,11 +37,11 @@ export class ClientClubsController {
     return this.clientClubsService.findRules(id);
   }
 
-  @Get(':id/videos')
-  findVideos(
+  @Get(':id/contents')
+  findContents(
     @Param('id') id: string,
     @Query('type') type?: string,
   ) {
-    return this.clientClubsService.findVideos(id, type);
+    return this.clientClubsService.findContents(id, type);
   }
 }

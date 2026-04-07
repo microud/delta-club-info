@@ -1,6 +1,6 @@
 import { Inject, Injectable, NotFoundException } from '@nestjs/common';
 import { NodePgDatabase } from 'drizzle-orm/node-postgres';
-import { eq, ilike, count, desc, and, inArray } from 'drizzle-orm';
+import { eq, ilike, count, desc, and, inArray, SQL } from 'drizzle-orm';
 import { DRIZZLE } from '../../database/database.module';
 import * as schema from '../../database/schema';
 
@@ -121,17 +121,31 @@ export class ClientClubsService {
       .where(eq(schema.clubRules.clubId, clubId));
   }
 
-  async findVideos(clubId: string, type?: string) {
-    const conditions: any[] = [eq(schema.videos.clubId, clubId)];
+  async findContents(clubId: string, type?: string) {
+    const conditions: SQL[] = [
+      eq(schema.contents.clubId, clubId),
+      eq(schema.contents.isPrimary, true),
+    ];
     if (type) {
-      conditions.push(eq(schema.videos.category, type as any));
+      conditions.push(
+        eq(schema.contents.category, type as 'REVIEW' | 'SENTIMENT' | 'ANNOUNCEMENT'),
+      );
     }
-    const where = conditions.length === 1 ? conditions[0] : and(...conditions);
 
     return this.db
-      .select()
-      .from(schema.videos)
-      .where(where)
-      .orderBy(desc(schema.videos.publishedAt));
+      .select({
+        id: schema.contents.id,
+        title: schema.contents.title,
+        coverUrl: schema.contents.coverUrl,
+        authorName: schema.contents.authorName,
+        platform: schema.contents.platform,
+        contentType: schema.contents.contentType,
+        category: schema.contents.category,
+        groupPlatforms: schema.contents.groupPlatforms,
+        publishedAt: schema.contents.publishedAt,
+      })
+      .from(schema.contents)
+      .where(and(...conditions))
+      .orderBy(desc(schema.contents.publishedAt));
   }
 }

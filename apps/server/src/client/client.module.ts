@@ -13,8 +13,8 @@ import { HomeService } from './home/home.service';
 import { ClientClubsController } from './clubs/client-clubs.controller';
 import { ClientClubsService } from './clubs/client-clubs.service';
 
-import { ClientVideosController } from './videos/client-videos.controller';
-import { ClientVideosService } from './videos/client-videos.service';
+import { ClientContentsController } from './contents/client-contents.controller';
+import { ClientContentsService } from './contents/client-contents.service';
 
 import { ClientAnnouncementsController } from './announcements/client-announcements.controller';
 import { ClientAnnouncementsService } from './announcements/client-announcements.service';
@@ -37,7 +37,7 @@ import { UserService } from './user/user.service';
     ClientAuthController,
     HomeController,
     ClientClubsController,
-    ClientVideosController,
+    ClientContentsController,
     ClientAnnouncementsController,
     UserController,
   ],
@@ -46,7 +46,7 @@ import { UserService } from './user/user.service';
     ClientJwtStrategy,
     HomeService,
     ClientClubsService,
-    ClientVideosService,
+    ClientContentsService,
     ClientAnnouncementsService,
     UserService,
   ],
