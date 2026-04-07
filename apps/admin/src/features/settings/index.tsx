@@ -9,7 +9,7 @@ import { ThemeSwitch } from '@/components/theme-switch'
 const pageTitles: Record<string, string> = {
   ai: 'AI 配置',
   'wechat-work': '企业微信',
-  tikhub: 'TikHub 配置',
+  system: '系统配置',
 }
 
 export function Settings() {

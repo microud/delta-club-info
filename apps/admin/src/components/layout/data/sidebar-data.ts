@@ -73,8 +73,8 @@ export const sidebarData: SidebarData = {
           icon: Bot,
         },
         {
-          title: 'TikHub 配置',
-          url: '/settings/tikhub',
+          title: '系统配置',
+          url: '/settings/system',
           icon: Globe,
         },
       ],
