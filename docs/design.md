@@ -129,13 +129,13 @@ POST   /webhook/wechat-work                     (消息接收)
 POST   /api/client/auth/login                   (静默登录，wx.login code → token)
 POST   /api/client/auth/profile                 (提交授权后的头像和昵称，需登录)
 GET    /api/client/home/banners                 (首页推广轮播)
-GET    /api/client/home/feed                    (混合 feed 流：视频+公告，分页)
+GET    /api/client/home/feed                    (多 Tab feed 流：推荐/评测/舆情/公告，分页)
 GET    /api/client/clubs                        (列表 + 筛选 + 搜索)
 GET    /api/client/clubs/:id                    (详情：基本信息+工商+前身俱乐部)
 GET    /api/client/clubs/:id/services           (服务项列表)
 GET    /api/client/clubs/:id/rules              (规则列表)
-GET    /api/client/clubs/:id/videos             (关联视频，type=REVIEW|SENTIMENT)
-GET    /api/client/videos/:id                   (视频详情)
+GET    /api/client/clubs/:id/contents            (关联内容，category=REVIEW|SENTIMENT)
+GET    /api/client/contents/:id                 (内容详情，含同组平台源)
 GET    /api/client/announcements/:id            (公告详情)
 GET    /api/client/user/profile                 (用户信息，需登录)
 GET    /api/client/user/favorites               (收藏列表，需登录)
@@ -167,6 +167,7 @@ Stage 1 通过 seed 脚本创建初始管理员账号：
 | establishedAt | date | 俱乐部成立日期 (nullable) |
 | closedAt | date | 倒闭日期 (nullable) |
 | predecessorId | uuid | 前身俱乐部 ID (nullable, 自关联 Club) |
+| wechatMpGhid | varchar | 官方公众号 ghid (nullable, 用于公告采集) |
 | closureNote | text | 倒闭备注 (nullable) |
 | companyName | varchar(300) | 公司全称 (nullable) |
 | creditCode | varchar(18) | 统一社会信用代码 (nullable) |
@@ -308,31 +309,41 @@ parsedResult 结构：
 | createdAt | timestamp | |
 | updatedAt | timestamp | |
 
-### Video (视频)
+### Content (内容，原 Video)
 
 | 字段 | 类型 | 说明 |
 |------|------|------|
 | id | uuid | 主键 |
+| platform | enum | BILIBILI / DOUYIN / XIAOHONGSHU / WECHAT_CHANNELS / WECHAT_MP |
+| contentType | enum | VIDEO / NOTE / ARTICLE |
+| category | enum | REVIEW / SENTIMENT / ANNOUNCEMENT |
+| externalId | varchar | 平台侧唯一 ID |
+| externalUrl | varchar | 原始链接 (nullable) |
+| title | varchar | 标题 |
+| description | text | 简介/正文摘要 (nullable) |
+| coverUrl | varchar | 封面图 (nullable) |
+| authorName | varchar | 作者名 (nullable, 冗余方便展示) |
+| publishedAt | timestamp | 原始发布时间 (nullable) |
+| bloggerId | uuid | 关联博主 (nullable, 博主采集时有值) |
 | clubId | uuid | 关联俱乐部 (nullable, AI 匹配或手动关联) |
-| platform | enum | BILIBILI / DOUYIN |
-| externalId | varchar | 平台视频 ID |
-| title | varchar | 视频标题 |
-| coverUrl | varchar | 封面 URL |
-| videoUrl | varchar | 视频链接 |
-| description | text | 视频简介 (nullable) |
-| authorName | varchar | 博主名称 |
-| authorId | varchar | 博主平台 ID |
-| category | enum | REVIEW / SENTIMENT (评测 vs 舆情) |
-| subtitleText | text | 字幕文本 (nullable, 暂不抓取) |
-| aiParsed | boolean | 是否已 AI 解析 |
+| groupId | uuid | 跨平台聚合组 ID (nullable, 同组内容共享) |
+| isPrimary | boolean | 是否为组内主内容（列表展示入口），默认 true |
+| groupPlatforms | enum[] | 组内所有平台列表 (nullable, 仅主记录维护) |
+| aiParsed | boolean | 是否已 AI 解析，默认 false |
 | aiClubMatch | varchar | AI 识别的俱乐部名 (nullable) |
 | aiSummary | text | AI 简要评价 (nullable) |
 | aiSentiment | enum | POSITIVE / NEGATIVE / NEUTRAL (nullable) |
-| publishedAt | timestamp | 视频发布时间 |
 | createdAt | timestamp | |
 | updatedAt | timestamp | |
 
 唯一索引：`platform + externalId`
+索引：`isPrimary`、`groupId`、`category`、`platform`、`publishedAt`
+
+**跨平台聚合规则**：
+- 未聚合内容：`groupId = null`，`isPrimary = true`
+- 聚合组内：多条共享同一 `groupId`，一条 `isPrimary = true`，其余 `false`
+- `groupPlatforms` 仅在主记录上维护，聚合/拆分操作时同步更新
+- 列表查询：`WHERE isPrimary = true`，详情获取同组源：`WHERE groupId = :groupId`
 
 ### Review (用户评价)
 
@@ -433,7 +444,9 @@ parsedResult 结构：
 | updatedAt | timestamp | |
 
 预置配置项：
-- `crawler.frequency` — 爬虫抓取频率（分钟），默认 60
+- `tikhub.apiKey` — TikHub API Key
+- `tikhub.baseUrl` — TikHub API 地址，默认 `https://api.tikhub.io`
+- `tikhub.rateLimit` — TikHub 每秒最大请求数，默认 10
 - `wechat_work.corp_id` — 企业微信企业 ID
 - `wechat_work.agent_id` — 应用 AgentId
 - `wechat_work.secret` — 应用 Secret
@@ -447,23 +460,55 @@ parsedResult 结构：
 | 字段 | 类型 | 说明 |
 |------|------|------|
 | id | uuid | 主键 |
-| platform | enum | BILIBILI / DOUYIN |
-| externalId | varchar | 平台用户 ID |
-| name | varchar | 博主名称 |
-| isActive | boolean | 是否启用 |
+| name | varchar | 博主名称（统一显示名） |
+| avatar | varchar | 头像 (nullable) |
+| isActive | boolean | 是否启用采集 |
 | createdAt | timestamp | |
+| updatedAt | timestamp | |
 
-### CrawlTask (爬虫执行记录)
+### BloggerAccount (博主平台账号)
 
 | 字段 | 类型 | 说明 |
 |------|------|------|
 | id | uuid | 主键 |
-| type | enum | BLOGGER / KEYWORD (博主抓取 / 关键词搜索) |
-| targetId | varchar | 博主 ID 或搜索关键词 |
+| bloggerId | uuid | 关联 Blogger |
+| platform | enum | BILIBILI / DOUYIN / XIAOHONGSHU / WECHAT_CHANNELS |
+| platformUserId | varchar | 平台侧用户 ID (uid / sec_user_id / user_id / username) |
+| platformUsername | varchar | 平台侧用户名 (nullable) |
+| crawlCategories | enum[] | 参与的采集线：REVIEW / SENTIMENT，支持多选 |
+| lastCrawledAt | timestamp | 上次采集时间 (nullable) |
+| createdAt | timestamp | |
+| updatedAt | timestamp | |
+
+唯一约束：`platform + platformUserId`
+
+### CrawlTask (采集任务定义)
+
+| 字段 | 类型 | 说明 |
+|------|------|------|
+| id | uuid | 主键 |
+| taskType | enum | BLOGGER_POSTS / KEYWORD_SEARCH / MP_ARTICLES |
+| category | enum | REVIEW / SENTIMENT / ANNOUNCEMENT |
+| platform | enum | 目标平台 |
+| targetId | varchar | BloggerAccount ID / Club ID |
+| cronExpression | varchar | 调度表达式，默认 `0 */1 * * *`（每小时） |
+| isActive | boolean | 是否启用 |
+| lastRunAt | timestamp | 上次执行时间 (nullable) |
+| nextRunAt | timestamp | 下次计划执行时间 (nullable) |
+| createdAt | timestamp | |
+| updatedAt | timestamp | |
+
+### CrawlTaskRun (采集执行记录)
+
+| 字段 | 类型 | 说明 |
+|------|------|------|
+| id | uuid | 主键 |
+| crawlTaskId | uuid | 关联 CrawlTask |
 | status | enum | RUNNING / SUCCESS / FAILED |
 | startedAt | timestamp | |
 | finishedAt | timestamp | (nullable) |
-| videoCount | int | 本次抓取到的新视频数 |
+| itemsFetched | int | 抓取条数 |
+| itemsCreated | int | 新入库条数（去重后） |
 | errorMessage | text | 失败原因 (nullable) |
 
 ## 企业微信集成
@@ -545,61 +590,120 @@ parsedResult 结构：
 
 ## 爬虫与 AI 解析流程
 
-### 两条抓取任务线
+### 数据源：TikHub 平台
 
-| | 评测/体验 (REVIEW) | 舆情 (SENTIMENT) |
-|---|---|---|
-| **来源** | 指定博主列表 | 俱乐部名称关键词搜索 |
-| **抓取方式** | 按博主抓最新视频 | 按关键词搜索最新视频 |
-| **默认频率** | 每小时 | 每小时 |
-| **AI 任务** | 匹配俱乐部 + 简要评价 | 匹配俱乐部 + 情感判断 |
+所有平台数据通过 [TikHub](https://www.tikhub.io/) 统一 API 平台采集，支持 5 个社交平台：
 
-频率可在 Admin 后台配置，通过 SchedulerRegistry 动态更新。
+| 平台 | 枚举值 | 内容形态 | 采集能力 |
+|------|--------|---------|---------|
+| B站 | `BILIBILI` | 视频 | 博主视频列表 + 关键词搜索 |
+| 抖音 | `DOUYIN` | 视频 | 博主视频列表 + 关键词搜索 |
+| 小红书 | `XIAOHONGSHU` | 视频 + 图文笔记 | 博主笔记列表 + 关键词搜索 |
+| 视频号 | `WECHAT_CHANNELS` | 视频 | 博主视频列表 + 关键词搜索 |
+| 公众号 | `WECHAT_MP` | 文章 | 按公众号 ghid 拉取文章列表（无关键词搜索） |
+
+### 三条采集线
+
+| 采集线 | 分类 | 数据来源 | 覆盖平台 |
+|--------|------|---------|---------|
+| 评测采集 | REVIEW | 指定博主列表 → 抓最新内容 | B站、抖音、小红书、视频号 |
+| 舆情采集 | SENTIMENT | 关键词搜索 + 指定博主采集（两条并行路径） | B站、抖音、小红书、视频号 |
+| 公告采集 | ANNOUNCEMENT | 俱乐部官方公众号文章列表 | 仅公众号 |
 
 ### 抓取流程
 
 ```
-定时触发 (SchedulerRegistry 动态 Interval)
+定时触发 (SchedulerRegistry，每个 CrawlTask 独立 cron)
   │
-  ├─ BloggerCrawl: 遍历 Blogger 列表 → 各平台 Adapter 抓新视频 → REVIEW
+  ├─ BLOGGER_POSTS: 遍历 BloggerAccount
+  │   ├─ crawlCategories 包含 REVIEW → 评测采集
+  │   └─ crawlCategories 包含 SENTIMENT → 舆情采集
   │
-  └─ KeywordCrawl: 遍历 Club 名称搜索 → 各平台 Adapter 搜索 → SENTIMENT
+  ├─ KEYWORD_SEARCH: 遍历 Club 名称 → 4 个平台搜索 → SENTIMENT
+  │
+  └─ MP_ARTICLES: 遍历有 wechatMpGhid 的 Club → 拉取公众号文章 → ANNOUNCEMENT
+      │
+      ▼
+  PlatformAdapter 标准化为 RawContent
       │
       ▼
   去重 (platform + externalId)
       │
       ▼
-  存入 Video 表 (aiParsed = false)
+  存入 Content 表 (aiParsed = false, isPrimary = true)
       │
       ▼
   AI 解析 (输入: 标题 + 简介)
     - 识别关联俱乐部名 → 模糊匹配已有 Club
-    - 提取简要评价
-    - 判断情感倾向
+    - 提取简要评价 + 判断情感倾向
+    - 跨平台聚合判断（标题相似度 + 同一 Blogger 不同 Account）
       │
       ▼
-  更新 Video (aiParsed = true, aiClubMatch, aiSummary, aiSentiment)
-  匹配不上俱乐部的 clubId = null, Admin 可手动关联
+  更新 Content (aiParsed, aiClubMatch, aiSummary, aiSentiment, groupId, isPrimary, groupPlatforms)
 ```
 
-### Adapter 模式
+### 架构：TikHubClient + PlatformAdapter
 
 ```typescript
-interface CrawlerAdapter {
-  platform: VideoPlatform;
-  fetchBloggerVideos(bloggerId: string): Promise<RawVideo[]>;
-  searchVideos(keyword: string): Promise<RawVideo[]>;
+// TikHub API 统一封装（认证、限流、重试、错误处理）
+class TikHubClient {
+  fetchDouyinUserPosts(secUserId: string, cursor?: number): Promise<TikHubResponse>
+  searchDouyinVideos(keyword: string, cursor?: number): Promise<TikHubResponse>
+  fetchBilibiliUserPosts(uid: string, page?: number): Promise<TikHubResponse>
+  searchBilibiliVideos(keyword: string, page?: number): Promise<TikHubResponse>
+  fetchXiaohongshuUserNotes(userId: string, cursor?: string): Promise<TikHubResponse>
+  searchXiaohongshuNotes(keyword: string, page?: number): Promise<TikHubResponse>
+  fetchWechatChannelsUserPosts(username: string, lastBuffer?: string): Promise<TikHubResponse>
+  searchWechatChannelsVideos(keywords: string): Promise<TikHubResponse>
+  fetchWechatMpArticles(ghid: string, offset?: number): Promise<TikHubResponse>
+}
+
+// 平台数据标准化
+interface RawContent {
+  platform: Platform
+  externalId: string
+  externalUrl: string | null
+  contentType: 'VIDEO' | 'NOTE' | 'ARTICLE'
+  title: string
+  description: string | null
+  coverUrl: string | null
+  authorName: string | null
+  authorPlatformId: string | null
+  publishedAt: Date | null
+}
+
+interface PlatformAdapter {
+  platform: Platform
+  normalizeUserPosts(raw: TikHubResponse): RawContent[]
+  normalizeSearchResults(raw: TikHubResponse): RawContent[]
 }
 ```
 
-- `BilibiliAdapter`：调用 B 站公开接口实现
-- `DouyinAdapter`：接口已定义，方法抛出 NotImplemented（后续实现）
+5 个实现：`BilibiliAdapter`、`DouyinAdapter`、`XiaohongshuAdapter`、`WechatChannelsAdapter`、`WechatMpAdapter`（仅 `normalizeUserPosts`，无搜索）。
+
+### 跨平台内容聚合
+
+- AI 解析阶段识别跨平台重复内容（标题相似度 + 同一 Blogger 不同 Account）
+- 匹配成功 → 设置相同 `groupId`，指定 `isPrimary`，更新主记录 `groupPlatforms`
+- 前端以 Content 卡片展示，有 `groupPlatforms` 时显示多平台图标（类似豆瓣影视多平台入口）
+- Admin 可手动合并/拆分
 
 ### 关键设计点
 
-- **动态频率**：从 SystemConfig 读取 `crawler.frequency`，Admin 修改后通过 SchedulerRegistry 实时更新 Interval
+- **统一网关**：所有平台 API 调用通过 TikHub，TikHubClient 封装认证、限流（令牌桶）、重试（指数退避）
+- **任务粒度**：每个 CrawlTask 独立 cron 表达式，默认每小时，Admin 可单独调整
 - **字幕解析**：暂不实现，AI 解析仅用标题 + 简介作为输入
-- **失败处理**：LLM 解析失败的视频保持 `aiParsed = false`，不阻塞流程
+- **失败处理**：AI 解析失败的内容保持 `aiParsed = false`，不阻塞流程
+
+### TikHub API 端点参考
+
+| 平台 | 博主内容列表 | 关键词搜索 | 内容详情 |
+|------|------------|-----------|---------|
+| 抖音 | `/api/v1/douyin/app/v3/fetch_user_post_videos` | `/api/v1/douyin/search/fetch_video_search_v2` (POST) | `/api/v1/douyin/app/v3/fetch_one_video` |
+| B站 | `/api/v1/bilibili/web/fetch_user_post_videos` | `/api/v1/bilibili/web/fetch_general_search` | `/api/v1/bilibili/web/fetch_video_detail` |
+| 小红书 | `/api/v1/xiaohongshu/web_v3/fetch_user_notes` | `/api/v1/xiaohongshu/web_v3/fetch_search_notes` | `/api/v1/xiaohongshu/web_v3/fetch_note_detail` |
+| 视频号 | `/api/v1/wechat_channels/fetch_home_page` (POST) | `/api/v1/wechat_channels/fetch_default_search` (POST) | `/api/v1/wechat_channels/fetch_video_detail` |
+| 公众号 | `/api/v1/wechat_mp/web/fetch_mp_article_list` | — | `/api/v1/wechat_mp/web/fetch_mp_article_detail_json` |
 
 ## AI 智能录入
 
@@ -640,18 +744,22 @@ interface CrawlerAdapter {
 - 推广订单管理（新增订单、查看当前 dailyRate 排名）
 
 **2. 博主管理**
-- 博主列表 CRUD
+- 博主列表 CRUD，展示关联的所有平台账号
+- 新增/编辑博主时管理多个 BloggerAccount
+- 每个 Account 配置：平台、平台用户 ID、采集分类（REVIEW / SENTIMENT 多选）
 - 启用/停用
 
 **3. 爬虫管理**
-- 爬虫任务执行记录列表
-- 抓取频率配置
-- 手动触发抓取
+- 采集任务列表（CrawlTask），支持按平台/类型/状态筛选
+- 单个任务可编辑 cron 表达式、启用/停用
+- 执行记录列表（CrawlTaskRun）
+- 手动触发单个任务
 
-**4. 视频管理**
-- 视频列表（筛选：平台、分类、是否已关联俱乐部、AI 解析状态）
-- 手动关联：AI 匹配不上的视频，手动指定俱乐部
-- 手动添加视频 URL → 触发抓取 + 解析
+**4. 内容管理（原视频管理）**
+- 内容列表（筛选：平台、内容类型、分类、聚合状态、是否已关联俱乐部、AI 解析状态）
+- 手动关联俱乐部
+- 手动合并/拆分 ContentGroup
+- 手动添加内容 URL
 
 **5. 解析任务管理**
 - 解析任务列表（按状态筛选）
@@ -661,7 +769,7 @@ interface CrawlerAdapter {
 **6. 系统设置**
 - AI Provider 配置（xAI / OpenAI / Anthropic，API Key + 模型选择）
 - 企业微信配置
-- 爬虫频率全局设置
+- TikHub API 配置（API Key、速率限制）
 - 外观设置（主题切换）
 
 ### 后期补充
@@ -692,9 +800,11 @@ server/src/
 │       ├── club-service.schema.ts
 │       ├── club-rule.schema.ts
 │       ├── promotion-order.schema.ts
-│       ├── video.schema.ts
+│       ├── content.schema.ts
 │       ├── blogger.schema.ts
+│       ├── blogger-account.schema.ts
 │       ├── crawl-task.schema.ts
+│       ├── crawl-task-run.schema.ts
 │       ├── wechat-message.schema.ts
 │       ├── parse-task.schema.ts
 │       ├── ai-config.schema.ts
@@ -707,7 +817,7 @@ server/src/
 │   ├── promotions/
 │   ├── bloggers/
 │   ├── crawl-tasks/
-│   ├── videos/
+│   ├── contents/
 │   ├── parse-tasks/
 │   ├── ai-configs/
 │   ├── system-configs/
@@ -715,10 +825,15 @@ server/src/
 ├── crawler/                       # 爬虫模块
 │   ├── crawler.module.ts
 │   ├── crawler.service.ts
+│   ├── crawler-scheduler.service.ts
+│   ├── tikhub.client.ts
 │   └── adapters/
-│       ├── crawler-adapter.interface.ts
+│       ├── platform-adapter.interface.ts
 │       ├── bilibili.adapter.ts
-│       └── douyin.adapter.ts
+│       ├── douyin.adapter.ts
+│       ├── xiaohongshu.adapter.ts
+│       ├── wechat-channels.adapter.ts
+│       └── wechat-mp.adapter.ts
 ├── wechat-work/                   # 企业微信模块
 │   ├── wechat-work.module.ts
 │   ├── wechat-work.controller.ts
@@ -855,29 +970,32 @@ Stage 依赖关系：`1 → 2 → 3 → 4 → 5 → 6`（严格顺序，每个 S
 
 交付物：企微消息自动接收 → AI 解析 → 人工审核入库
 
-### Stage 3: 爬虫与视频采集
-> 目标：实现自动化视频抓取入库
-> 前置：Stage 2 完成（需要 Club 数据用于关键词搜索）
+### Stage 3: 多平台内容采集
+> 目标：通过 TikHub 实现 5 平台自动化内容采集
+> 前置：Stage 2 完成（需要 Club 数据用于关键词搜索和公众号采集）
 
-- Blogger 表 schema + Admin 博主管理 CRUD
-- CrawlTask 表 schema + Admin 爬虫管理（记录、频率配置、手动触发）
-- 爬虫 Adapter 实现（B 站实现 + 抖音接口预留）
-- BloggerCrawl 定时任务（按博主抓取 → REVIEW）
-- KeywordCrawl 定时任务（按俱乐部名搜索 → SENTIMENT）
-- Video 表 schema + 去重逻辑
-- 动态定时任务调度（SchedulerRegistry）
+- Blogger、BloggerAccount 表 schema + Admin 博主管理（多平台账号、采集分类配置）
+- CrawlTask、CrawlTaskRun 表 schema + Admin 爬虫管理（任务列表、cron 配置、手动触发、执行记录）
+- Content 表 schema（替代 Video）+ 去重逻辑
+- Club 表新增 wechatMpGhid 字段
+- TikHubClient 封装（认证、限流、重试）
+- 5 个 PlatformAdapter 实现（B站、抖音、小红书、视频号、公众号）
+- 三条采集线：评测（博主）、舆情（关键词+博主）、公告（公众号）
+- CrawlerSchedulerService（SchedulerRegistry 动态定时任务）
+- Admin 内容管理（原视频管理，支持多平台筛选）
 
-交付物：定时自动抓取视频并入库，Admin 可查看爬虫执行记录
+交付物：定时自动采集 5 平台内容并入库，Admin 可管理采集任务和内容
 
-### Stage 4: LLM 集成（视频解析）
-> 目标：AI 自动解析视频内容和俱乐部规则
-> 前置：Stage 3 完成（需要 Video 数据用于 AI 解析）
+### Stage 4: LLM 集成（内容解析与聚合）
+> 目标：AI 自动解析内容、关联俱乐部、跨平台聚合
+> 前置：Stage 3 完成（需要 Content 数据用于 AI 解析）
 
-- 视频 AI 解析流程串联（爬虫入库 → 自动触发 AI 解析 → 更新 Video）
+- 内容 AI 解析流程串联（采集入库 → 自动触发 AI 解析 → 更新 Content）
+- 跨平台内容聚合（AI 识别重复内容 → 设置 groupId/isPrimary/groupPlatforms）
 - 俱乐部规则 AI 分析（录入规则 → AI 标注 sentiment）
-- Admin - 视频管理（列表、筛选、手动关联俱乐部、手动添加 URL）
+- Admin - 内容管理完善（手动关联俱乐部、手动合并/拆分 ContentGroup）
 
-交付物：视频自动解析并关联俱乐部，规则自动标注利弊
+交付物：内容自动解析并关联俱乐部，跨平台重复内容自动聚合，规则自动标注利弊
 
 ### Stage 5: 小程序端
 > 目标：面向玩家的小程序上线
