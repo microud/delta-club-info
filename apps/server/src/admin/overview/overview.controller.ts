@@ -1,4 +1,4 @@
-import { Controller, Get, UseGuards } from '@nestjs/common';
+import { Controller, Get, Query, UseGuards } from '@nestjs/common';
 import { AdminGuard } from '../../common/guards/admin.guard';
 import { OverviewService } from './overview.service';
 
@@ -15,5 +15,16 @@ export class OverviewController {
   @Get('summary')
   getSummary() {
     return this.overviewService.getSummary();
+  }
+
+  @Get('todos')
+  getTodos() {
+    return this.overviewService.getTodos();
+  }
+
+  @Get('recent-contents')
+  getRecentContents(@Query('limit') limit?: string) {
+    const n = limit ? Math.min(Math.max(parseInt(limit, 10) || 10, 1), 50) : 10;
+    return this.overviewService.getRecentContents(n);
   }
 }
