@@ -11,4 +11,9 @@ export class OverviewController {
   ping() {
     return this.overviewService.ping();
   }
+
+  @Get('summary')
+  getSummary() {
+    return this.overviewService.getSummary();
+  }
 }
