@@ -236,4 +236,41 @@ export const updateAnnouncement = (id: string, data: { title?: string; content?:
 export const deleteAnnouncement = (id: string) =>
   api.delete(`/announcements/${id}`).then((res) => res.data)
 
+// Overview
+export interface OverviewSummary {
+  clubs: { total: number; published: number; closed: number }
+  contents: { total: number; last7dNew: number }
+  bloggers: { total: number; accountTotal: number }
+  promotions: { activeCount: number; activeDailyRateSum: number }
+}
+
+export interface OverviewTodos {
+  pendingReviewComments: number
+  failedCrawlLast24h: number
+  aiParseFailedContents: number
+}
+
+export interface RecentContentItem {
+  id: string
+  title: string
+  platform: string
+  category: string
+  authorName: string | null
+  coverUrl: string | null
+  createdAt: string
+  clubId: string | null
+  clubName: string | null
+}
+
+export const getOverviewSummary = () =>
+  api.get<OverviewSummary>('/overview/summary').then((res) => res.data)
+
+export const getOverviewTodos = () =>
+  api.get<OverviewTodos>('/overview/todos').then((res) => res.data)
+
+export const getRecentContents = (limit = 10) =>
+  api
+    .get<RecentContentItem[]>('/overview/recent-contents', { params: { limit } })
+    .then((res) => res.data)
+
 export default api
