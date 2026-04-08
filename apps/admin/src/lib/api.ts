@@ -320,4 +320,16 @@ export const getOverviewCrawlerHealth = () =>
     .get<OverviewCrawlerHealth>('/overview/crawler-health')
     .then((res) => res.data)
 
+export interface OverviewDataQuality {
+  missingBusinessInfo: number
+  missingServices: number
+  missingRules: number
+  orphanClubs: number
+}
+
+export const getOverviewDataQuality = () =>
+  api
+    .get<OverviewDataQuality>('/overview/data-quality')
+    .then((res) => res.data)
+
 export default api
