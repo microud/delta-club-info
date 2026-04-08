@@ -148,12 +148,22 @@ export default function ClubsPage() {
           editTarget
             ? {
                 name: editTarget.name,
+                status: editTarget.status,
                 logo: editTarget.logo ?? '',
                 description: editTarget.description ?? '',
                 wechatOfficialAccount: editTarget.wechatOfficialAccount ?? '',
                 wechatMiniProgram: editTarget.wechatMiniProgram ?? '',
                 contactInfo: editTarget.contactInfo ?? '',
                 establishedAt: editTarget.establishedAt ?? '',
+                companyName: editTarget.companyName ?? '',
+                creditCode: editTarget.creditCode ?? '',
+                legalPerson: editTarget.legalPerson ?? '',
+                registeredAddress: editTarget.registeredAddress ?? '',
+                businessScope: editTarget.businessScope ?? '',
+                registeredCapital: editTarget.registeredCapital ?? '',
+                companyEstablishedAt: editTarget.companyEstablishedAt ?? '',
+                businessStatus: editTarget.businessStatus ?? '',
+                orderPosters: editTarget.orderPosters ?? [],
               }
             : undefined
         }

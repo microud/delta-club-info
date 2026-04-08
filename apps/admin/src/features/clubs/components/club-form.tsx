@@ -12,7 +12,14 @@ import {
   FormLabel,
   FormMessage,
 } from '@/components/ui/form'
-import { clubFormSchema, type ClubFormValues } from '../data/schema'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select'
+import { clubFormSchema, clubStatusLabels, type ClubFormValues } from '../data/schema'
 import { fetchWechatAvatar } from '@/lib/api'
 import { ImageUploadGrid } from '@/components/image-upload-grid'
 
@@ -29,6 +36,7 @@ export function ClubForm({ initialData, onSubmit, isSubmitting }: ClubFormProps)
     defaultValues: initialData ?? {
       orderPosters: [],
       name: '',
+      status: 'draft',
       logo: '',
       description: '',
       wechatOfficialAccount: '',
@@ -55,20 +63,48 @@ export function ClubForm({ initialData, onSubmit, isSubmitting }: ClubFormProps)
           companyEstablishedAt: data.companyEstablishedAt || null,
         }
         onSubmit(cleaned as ClubFormValues)
-      })} className='grid gap-4'>
-        <FormField
-          control={form.control}
-          name='name'
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>俱乐部名称 *</FormLabel>
-              <FormControl>
-                <Input placeholder='请输入俱乐部名称' {...field} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
+      })} className='flex min-h-0 flex-1 flex-col'>
+        <div className='grid flex-1 gap-4 overflow-y-auto px-6 py-4'>
+        <div className='grid gap-4 sm:grid-cols-[1fr_180px]'>
+          <FormField
+            control={form.control}
+            name='name'
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>俱乐部名称 *</FormLabel>
+                <FormControl>
+                  <Input placeholder='请输入俱乐部名称' {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name='status'
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>状态</FormLabel>
+                <Select onValueChange={field.onChange} value={field.value ?? 'draft'}>
+                  <FormControl>
+                    <SelectTrigger className='w-full'>
+                      <SelectValue placeholder='选择状态' />
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent>
+                    {Object.entries(clubStatusLabels).map(([value, label]) => (
+                      <SelectItem key={value} value={value}>
+                        {label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        </div>
 
         <FormField
           control={form.control}
@@ -272,7 +308,8 @@ export function ClubForm({ initialData, onSubmit, isSubmitting }: ClubFormProps)
           )} />
         </div>
 
-        <div className='flex justify-end gap-2 pt-2'>
+        </div>
+        <div className='flex justify-end gap-2 border-t px-6 py-4'>
           <Button type='submit' disabled={isSubmitting}>
             {isSubmitting ? '保存中...' : '保存'}
           </Button>

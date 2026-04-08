@@ -30,6 +30,7 @@ export type Club = z.infer<typeof clubSchema>
 
 export const clubFormSchema = z.object({
   name: z.string().min(1, '俱乐部名称不能为空'),
+  status: z.enum(['draft', 'published', 'closed', 'archived']).optional(),
   logo: z.string().optional(),
   description: z.string().optional(),
   wechatOfficialAccount: z.string().optional(),

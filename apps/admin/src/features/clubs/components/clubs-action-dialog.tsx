@@ -27,8 +27,8 @@ export function ClubsActionDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className='sm:max-w-lg'>
-        <DialogHeader>
+      <DialogContent className='flex max-h-[90vh] flex-col gap-0 p-0 sm:max-w-lg'>
+        <DialogHeader className='border-b px-6 pt-6 pb-4'>
           <DialogTitle>{isEdit ? '编辑俱乐部' : '添加俱乐部'}</DialogTitle>
           <DialogDescription>
             {isEdit
