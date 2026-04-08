@@ -297,4 +297,27 @@ export interface OverviewBusiness {
 export const getOverviewBusiness = () =>
   api.get<OverviewBusiness>('/overview/business').then((res) => res.data)
 
+export interface OverviewCrawlerHealth {
+  successRate24h: number | null
+  totalRuns24h: number
+  avgDailyCreated: number
+  platformLastSuccess: Array<{
+    platform: string
+    lastSuccessAt: string | null
+  }>
+  recentFailed: Array<{
+    id: string
+    crawlTaskId: string
+    startedAt: string
+    errorMessage: string | null
+    platform: string | null
+    taskType: string | null
+  }>
+}
+
+export const getOverviewCrawlerHealth = () =>
+  api
+    .get<OverviewCrawlerHealth>('/overview/crawler-health')
+    .then((res) => res.data)
+
 export default api
