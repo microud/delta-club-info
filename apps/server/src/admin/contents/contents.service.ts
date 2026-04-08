@@ -1,6 +1,6 @@
 import { Inject, Injectable, NotFoundException } from '@nestjs/common';
-import { type NodePgDatabase } from 'drizzle-orm/node-postgres';
-import { eq, desc, and, isNull, isNotNull, type SQL } from 'drizzle-orm';
+import { NodePgDatabase } from 'drizzle-orm/node-postgres';
+import { eq, desc, and, isNull, isNotNull,  SQL } from 'drizzle-orm';
 import { randomUUID } from 'crypto';
 import { DRIZZLE } from '../../database/database.module';
 import * as schema from '../../database/schema';

@@ -1,6 +1,6 @@
 import { Inject, Injectable, NotFoundException } from '@nestjs/common';
-import { type NodePgDatabase } from 'drizzle-orm/node-postgres';
-import { eq, ilike, count, desc, and, inArray, type SQL } from 'drizzle-orm';
+import { NodePgDatabase } from 'drizzle-orm/node-postgres';
+import { eq, ilike, count, desc, and, inArray,  SQL } from 'drizzle-orm';
 import { DRIZZLE } from '../../database/database.module';
 import * as schema from '../../database/schema';
 

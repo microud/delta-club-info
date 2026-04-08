@@ -27,14 +27,7 @@ export default defineConfig(
           ignoreRestSiblings: true,
         },
       ],
-      '@typescript-eslint/consistent-type-imports': [
-        'error',
-        {
-          prefer: 'type-imports',
-          fixStyle: 'inline-type-imports',
-          disallowTypeAnnotations: false,
-        },
-      ],
+      '@typescript-eslint/consistent-type-imports': 'off',
       'no-duplicate-imports': 'error',
     },
   },

@@ -1,16 +1,16 @@
 import { Inject, Injectable, Logger } from '@nestjs/common';
-import { type NodePgDatabase } from 'drizzle-orm/node-postgres';
+import { NodePgDatabase } from 'drizzle-orm/node-postgres';
 import { eq } from 'drizzle-orm';
 import { DRIZZLE } from '../database/database.module';
 import * as schema from '../database/schema';
-import { type TikHubClient } from './tikhub.client';
-import { type CrawlTaskService } from './crawl-task.service';
-import { type PlatformAdapter, type RawContent } from './adapters/platform-adapter.interface';
-import { type BilibiliAdapter } from './adapters/bilibili.adapter';
-import { type DouyinAdapter } from './adapters/douyin.adapter';
-import { type XiaohongshuAdapter } from './adapters/xiaohongshu.adapter';
-import { type WechatChannelsAdapter } from './adapters/wechat-channels.adapter';
-import { type WechatMpAdapter } from './adapters/wechat-mp.adapter';
+import { TikHubClient } from './tikhub.client';
+import { CrawlTaskService } from './crawl-task.service';
+import { PlatformAdapter,  RawContent } from './adapters/platform-adapter.interface';
+import { BilibiliAdapter } from './adapters/bilibili.adapter';
+import { DouyinAdapter } from './adapters/douyin.adapter';
+import { XiaohongshuAdapter } from './adapters/xiaohongshu.adapter';
+import { WechatChannelsAdapter } from './adapters/wechat-channels.adapter';
+import { WechatMpAdapter } from './adapters/wechat-mp.adapter';
 
 @Injectable()
 export class CrawlerService {

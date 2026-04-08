@@ -8,8 +8,8 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { AdminGuard } from '../../common/guards/admin.guard';
-import { type PromotionsService } from './promotions.service';
-import { type CreatePromotionDto } from './dto/create-promotion.dto';
+import { PromotionsService } from './promotions.service';
+import { CreatePromotionDto } from './dto/create-promotion.dto';
 
 @Controller('admin/promotions')
 @UseGuards(AdminGuard)

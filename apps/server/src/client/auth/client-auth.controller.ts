@@ -1,5 +1,5 @@
 import { Body, Controller, Post, UseGuards } from '@nestjs/common';
-import { type ClientAuthService } from './client-auth.service';
+import { ClientAuthService } from './client-auth.service';
 import { ClientGuard } from '../../common/guards/client.guard';
 import { CurrentUser } from '../../common/decorators/current-user.decorator';
 

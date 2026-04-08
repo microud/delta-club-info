@@ -10,9 +10,9 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { AdminGuard } from '../../common/guards/admin.guard';
-import { type AnnouncementsService } from './announcements.service';
-import { type CreateAnnouncementDto } from './dto/create-announcement.dto';
-import { type UpdateAnnouncementDto } from './dto/update-announcement.dto';
+import { AnnouncementsService } from './announcements.service';
+import { CreateAnnouncementDto } from './dto/create-announcement.dto';
+import { UpdateAnnouncementDto } from './dto/update-announcement.dto';
 
 @Controller('admin/announcements')
 @UseGuards(AdminGuard)

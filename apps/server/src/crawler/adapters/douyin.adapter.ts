@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { type PlatformAdapter, type RawContent } from './platform-adapter.interface';
+import { PlatformAdapter,  RawContent } from './platform-adapter.interface';
 
 @Injectable()
 export class DouyinAdapter implements PlatformAdapter {

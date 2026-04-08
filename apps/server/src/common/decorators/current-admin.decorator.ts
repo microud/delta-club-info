@@ -1,4 +1,4 @@
-import { createParamDecorator, type ExecutionContext } from '@nestjs/common';
+import { createParamDecorator,  ExecutionContext } from '@nestjs/common';
 
 export const CurrentAdmin = createParamDecorator(
   (_data: unknown, ctx: ExecutionContext) => {

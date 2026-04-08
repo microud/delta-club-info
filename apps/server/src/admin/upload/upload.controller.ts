@@ -8,7 +8,7 @@ import {
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { AdminGuard } from '../../common/guards/admin.guard';
-import { type StorageService } from '../../storage/storage.service';
+import { StorageService } from '../../storage/storage.service';
 import { randomUUID } from 'crypto';
 
 @Controller('admin/upload')

@@ -1,7 +1,7 @@
 import { Controller, Get, Post, Param, Query, Body, UseGuards, Logger } from '@nestjs/common';
 import { AdminGuard } from '../common/guards/admin.guard';
-import { type ParseTaskService } from './parse-task.service';
-import { type ConfirmParseDto } from './dto/confirm-parse.dto';
+import { ParseTaskService } from './parse-task.service';
+import { ConfirmParseDto } from './dto/confirm-parse.dto';
 
 @Controller('admin/parse-tasks')
 @UseGuards(AdminGuard)

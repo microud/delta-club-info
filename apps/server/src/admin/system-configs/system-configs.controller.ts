@@ -7,8 +7,8 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { AdminGuard } from '../../common/guards/admin.guard';
-import { type SystemConfigsService } from './system-configs.service';
-import { type UpdateConfigDto } from './dto/update-config.dto';
+import { SystemConfigsService } from './system-configs.service';
+import { UpdateConfigDto } from './dto/update-config.dto';
 
 @Controller('admin/system-configs')
 @UseGuards(AdminGuard)

@@ -1,8 +1,8 @@
-import { Injectable, Logger, type OnModuleInit } from '@nestjs/common';
-import { type SchedulerRegistry } from '@nestjs/schedule';
+import { Injectable, Logger,  OnModuleInit } from '@nestjs/common';
+import { SchedulerRegistry } from '@nestjs/schedule';
 import { CronJob } from 'cron';
-import { type CrawlerService } from './crawler.service';
-import { type CrawlTaskService } from './crawl-task.service';
+import { CrawlerService } from './crawler.service';
+import { CrawlTaskService } from './crawl-task.service';
 
 @Injectable()
 export class CrawlerSchedulerService implements OnModuleInit {

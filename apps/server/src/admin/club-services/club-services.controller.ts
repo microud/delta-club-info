@@ -12,10 +12,10 @@ import {
 } from '@nestjs/common';
 import { FilesInterceptor } from '@nestjs/platform-express';
 import { AdminGuard } from '../../common/guards/admin.guard';
-import { type ClubServicesService } from './club-services.service';
-import { type BatchCreateClubServiceDto } from './dto/batch-create-club-service.dto';
-import { type CreateClubServiceDto } from './dto/create-club-service.dto';
-import { type UpdateClubServiceDto } from './dto/update-club-service.dto';
+import { ClubServicesService } from './club-services.service';
+import { BatchCreateClubServiceDto } from './dto/batch-create-club-service.dto';
+import { CreateClubServiceDto } from './dto/create-club-service.dto';
+import { UpdateClubServiceDto } from './dto/update-club-service.dto';
 
 @Controller('admin/clubs/:clubId/services')
 @UseGuards(AdminGuard)

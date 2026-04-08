@@ -1,6 +1,6 @@
 import { Body, Controller, Get, Post, UseGuards } from '@nestjs/common';
-import { type AuthService } from './auth.service';
-import { type LoginDto } from './dto/login.dto';
+import { AuthService } from './auth.service';
+import { LoginDto } from './dto/login.dto';
 import { AdminGuard } from '../../common/guards/admin.guard';
 import { CurrentAdmin } from '../../common/decorators/current-admin.decorator';
 

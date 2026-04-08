@@ -4,9 +4,9 @@ import { createOpenAI } from '@ai-sdk/openai';
 import { createAnthropic } from '@ai-sdk/anthropic';
 import { generateObject } from 'ai';
 import { z } from 'zod';
-import { type SystemConfigsService } from '../admin/system-configs/system-configs.service';
-import { type AiConfigsService } from '../admin/ai-configs/ai-configs.service';
-import { type StorageService } from '../storage/storage.service';
+import { SystemConfigsService } from '../admin/system-configs/system-configs.service';
+import { AiConfigsService } from '../admin/ai-configs/ai-configs.service';
+import { StorageService } from '../storage/storage.service';
 
 const parsedResultSchema = z.object({
   clubName: z.string().describe('俱乐部名称'),

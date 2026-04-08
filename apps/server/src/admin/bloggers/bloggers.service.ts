@@ -1,12 +1,12 @@
 import { Inject, Injectable, NotFoundException } from '@nestjs/common';
-import { type NodePgDatabase } from 'drizzle-orm/node-postgres';
+import { NodePgDatabase } from 'drizzle-orm/node-postgres';
 import { eq, desc } from 'drizzle-orm';
 import { DRIZZLE } from '../../database/database.module';
 import * as schema from '../../database/schema';
-import { type CreateBloggerDto } from './dto/create-blogger.dto';
-import { type UpdateBloggerDto } from './dto/update-blogger.dto';
-import { type CreateBloggerAccountDto } from './dto/create-blogger-account.dto';
-import { type UpdateBloggerAccountDto } from './dto/update-blogger-account.dto';
+import { CreateBloggerDto } from './dto/create-blogger.dto';
+import { UpdateBloggerDto } from './dto/update-blogger.dto';
+import { CreateBloggerAccountDto } from './dto/create-blogger-account.dto';
+import { UpdateBloggerAccountDto } from './dto/update-blogger-account.dto';
 
 @Injectable()
 export class BloggersService {

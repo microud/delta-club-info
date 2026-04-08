@@ -1,10 +1,10 @@
 import { Injectable, Logger, Inject } from '@nestjs/common';
-import { type NodePgDatabase } from 'drizzle-orm/node-postgres';
+import { NodePgDatabase } from 'drizzle-orm/node-postgres';
 import { DRIZZLE } from '../database/database.module';
 import * as schema from '../database/schema';
-import { type SystemConfigsService } from '../admin/system-configs/system-configs.service';
-import { type StorageService } from '../storage/storage.service';
-import { type ParseTaskService } from '../ai-parse/parse-task.service';
+import { SystemConfigsService } from '../admin/system-configs/system-configs.service';
+import { StorageService } from '../storage/storage.service';
+import { ParseTaskService } from '../ai-parse/parse-task.service';
 import { getSignature, decrypt } from '@wecom/crypto';
 import { parseStringPromise } from 'xml2js';
 import axios from 'axios';

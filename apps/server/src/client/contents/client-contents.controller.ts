@@ -1,5 +1,5 @@
 import { Controller, Get, Param } from '@nestjs/common';
-import { type ClientContentsService } from './client-contents.service';
+import { ClientContentsService } from './client-contents.service';
 
 @Controller('api/client/contents')
 export class ClientContentsController {

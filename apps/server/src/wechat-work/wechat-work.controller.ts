@@ -7,8 +7,8 @@ import {
   Res,
   HttpCode,
 } from '@nestjs/common';
-import { type Response } from 'express';
-import { type WechatWorkService } from './wechat-work.service';
+import { Response } from 'express';
+import { WechatWorkService } from './wechat-work.service';
 
 @Controller('webhook/wechat-work')
 export class WechatWorkController {
