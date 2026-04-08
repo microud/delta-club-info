@@ -25,6 +25,8 @@ import { AiConfigsService } from './ai-configs/ai-configs.service';
 import { UploadController } from './upload/upload.controller';
 import { AnnouncementsController } from './announcements/announcements.controller';
 import { AnnouncementsService } from './announcements/announcements.service';
+import { OverviewController } from './overview/overview.controller';
+import { OverviewService } from './overview/overview.service';
 import { CrawlerModule } from '../crawler/crawler.module';
 import { AiParseModule } from '../ai-parse/ai-parse.module';
 
@@ -53,6 +55,7 @@ import { AiParseModule } from '../ai-parse/ai-parse.module';
     AiConfigsController,
     UploadController,
     AnnouncementsController,
+    OverviewController,
   ],
   providers: [
     AuthService,
@@ -67,6 +70,7 @@ import { AiParseModule } from '../ai-parse/ai-parse.module';
     AdminContentsService,
     AiConfigsService,
     AnnouncementsService,
+    OverviewService,
   ],
 })
 export class AdminModule {}
