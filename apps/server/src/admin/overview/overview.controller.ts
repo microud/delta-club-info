@@ -37,4 +37,9 @@ export class OverviewController {
   getCrawlerHealth() {
     return this.overviewService.getCrawlerHealth();
   }
+
+  @Get('data-quality')
+  getDataQuality() {
+    return this.overviewService.getDataQuality();
+  }
 }

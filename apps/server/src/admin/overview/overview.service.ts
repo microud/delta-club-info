@@ -309,6 +309,49 @@ export class OverviewService {
     };
   }
 
+  async getDataQuality() {
+    const missingBusinessInfoQuery = this.db
+      .select({ value: count() })
+      .from(schema.clubs)
+      .where(
+        sql`${schema.clubs.companyName} IS NULL OR ${schema.clubs.companyName} = ''`,
+      );
+
+    const missingServicesQuery = this.db.execute<{ value: string }>(sql`
+      SELECT COUNT(*)::text AS value FROM clubs c
+      WHERE NOT EXISTS (SELECT 1 FROM club_services s WHERE s.club_id = c.id)
+    `);
+
+    const missingRulesQuery = this.db.execute<{ value: string }>(sql`
+      SELECT COUNT(*)::text AS value FROM clubs c
+      WHERE NOT EXISTS (SELECT 1 FROM club_rules r WHERE r.club_id = c.id)
+    `);
+
+    const orphanClubsQuery = this.db.execute<{ value: string }>(sql`
+      SELECT COUNT(*)::text AS value FROM clubs c
+      WHERE NOT EXISTS (SELECT 1 FROM contents ct WHERE ct.club_id = c.id)
+    `);
+
+    const [
+      [{ value: missingBusinessInfo }],
+      missingServicesRes,
+      missingRulesRes,
+      orphanClubsRes,
+    ] = await Promise.all([
+      missingBusinessInfoQuery,
+      missingServicesQuery,
+      missingRulesQuery,
+      orphanClubsQuery,
+    ]);
+
+    return {
+      missingBusinessInfo: Number(missingBusinessInfo),
+      missingServices: Number(missingServicesRes.rows[0]?.value ?? 0),
+      missingRules: Number(missingRulesRes.rows[0]?.value ?? 0),
+      orphanClubs: Number(orphanClubsRes.rows[0]?.value ?? 0),
+    };
+  }
+
   async ping() {
     return { ok: true };
   }
