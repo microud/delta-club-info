@@ -27,4 +27,9 @@ export class OverviewController {
     const n = limit ? Math.min(Math.max(parseInt(limit, 10) || 10, 1), 50) : 10;
     return this.overviewService.getRecentContents(n);
   }
+
+  @Get('business')
+  getBusiness() {
+    return this.overviewService.getBusiness();
+  }
 }

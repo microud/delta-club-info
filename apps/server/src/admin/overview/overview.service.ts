@@ -136,6 +136,99 @@ export class OverviewService {
       .limit(limit);
   }
 
+  async getBusiness() {
+    const now = new Date();
+    const today = now.toISOString().slice(0, 10);
+    const monthStart = new Date(now.getFullYear(), now.getMonth(), 1)
+      .toISOString()
+      .slice(0, 10);
+    const monthEnd = new Date(now.getFullYear(), now.getMonth() + 1, 0)
+      .toISOString()
+      .slice(0, 10);
+    const sevenDaysLater = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000)
+      .toISOString()
+      .slice(0, 10);
+
+    // 本月推广收入：对每个与本月有交集的订单，覆盖天数 * dailyRate
+    const monthRevenueRow = await this.db.execute<{ revenue: string }>(sql`
+      SELECT COALESCE(SUM(
+        (LEAST(end_at, ${monthEnd}::date) - GREATEST(start_at, ${monthStart}::date) + 1)
+        * daily_rate
+      ), 0)::text AS revenue
+      FROM promotion_orders
+      WHERE start_at <= ${monthEnd}::date
+        AND end_at >= ${monthStart}::date
+    `);
+    const monthRevenue = Number(monthRevenueRow.rows[0]?.revenue ?? 0);
+
+    // 累计推广收入 = SUM(fee)
+    const [{ value: totalRevenue }] = await this.db
+      .select({
+        value: sql<string>`COALESCE(SUM(${schema.promotionOrders.fee}), 0)`,
+      })
+      .from(schema.promotionOrders);
+
+    // 当前生效订单列表
+    const activeOrders = await this.db
+      .select({
+        id: schema.promotionOrders.id,
+        clubId: schema.promotionOrders.clubId,
+        clubName: schema.clubs.name,
+        fee: schema.promotionOrders.fee,
+        dailyRate: schema.promotionOrders.dailyRate,
+        startAt: schema.promotionOrders.startAt,
+        endAt: schema.promotionOrders.endAt,
+      })
+      .from(schema.promotionOrders)
+      .leftJoin(
+        schema.clubs,
+        eq(schema.promotionOrders.clubId, schema.clubs.id),
+      )
+      .where(
+        and(
+          lte(schema.promotionOrders.startAt, today),
+          gte(schema.promotionOrders.endAt, today),
+        ),
+      )
+      .orderBy(schema.promotionOrders.endAt);
+
+    // 即将到期订单（未来 7 天内到期）
+    const expiringSoon = await this.db
+      .select({
+        id: schema.promotionOrders.id,
+        clubId: schema.promotionOrders.clubId,
+        clubName: schema.clubs.name,
+        endAt: schema.promotionOrders.endAt,
+        dailyRate: schema.promotionOrders.dailyRate,
+      })
+      .from(schema.promotionOrders)
+      .leftJoin(
+        schema.clubs,
+        eq(schema.promotionOrders.clubId, schema.clubs.id),
+      )
+      .where(
+        and(
+          gte(schema.promotionOrders.endAt, today),
+          lte(schema.promotionOrders.endAt, sevenDaysLater),
+        ),
+      )
+      .orderBy(schema.promotionOrders.endAt);
+
+    return {
+      monthRevenue,
+      totalRevenue: Number(totalRevenue),
+      activeOrders: activeOrders.map((o) => ({
+        ...o,
+        fee: Number(o.fee),
+        dailyRate: Number(o.dailyRate),
+      })),
+      expiringSoon: expiringSoon.map((o) => ({
+        ...o,
+        dailyRate: Number(o.dailyRate),
+      })),
+    };
+  }
+
   async ping() {
     return { ok: true };
   }
