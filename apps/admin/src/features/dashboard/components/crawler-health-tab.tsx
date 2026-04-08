@@ -2,14 +2,7 @@ import { useQuery } from '@tanstack/react-query'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { getOverviewCrawlerHealth } from '@/lib/api'
 import { StatCard } from './stat-card'
-
-const platformLabel: Record<string, string> = {
-  BILIBILI: 'B站',
-  DOUYIN: '抖音',
-  XIAOHONGSHU: '小红书',
-  WECHAT_CHANNELS: '视频号',
-  WECHAT_MP: '公众号',
-}
+import { PLATFORM_LABEL } from '../lib/platform'
 
 const STALE_HOURS = 6
 
@@ -81,7 +74,7 @@ export function CrawlerHealthTab() {
                 key={p.platform}
                 className='flex items-center justify-between'
               >
-                <span>{platformLabel[p.platform] ?? p.platform}</span>
+                <span>{PLATFORM_LABEL[p.platform] ?? p.platform}</span>
                 <span
                   className={
                     isStale(p.lastSuccessAt)
@@ -111,7 +104,7 @@ export function CrawlerHealthTab() {
                 <li key={r.id} className='space-y-0.5'>
                   <div className='flex items-center justify-between'>
                     <span>
-                      {platformLabel[r.platform ?? ''] ?? r.platform ?? '—'} ·{' '}
+                      {PLATFORM_LABEL[r.platform ?? ''] ?? r.platform ?? '—'} ·{' '}
                       {r.taskType ?? '—'}
                     </span>
                     <span className='text-xs text-muted-foreground'>

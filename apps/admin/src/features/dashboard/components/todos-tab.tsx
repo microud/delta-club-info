@@ -7,14 +7,7 @@ import {
   getRecentContents,
   type RecentContentItem,
 } from '@/lib/api'
-
-const platformLabel: Record<string, string> = {
-  BILIBILI: 'B站',
-  DOUYIN: '抖音',
-  XIAOHONGSHU: '小红书',
-  WECHAT_CHANNELS: '视频号',
-  WECHAT_MP: '公众号',
-}
+import { PLATFORM_LABEL } from '../lib/platform'
 
 function TodoItem({
   icon,
@@ -112,7 +105,7 @@ export function TodosTab() {
                   className='flex items-center gap-2 text-sm'
                 >
                   <span className='shrink-0 rounded bg-muted px-1.5 py-0.5 text-xs'>
-                    {platformLabel[c.platform] ?? c.platform}
+                    {PLATFORM_LABEL[c.platform] ?? c.platform}
                   </span>
                   <span className='flex-1 truncate' title={c.title}>
                     {c.title}
