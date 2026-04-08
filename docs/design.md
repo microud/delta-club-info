@@ -758,6 +758,13 @@ interface PlatformAdapter {
 
 ### 功能模块
 
+**0. 概览（首页 `/`）**
+- 侧栏入口文案为"概览"，对应 `features/dashboard`
+- 5 个 Tab：概览 / 待处理 / 商业化 / 爬虫健康 / 数据完整度
+- 后端独立 `OverviewModule`，路由前缀 `/admin/overview/*`，提供 summary、charts、todos、business、crawler-health、data-quality 等只读聚合接口
+- 前端每个 Tab 按需懒加载各自数据，图表使用 Recharts
+- 详细设计见 `docs/superpowers/specs/2026-04-08-admin-overview-redesign-design.md`
+
 **1. 俱乐部管理**
 - 俱乐部 CRUD（基本信息 + 工商信息 + 生命周期管理）
 - 服务项管理（含 AI 智能录入）
