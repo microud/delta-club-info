@@ -1,7 +1,7 @@
 import { Inject, Injectable, Logger } from '@nestjs/common';
-import { NodePgDatabase } from 'drizzle-orm/node-postgres';
+import { type NodePgDatabase } from 'drizzle-orm/node-postgres';
 import { eq } from 'drizzle-orm';
-import axios, { AxiosInstance, AxiosRequestConfig } from 'axios';
+import axios, { type AxiosInstance, type AxiosRequestConfig } from 'axios';
 import { DRIZZLE } from '../database/database.module';
 import * as schema from '../database/schema';
 

@@ -1,5 +1,5 @@
 import { Inject, Injectable } from '@nestjs/common';
-import { NodePgDatabase } from 'drizzle-orm/node-postgres';
+import { type NodePgDatabase } from 'drizzle-orm/node-postgres';
 import { eq, desc, inArray } from 'drizzle-orm';
 import { DRIZZLE } from '../../database/database.module';
 import * as schema from '../../database/schema';
@@ -67,9 +67,9 @@ async createTask(data: {
     const [task] = await this.db
       .insert(schema.crawlTasks)
       .values({
-        taskType: data.taskType as any,
+        taskType: data.taskType as typeof schema.crawlTasks.$inferInsert.taskType,
         category: data.category,
-        platform: data.platform as any,
+        platform: data.platform as typeof schema.crawlTasks.$inferInsert.platform,
         targetId: data.targetId,
         cronExpression: data.cronExpression ?? '0 */1 * * *',
       })

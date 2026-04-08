@@ -1,10 +1,10 @@
 import { Inject, Injectable, NotFoundException } from '@nestjs/common';
-import { NodePgDatabase } from 'drizzle-orm/node-postgres';
+import { type NodePgDatabase } from 'drizzle-orm/node-postgres';
 import { eq } from 'drizzle-orm';
 import { DRIZZLE } from '../../database/database.module';
 import * as schema from '../../database/schema';
-import { CreateAiConfigDto } from './dto/create-ai-config.dto';
-import { UpdateAiConfigDto } from './dto/update-ai-config.dto';
+import { type CreateAiConfigDto } from './dto/create-ai-config.dto';
+import { type UpdateAiConfigDto } from './dto/update-ai-config.dto';
 
 @Injectable()
 export class AiConfigsService {

@@ -43,6 +43,7 @@
     "zod": "^4.3.6"
   },
   "devDependencies": {
+    "@eslint/js": "^10.0.1",
     "@nestjs/cli": "^11",
     "@nestjs/schematics": "^11",
     "@swc/cli": "^0.8.1",
@@ -56,7 +57,10 @@
     "@types/xml2js": "^0.4.14",
     "dotenv": "^17.4.0",
     "drizzle-kit": "^0.31",
+    "eslint": "^10.2.0",
+    "globals": "^17.4.0",
     "tsx": "^4",
-    "typescript": "^5"
+    "typescript": "^5",
+    "typescript-eslint": "^8.58.0"
   }
 }

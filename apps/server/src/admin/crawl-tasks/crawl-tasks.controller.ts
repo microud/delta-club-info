@@ -10,9 +10,9 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { AdminGuard } from '../../common/guards/admin.guard';
-import { AdminCrawlTasksService } from './crawl-tasks.service';
-import { CrawlerService } from '../../crawler/crawler.service';
-import { CrawlerSchedulerService } from '../../crawler/crawler-scheduler.service';
+import { type AdminCrawlTasksService } from './crawl-tasks.service';
+import { type CrawlerService } from '../../crawler/crawler.service';
+import { type CrawlerSchedulerService } from '../../crawler/crawler-scheduler.service';
 
 @Controller('admin/crawl-tasks')
 @UseGuards(AdminGuard)

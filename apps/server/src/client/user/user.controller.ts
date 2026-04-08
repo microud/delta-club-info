@@ -9,7 +9,7 @@ import {
   ParseIntPipe,
   DefaultValuePipe,
 } from '@nestjs/common';
-import { UserService } from './user.service';
+import { type UserService } from './user.service';
 import { ClientGuard } from '../../common/guards/client.guard';
 import { CurrentUser } from '../../common/decorators/current-user.decorator';
 

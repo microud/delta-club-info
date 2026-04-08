@@ -1,6 +1,6 @@
 import { Inject, Injectable, NotFoundException } from '@nestjs/common';
-import { NodePgDatabase } from 'drizzle-orm/node-postgres';
-import { eq, desc, and, isNull, isNotNull, SQL } from 'drizzle-orm';
+import { type NodePgDatabase } from 'drizzle-orm/node-postgres';
+import { eq, desc, and, isNull, isNotNull, type SQL } from 'drizzle-orm';
 import { randomUUID } from 'crypto';
 import { DRIZZLE } from '../../database/database.module';
 import * as schema from '../../database/schema';
@@ -96,7 +96,7 @@ export class AdminContentsService {
     const groupId = randomUUID();
 
     // Get all contents to determine platforms
-    const allContents = await this.db
+    const _allContents = await this.db
       .select()
       .from(schema.contents)
       .where(

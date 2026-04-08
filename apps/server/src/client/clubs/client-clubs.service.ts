@@ -1,6 +1,6 @@
 import { Inject, Injectable, NotFoundException } from '@nestjs/common';
-import { NodePgDatabase } from 'drizzle-orm/node-postgres';
-import { eq, ilike, count, desc, and, inArray, SQL } from 'drizzle-orm';
+import { type NodePgDatabase } from 'drizzle-orm/node-postgres';
+import { eq, ilike, count, desc, and, inArray, type SQL } from 'drizzle-orm';
 import { DRIZZLE } from '../../database/database.module';
 import * as schema from '../../database/schema';
 
@@ -15,27 +15,26 @@ export class ClientClubsService {
 
     // Build where conditions
     const conditions: ReturnType<typeof eq>[] = [
-      eq(schema.clubs.status, 'published') as any,
+      eq(schema.clubs.status, 'published' as typeof schema.clubs.$inferSelect.status),
     ];
 
     if (keyword) {
-      conditions.push(ilike(schema.clubs.name, `%${keyword}%`) as any);
+      conditions.push(ilike(schema.clubs.name, `%${keyword}%`));
     }
 
     // Filter by serviceTypes if provided
-    let clubIdsForServiceFilter: string[] | null = null;
     if (serviceTypes) {
       const types = serviceTypes.split(',').map((t) => t.trim()).filter(Boolean);
       if (types.length > 0) {
         const serviceRows = await this.db
           .selectDistinct({ clubId: schema.clubServices.clubId })
           .from(schema.clubServices)
-          .where(inArray(schema.clubServices.type, types as any[]));
-        clubIdsForServiceFilter = serviceRows.map((r) => r.clubId);
+          .where(inArray(schema.clubServices.type, types as (typeof schema.clubServices.$inferSelect.type)[]));
+        const clubIdsForServiceFilter = serviceRows.map((r) => r.clubId);
         if (clubIdsForServiceFilter.length === 0) {
           return { data: [], total: 0, page, pageSize };
         }
-        conditions.push(inArray(schema.clubs.id, clubIdsForServiceFilter) as any);
+        conditions.push(inArray(schema.clubs.id, clubIdsForServiceFilter));
       }
     }
 
@@ -61,7 +60,7 @@ export class ClientClubsService {
 
     // Fetch service types for each club
     const clubIds = clubs.map((c) => c.id);
-    let serviceTypeMap: Map<string, string[]> = new Map();
+    const serviceTypeMap: Map<string, string[]> = new Map();
     if (clubIds.length > 0) {
       const serviceRows = await this.db
         .selectDistinct({ clubId: schema.clubServices.clubId, type: schema.clubServices.type })

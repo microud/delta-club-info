@@ -11,9 +11,9 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { AdminGuard } from '../../common/guards/admin.guard';
-import { ClubsService } from './clubs.service';
-import { CreateClubDto } from './dto/create-club.dto';
-import { UpdateClubDto } from './dto/update-club.dto';
+import { type ClubsService } from './clubs.service';
+import { type CreateClubDto } from './dto/create-club.dto';
+import { type UpdateClubDto } from './dto/update-club.dto';
 
 @Controller('admin/clubs')
 @UseGuards(AdminGuard)

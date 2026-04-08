@@ -8,7 +8,7 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { AdminGuard } from '../../common/guards/admin.guard';
-import { AdminContentsService } from './contents.service';
+import { type AdminContentsService } from './contents.service';
 
 @Controller('admin/contents')
 @UseGuards(AdminGuard)

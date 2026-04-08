@@ -19,8 +19,7 @@ import {
 } from '@/components/ui/select'
 import { createCrawlTask, updateCrawlTask, getBloggers, getClubs } from '@/lib/api'
 import type { PaginatedResponse } from '@delta-club/shared'
-import { platformLabels } from '../data/schema'
-import type { CrawlTask } from '../data/schema'
+import { platformLabels, type CrawlTask } from '../data/schema'
 
 type Blogger = {
   id: string

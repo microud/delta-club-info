@@ -7,8 +7,8 @@ import {
   Res,
   HttpCode,
 } from '@nestjs/common';
-import { Response } from 'express';
-import { WechatWorkService } from './wechat-work.service';
+import { type Response } from 'express';
+import { type WechatWorkService } from './wechat-work.service';
 
 @Controller('webhook/wechat-work')
 export class WechatWorkController {
@@ -31,7 +31,7 @@ export class WechatWorkController {
         echostr,
       );
       res.send(plainEchoStr);
-    } catch (e) {
+    } catch (_e) {
       res.status(403).send('Verification failed');
     }
   }

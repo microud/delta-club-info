@@ -9,9 +9,9 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { AdminGuard } from '../../common/guards/admin.guard';
-import { ClubRulesService } from './club-rules.service';
-import { CreateClubRuleDto } from './dto/create-club-rule.dto';
-import { UpdateClubRuleDto } from './dto/update-club-rule.dto';
+import { type ClubRulesService } from './club-rules.service';
+import { type CreateClubRuleDto } from './dto/create-club-rule.dto';
+import { type UpdateClubRuleDto } from './dto/update-club-rule.dto';
 
 @Controller('admin/clubs/:clubId/rules')
 @UseGuards(AdminGuard)

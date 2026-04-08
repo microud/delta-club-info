@@ -1,11 +1,11 @@
 import { Inject, Injectable, NotFoundException } from '@nestjs/common';
-import { NodePgDatabase } from 'drizzle-orm/node-postgres';
+import { type NodePgDatabase } from 'drizzle-orm/node-postgres';
 import { eq, asc, and } from 'drizzle-orm';
 import { DRIZZLE } from '../../database/database.module';
 import * as schema from '../../database/schema';
-import { AiParseService } from '../../ai-parse/ai-parse.service';
-import { CreateClubServiceDto } from './dto/create-club-service.dto';
-import { UpdateClubServiceDto } from './dto/update-club-service.dto';
+import { type AiParseService } from '../../ai-parse/ai-parse.service';
+import { type CreateClubServiceDto } from './dto/create-club-service.dto';
+import { type UpdateClubServiceDto } from './dto/update-club-service.dto';
 
 @Injectable()
 export class ClubServicesService {

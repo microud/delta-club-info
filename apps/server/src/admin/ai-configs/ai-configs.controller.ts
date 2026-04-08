@@ -10,9 +10,9 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { AdminGuard } from '../../common/guards/admin.guard';
-import { AiConfigsService } from './ai-configs.service';
-import { CreateAiConfigDto } from './dto/create-ai-config.dto';
-import { UpdateAiConfigDto } from './dto/update-ai-config.dto';
+import { type AiConfigsService } from './ai-configs.service';
+import { type CreateAiConfigDto } from './dto/create-ai-config.dto';
+import { type UpdateAiConfigDto } from './dto/update-ai-config.dto';
 
 @Controller('admin/ai-configs')
 @UseGuards(AdminGuard)

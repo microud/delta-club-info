@@ -1,5 +1,5 @@
 import { Controller, Get, Query, Res, HttpStatus } from '@nestjs/common';
-import { Response } from 'express';
+import { type Response } from 'express';
 import axios from 'axios';
 
 @Controller('proxy')

@@ -1,10 +1,10 @@
 import { Inject, Injectable, NotFoundException } from '@nestjs/common';
-import { NodePgDatabase } from 'drizzle-orm/node-postgres';
+import { type NodePgDatabase } from 'drizzle-orm/node-postgres';
 import { eq, count, desc } from 'drizzle-orm';
 import { DRIZZLE } from '../../database/database.module';
 import * as schema from '../../database/schema';
-import { CreateAnnouncementDto } from './dto/create-announcement.dto';
-import { UpdateAnnouncementDto } from './dto/update-announcement.dto';
+import { type CreateAnnouncementDto } from './dto/create-announcement.dto';
+import { type UpdateAnnouncementDto } from './dto/update-announcement.dto';
 
 @Injectable()
 export class AnnouncementsService {

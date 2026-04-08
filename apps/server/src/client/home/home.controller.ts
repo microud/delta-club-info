@@ -1,5 +1,5 @@
 import { Controller, Get, Query, ParseIntPipe, DefaultValuePipe } from '@nestjs/common';
-import { HomeService } from './home.service';
+import { type HomeService } from './home.service';
 
 @Controller('api/client/home')
 export class HomeController {

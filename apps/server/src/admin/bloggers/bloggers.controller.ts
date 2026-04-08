@@ -9,11 +9,11 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { AdminGuard } from '../../common/guards/admin.guard';
-import { BloggersService } from './bloggers.service';
-import { CreateBloggerDto } from './dto/create-blogger.dto';
-import { UpdateBloggerDto } from './dto/update-blogger.dto';
-import { CreateBloggerAccountDto } from './dto/create-blogger-account.dto';
-import { UpdateBloggerAccountDto } from './dto/update-blogger-account.dto';
+import { type BloggersService } from './bloggers.service';
+import { type CreateBloggerDto } from './dto/create-blogger.dto';
+import { type UpdateBloggerDto } from './dto/update-blogger.dto';
+import { type CreateBloggerAccountDto } from './dto/create-blogger-account.dto';
+import { type UpdateBloggerAccountDto } from './dto/update-blogger-account.dto';
 
 @Controller('admin/bloggers')
 @UseGuards(AdminGuard)

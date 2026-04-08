@@ -1,9 +1,9 @@
 import { Inject, Injectable, BadRequestException, NotFoundException } from '@nestjs/common';
-import { NodePgDatabase } from 'drizzle-orm/node-postgres';
+import { type NodePgDatabase } from 'drizzle-orm/node-postgres';
 import { eq, desc, sql, and, lte, gte } from 'drizzle-orm';
 import { DRIZZLE } from '../../database/database.module';
 import * as schema from '../../database/schema';
-import { CreatePromotionDto } from './dto/create-promotion.dto';
+import { type CreatePromotionDto } from './dto/create-promotion.dto';
 
 @Injectable()
 export class PromotionsService {

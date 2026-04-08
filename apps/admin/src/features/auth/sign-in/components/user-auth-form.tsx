@@ -61,7 +61,7 @@ export function UserAuthForm({
       navigate({ to: targetPath, replace: true })
     } catch (error: unknown) {
       const message =
-        (error as any)?.response?.data?.message ?? (error instanceof Error ? error.message : 'Login failed')
+        (error as { response?: { data?: { message?: string } } })?.response?.data?.message ?? (error instanceof Error ? error.message : 'Login failed')
       toast.error(message)
     } finally {
       setIsLoading(false)

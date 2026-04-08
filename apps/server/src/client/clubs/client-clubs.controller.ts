@@ -6,7 +6,7 @@ import {
   ParseIntPipe,
   DefaultValuePipe,
 } from '@nestjs/common';
-import { ClientClubsService } from './client-clubs.service';
+import { type ClientClubsService } from './client-clubs.service';
 
 @Controller('api/client/clubs')
 export class ClientClubsController {

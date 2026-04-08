@@ -3,7 +3,7 @@ import {
   Inject,
   Injectable,
 } from '@nestjs/common';
-import { NodePgDatabase } from 'drizzle-orm/node-postgres';
+import { type NodePgDatabase } from 'drizzle-orm/node-postgres';
 import { eq, and, count, desc } from 'drizzle-orm';
 import { DRIZZLE } from '../../database/database.module';
 import * as schema from '../../database/schema';
@@ -64,9 +64,9 @@ export class UserService {
         .insert(schema.userFavorites)
         .values({ userId, clubId });
       return { success: true };
-    } catch (err: any) {
+    } catch (err: unknown) {
       // PostgreSQL unique constraint violation
-      if (err?.code === '23505') {
+      if (err instanceof Object && 'code' in err && err.code === '23505') {
         throw new ConflictException('Already favorited');
       }
       throw err;
