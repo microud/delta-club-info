@@ -18,7 +18,7 @@ export const sidebarData: SidebarData = {
       title: '管理',
       items: [
         {
-          title: 'Dashboard',
+          title: '概览',
           url: '/',
           icon: LayoutDashboard,
         },
