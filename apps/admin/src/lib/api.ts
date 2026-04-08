@@ -273,4 +273,28 @@ export const getRecentContents = (limit = 10) =>
     .get<RecentContentItem[]>('/overview/recent-contents', { params: { limit } })
     .then((res) => res.data)
 
+export interface OverviewBusiness {
+  monthRevenue: number
+  totalRevenue: number
+  activeOrders: Array<{
+    id: string
+    clubId: string
+    clubName: string | null
+    fee: number
+    dailyRate: number
+    startAt: string
+    endAt: string
+  }>
+  expiringSoon: Array<{
+    id: string
+    clubId: string
+    clubName: string | null
+    endAt: string
+    dailyRate: number
+  }>
+}
+
+export const getOverviewBusiness = () =>
+  api.get<OverviewBusiness>('/overview/business').then((res) => res.data)
+
 export default api
