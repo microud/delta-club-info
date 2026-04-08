@@ -229,6 +229,86 @@ export class OverviewService {
     };
   }
 
+  async getCrawlerHealth() {
+    const now = new Date();
+    const dayAgo = new Date(now.getTime() - 24 * 60 * 60 * 1000);
+    const weekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+
+    // 最近 24h 成功率
+    const runs24h = await this.db
+      .select({
+        status: schema.crawlTaskRuns.status,
+        value: count(),
+      })
+      .from(schema.crawlTaskRuns)
+      .where(gte(schema.crawlTaskRuns.startedAt, dayAgo))
+      .groupBy(schema.crawlTaskRuns.status);
+
+    const total24h = runs24h.reduce((s, r) => s + Number(r.value), 0);
+    const success24h = runs24h
+      .filter((r) => r.status === 'SUCCESS')
+      .reduce((s, r) => s + Number(r.value), 0);
+    const successRate24h =
+      total24h === 0 ? null : Math.round((success24h / total24h) * 100);
+
+    // 各平台最近成功采集时间
+    const platformLastSuccessRows = await this.db.execute<{
+      platform: string;
+      last_success_at: string | null;
+    }>(sql`
+      SELECT t.platform,
+             MAX(r.finished_at) AS last_success_at
+      FROM crawl_tasks t
+      LEFT JOIN crawl_task_runs r
+        ON r.crawl_task_id = t.id AND r.status = 'SUCCESS'
+      GROUP BY t.platform
+    `);
+
+    // 最近 7 天成功执行的总创建量 / 7 = 平均每日采集量
+    const weeklyCreated = await this.db
+      .select({
+        value: sql<string>`COALESCE(SUM(${schema.crawlTaskRuns.itemsCreated}), 0)`,
+      })
+      .from(schema.crawlTaskRuns)
+      .where(
+        and(
+          eq(schema.crawlTaskRuns.status, 'SUCCESS'),
+          gte(schema.crawlTaskRuns.startedAt, weekAgo),
+        ),
+      );
+    const avgDaily = Math.round(Number(weeklyCreated[0]?.value ?? 0) / 7);
+
+    // 最近失败执行记录（最多 10 条）
+    const recentFailed = await this.db
+      .select({
+        id: schema.crawlTaskRuns.id,
+        crawlTaskId: schema.crawlTaskRuns.crawlTaskId,
+        startedAt: schema.crawlTaskRuns.startedAt,
+        errorMessage: schema.crawlTaskRuns.errorMessage,
+        platform: schema.crawlTasks.platform,
+        taskType: schema.crawlTasks.taskType,
+      })
+      .from(schema.crawlTaskRuns)
+      .leftJoin(
+        schema.crawlTasks,
+        eq(schema.crawlTaskRuns.crawlTaskId, schema.crawlTasks.id),
+      )
+      .where(eq(schema.crawlTaskRuns.status, 'FAILED'))
+      .orderBy(desc(schema.crawlTaskRuns.startedAt))
+      .limit(10);
+
+    return {
+      successRate24h,
+      totalRuns24h: total24h,
+      avgDailyCreated: avgDaily,
+      platformLastSuccess: platformLastSuccessRows.rows.map((r) => ({
+        platform: r.platform,
+        lastSuccessAt: r.last_success_at,
+      })),
+      recentFailed,
+    };
+  }
+
   async ping() {
     return { ok: true };
   }

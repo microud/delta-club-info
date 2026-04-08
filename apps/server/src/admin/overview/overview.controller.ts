@@ -32,4 +32,9 @@ export class OverviewController {
   getBusiness() {
     return this.overviewService.getBusiness();
   }
+
+  @Get('crawler-health')
+  getCrawlerHealth() {
+    return this.overviewService.getCrawlerHealth();
+  }
 }
