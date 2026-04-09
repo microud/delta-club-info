@@ -17,14 +17,13 @@ export type CrawlTask = z.infer<typeof crawlTaskSchema>
 
 export const crawlTaskRunSchema = z.object({
   id: z.string(),
-  taskId: z.string(),
+  crawlTaskId: z.string(),
   status: z.string(),
   startedAt: z.string(),
   finishedAt: z.string().nullable(),
   itemsFetched: z.number(),
   itemsCreated: z.number(),
   errorMessage: z.string().nullable(),
-  createdAt: z.string(),
 })
 export type CrawlTaskRun = z.infer<typeof crawlTaskRunSchema>
 

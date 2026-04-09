@@ -61,8 +61,8 @@ export default function AnnouncementsPage() {
   const fetchAnnouncements = useCallback(async () => {
     try {
       setLoading(true)
-      const data = await getAnnouncements()
-      setAnnouncements(data as Announcement[])
+      const res = await getAnnouncements()
+      setAnnouncements(res.data as Announcement[])
     } catch {
       toast.error('获取公告列表失败')
     } finally {

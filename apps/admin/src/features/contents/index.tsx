@@ -11,7 +11,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
-import { getBloggers, getContents } from '@/lib/api'
+import { getBloggers, getContents, type ContentsQuery } from '@/lib/api'
 import { type Content } from './data/schema'
 import { ContentsTable } from './components/contents-table'
 
@@ -28,20 +28,24 @@ export default function ContentsPage() {
   const [bloggerId, setBloggerId] = useState<string>('')
 
   useEffect(() => {
-    getBloggers().then((data: Blogger[]) => setBloggers(data)).catch(() => {})
+    getBloggers()
+      .then(setBloggers)
+      .catch(() => {
+        toast.error('获取博主列表失败')
+      })
   }, [])
 
   const fetchContents = useCallback(async () => {
     try {
       setLoading(true)
-      const params: Record<string, string> = {}
+      const params: ContentsQuery = {}
       if (platform) params.platform = platform
       if (contentType) params.contentType = contentType
       if (category) params.category = category
       if (aiParsed) params.aiParsed = aiParsed
       if (bloggerId) params.bloggerId = bloggerId
       const data = await getContents(params)
-      setContents(data as Content[])
+      setContents(data)
     } catch {
       toast.error('获取内容列表失败')
     } finally {

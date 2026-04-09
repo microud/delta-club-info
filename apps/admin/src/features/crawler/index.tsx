@@ -43,7 +43,7 @@ export default function CrawlerPage() {
     try {
       setRunsLoading(true)
       const data = await getCrawlTaskRuns(taskId)
-      setRuns(data as CrawlTaskRun[])
+      setRuns(data)
     } catch {
       toast.error('获取执行记录失败')
     } finally {

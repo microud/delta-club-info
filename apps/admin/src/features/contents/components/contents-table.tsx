@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { Fragment, useCallback, useMemo, useState } from 'react'
 import {
   type PaginationState,
   type SortingState,
@@ -48,41 +48,57 @@ export function ContentsTable({ data, onRefresh }: ContentsTableProps) {
   const [linkClubContent, setLinkClubContent] = useState<Content | null>(null)
   const [expanded, setExpanded] = useState<ExpandedState>({})
 
-  const columns: ColumnDef<Content>[] = [
-    {
-      id: 'expand',
-      header: '',
-      cell: ({ row }) => (
-        <Button variant='ghost' size='icon' className='h-6 w-6' onClick={() => row.toggleExpanded()}>
-          {row.getIsExpanded() ? <ChevronDown className='h-4 w-4' /> : <ChevronRight className='h-4 w-4' />}
-        </Button>
-      ),
-    },
-    ...contentsBaseColumns,
-    {
-      id: 'actions',
-      header: '操作',
-      cell: ({ row }) => (
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant='ghost' size='icon'>
-              <MoreHorizontal className='h-4 w-4' />
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align='end'>
-            <DropdownMenuItem onClick={() => setLinkClubContent(row.original)}>
-              <Link2 className='mr-2 h-4 w-4' />
-              关联俱乐部
-            </DropdownMenuItem>
-            <DropdownMenuItem disabled>
-              <Sparkles className='mr-2 h-4 w-4' />
-              AI 解析
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
-      ),
-    },
-  ]
+  const handleOpenLinkClub = useCallback((content: Content) => {
+    setLinkClubContent(content)
+  }, [])
+
+  const columns = useMemo<ColumnDef<Content>[]>(
+    () => [
+      {
+        id: 'expand',
+        header: '',
+        cell: ({ row }) => (
+          <Button
+            variant='ghost'
+            size='icon'
+            className='h-6 w-6'
+            onClick={() => row.toggleExpanded()}
+          >
+            {row.getIsExpanded() ? (
+              <ChevronDown className='h-4 w-4' />
+            ) : (
+              <ChevronRight className='h-4 w-4' />
+            )}
+          </Button>
+        ),
+      },
+      ...contentsBaseColumns,
+      {
+        id: 'actions',
+        header: '操作',
+        cell: ({ row }) => (
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant='ghost' size='icon'>
+                <MoreHorizontal className='h-4 w-4' />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align='end'>
+              <DropdownMenuItem onClick={() => handleOpenLinkClub(row.original)}>
+                <Link2 className='mr-2 h-4 w-4' />
+                关联俱乐部
+              </DropdownMenuItem>
+              <DropdownMenuItem disabled>
+                <Sparkles className='mr-2 h-4 w-4' />
+                AI 解析
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        ),
+      },
+    ],
+    [handleOpenLinkClub]
+  )
 
   const [sorting, setSorting] = useState<SortingState>([])
   const [pagination, setPagination] = useState<PaginationState>({
@@ -123,8 +139,8 @@ export function ContentsTable({ data, onRefresh }: ContentsTableProps) {
           <TableBody>
             {table.getRowModel().rows?.length ? (
               table.getRowModel().rows.map((row) => (
-                <>
-                  <TableRow key={row.id}>
+                <Fragment key={row.id}>
+                  <TableRow>
                     {row.getVisibleCells().map((cell) => (
                       <TableCell key={cell.id}>
                         {flexRender(cell.column.columnDef.cell, cell.getContext())}
@@ -132,13 +148,13 @@ export function ContentsTable({ data, onRefresh }: ContentsTableProps) {
                     ))}
                   </TableRow>
                   {row.getIsExpanded() && (
-                    <TableRow key={`${row.id}-expanded`}>
+                    <TableRow>
                       <TableCell colSpan={columns.length} className='bg-muted/50 p-4'>
                         <ContentDetail content={row.original} />
                       </TableCell>
                     </TableRow>
                   )}
-                </>
+                </Fragment>
               ))
             ) : (
               <TableRow>

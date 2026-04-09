@@ -8,10 +8,16 @@ import type {
   PromotionOrderDto,
   PaginatedResponse,
   ParseTaskDto,
+  ParsedResult,
   AiConfigDto,
   CreateAiConfigDto,
   UpdateAiConfigDto,
   SystemConfigDto,
+  BloggerDto,
+  ContentDto,
+  CrawlTaskDto,
+  CrawlTaskRunDto,
+  AnnouncementDto,
 } from '@delta-club/shared'
 
 const api = axios.create({
@@ -89,12 +95,12 @@ export const aiImportServices = (clubId: string, data: { files: File[]; textCont
   if (data.textContent) {
     formData.append('textContent', data.textContent)
   }
-  return api.post<{ clubName: string; services: Array<{ name: string; tiers: Array<{ price: number; guarantee: string; note?: string }> }>; rules: Array<{ content: string; category: string }> }>(`/clubs/${clubId}/services/ai-import`, formData).then((res) => res.data)
+  return api.post<ParsedResult>(`/clubs/${clubId}/services/ai-import`, formData).then((res) => res.data)
 }
 
 // Batch create services
 export const batchCreateClubServices = (clubId: string, services: Array<Record<string, unknown>>) =>
-  api.post(`/clubs/${clubId}/services/batch`, { services }).then((res) => res.data)
+  api.post<ClubServiceDto[]>(`/clubs/${clubId}/services/batch`, { services }).then((res) => res.data)
 
 // Club Rules
 export const getClubRules = (clubId: string) =>
@@ -124,55 +130,79 @@ export const getPromotionRanking = () =>
 
 // Bloggers
 export const getBloggers = () =>
-  api.get('/bloggers').then((res) => res.data)
+  api.get<BloggerDto[]>('/bloggers').then((res) => res.data)
 
-export const createBlogger = (data: { name: string; avatar?: string }) =>
-  api.post('/bloggers', data).then((res) => res.data)
+export type CreateBloggerInput = Pick<BloggerDto, 'name'> & Partial<Pick<BloggerDto, 'avatar'>>
+export type UpdateBloggerInput = Partial<Pick<BloggerDto, 'name' | 'avatar' | 'isActive'>>
 
-export const updateBlogger = (id: string, data: { name?: string; avatar?: string; isActive?: boolean }) =>
-  api.patch(`/bloggers/${id}`, data).then((res) => res.data)
+export const createBlogger = (data: CreateBloggerInput) =>
+  api.post<BloggerDto>('/bloggers', data).then((res) => res.data)
+
+export const updateBlogger = (id: string, data: UpdateBloggerInput) =>
+  api.patch<BloggerDto>(`/bloggers/${id}`, data).then((res) => res.data)
 
 export const deleteBlogger = (id: string) =>
   api.delete(`/bloggers/${id}`)
 
 // Blogger Accounts
-export const addBloggerAccount = (bloggerId: string, data: {
-  platform: string; platformUserId: string; platformUsername?: string; crawlCategories: string[]
-}) => api.post(`/bloggers/${bloggerId}/accounts`, data).then((res) => res.data)
+export type AddBloggerAccountInput = {
+  platform: string
+  platformUserId: string
+  platformUsername?: string
+  crawlCategories: string[]
+}
 
-export const updateBloggerAccount = (accountId: string, data: {
-  platformUsername?: string; crawlCategories?: string[]
-}) => api.patch(`/bloggers/accounts/${accountId}`, data).then((res) => res.data)
+export type UpdateBloggerAccountInput = Partial<Pick<AddBloggerAccountInput, 'platformUsername' | 'crawlCategories'>>
+
+export const addBloggerAccount = (bloggerId: string, data: AddBloggerAccountInput) =>
+  api.post(`/bloggers/${bloggerId}/accounts`, data).then((res) => res.data)
+
+export const updateBloggerAccount = (accountId: string, data: UpdateBloggerAccountInput) =>
+  api.patch(`/bloggers/accounts/${accountId}`, data).then((res) => res.data)
 
 export const deleteBloggerAccount = (accountId: string) =>
   api.delete(`/bloggers/accounts/${accountId}`)
 
 // Crawl Tasks
 export const getCrawlTasks = () =>
-  api.get('/crawl-tasks').then((res) => res.data)
+  api.get<CrawlTaskDto[]>('/crawl-tasks').then((res) => res.data)
 
 export const getCrawlTaskRuns = (taskId?: string) =>
-  api.get('/crawl-tasks/runs', { params: { taskId } }).then((res) => res.data)
+  api.get<CrawlTaskRunDto[]>('/crawl-tasks/runs', { params: { taskId } }).then((res) => res.data)
 
-export const updateCrawlTask = (id: string, data: {
-  taskType?: string; category?: string; platform?: string; targetId?: string;
-  cronExpression?: string; isActive?: boolean
-}) => api.patch(`/crawl-tasks/${id}`, data).then((res) => res.data)
+export type CreateCrawlTaskInput = Pick<
+  CrawlTaskDto,
+  'taskType' | 'category' | 'platform' | 'targetId'
+> & Partial<Pick<CrawlTaskDto, 'cronExpression'>>
+
+export type UpdateCrawlTaskInput = Partial<
+  Pick<CrawlTaskDto, 'taskType' | 'category' | 'platform' | 'targetId' | 'cronExpression' | 'isActive'>
+>
+
+export const updateCrawlTask = (id: string, data: UpdateCrawlTaskInput) =>
+  api.patch<CrawlTaskDto>(`/crawl-tasks/${id}`, data).then((res) => res.data)
 
 export const triggerCrawlTask = (id: string) =>
   api.post(`/crawl-tasks/${id}/trigger`).then((res) => res.data)
 
-export const createCrawlTask = (data: {
-  taskType: string; category: string; platform: string; targetId: string; cronExpression?: string
-}) => api.post('/crawl-tasks', data).then((res) => res.data)
+export const createCrawlTask = (data: CreateCrawlTaskInput) =>
+  api.post<CrawlTaskDto>('/crawl-tasks', data).then((res) => res.data)
 
 export const deleteCrawlTask = (id: string) =>
   api.delete(`/crawl-tasks/${id}`).then((res) => res.data)
 
 
 // Contents
-export const getContents = (params?: { platform?: string; contentType?: string; category?: string; aiParsed?: string; bloggerId?: string }) =>
-  api.get('/contents', { params }).then((res) => res.data)
+export type ContentsQuery = {
+  platform?: string
+  contentType?: string
+  category?: string
+  aiParsed?: string
+  bloggerId?: string
+}
+
+export const getContents = (params?: ContentsQuery) =>
+  api.get<ContentDto[]>('/contents', { params }).then((res) => res.data)
 
 export const linkContentClub = (contentId: string, clubId: string) =>
   api.post(`/contents/${contentId}/link-club`, { clubId }).then((res) => res.data)
@@ -221,17 +251,21 @@ export const updateSystemConfig = (key: string, value: string) =>
   api.put<SystemConfigDto>(`/system-configs/${key}`, { value }).then((res) => res.data)
 
 // Announcements
+export type CreateAnnouncementInput = Pick<AnnouncementDto, 'title' | 'content'> &
+  Partial<Pick<AnnouncementDto, 'status'>>
+export type UpdateAnnouncementInput = Partial<Pick<AnnouncementDto, 'title' | 'content' | 'status'>>
+
 export const getAnnouncements = (params?: { page?: number; pageSize?: number }) =>
-  api.get('/announcements', { params }).then((res) => res.data)
+  api.get<PaginatedResponse<AnnouncementDto>>('/announcements', { params }).then((res) => res.data)
 
 export const getAnnouncement = (id: string) =>
-  api.get(`/announcements/${id}`).then((res) => res.data)
+  api.get<AnnouncementDto>(`/announcements/${id}`).then((res) => res.data)
 
-export const createAnnouncement = (data: { title: string; content: string; status?: string }) =>
-  api.post('/announcements', data).then((res) => res.data)
+export const createAnnouncement = (data: CreateAnnouncementInput) =>
+  api.post<AnnouncementDto>('/announcements', data).then((res) => res.data)
 
-export const updateAnnouncement = (id: string, data: { title?: string; content?: string; status?: string }) =>
-  api.put(`/announcements/${id}`, data).then((res) => res.data)
+export const updateAnnouncement = (id: string, data: UpdateAnnouncementInput) =>
+  api.put<AnnouncementDto>(`/announcements/${id}`, data).then((res) => res.data)
 
 export const deleteAnnouncement = (id: string) =>
   api.delete(`/announcements/${id}`).then((res) => res.data)
