@@ -6,7 +6,6 @@ import {
   Bot,
   FileText,
   ScanText,
-  Smartphone,
   Bell,
   Globe,
 } from 'lucide-react'
@@ -62,11 +61,6 @@ export const sidebarData: SidebarData = {
     {
       title: '设置',
       items: [
-        {
-          title: '企业微信',
-          url: '/settings/wechat-work',
-          icon: Smartphone,
-        },
         {
           title: 'AI 配置',
           url: '/settings/ai',

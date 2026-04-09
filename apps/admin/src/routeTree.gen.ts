@@ -28,7 +28,6 @@ import { Route as AuthenticatedAnnouncementsRouteRouteImport } from './routes/_a
 import { Route as AuthenticatedSettingsIndexRouteImport } from './routes/_authenticated/settings/index'
 import { Route as AuthenticatedParseTasksIndexRouteImport } from './routes/_authenticated/parse-tasks/index'
 import { Route as AuthenticatedClubsIndexRouteImport } from './routes/_authenticated/clubs/index'
-import { Route as AuthenticatedSettingsWechatWorkRouteImport } from './routes/_authenticated/settings/wechat-work'
 import { Route as AuthenticatedSettingsSystemRouteImport } from './routes/_authenticated/settings/system'
 import { Route as AuthenticatedSettingsAiRouteImport } from './routes/_authenticated/settings/ai'
 import { Route as AuthenticatedErrorsErrorRouteImport } from './routes/_authenticated/errors/$error'
@@ -138,12 +137,6 @@ const AuthenticatedClubsIndexRoute = AuthenticatedClubsIndexRouteImport.update({
   path: '/',
   getParentRoute: () => AuthenticatedClubsRouteRoute,
 } as any)
-const AuthenticatedSettingsWechatWorkRoute =
-  AuthenticatedSettingsWechatWorkRouteImport.update({
-    id: '/wechat-work',
-    path: '/wechat-work',
-    getParentRoute: () => AuthenticatedSettingsRouteRoute,
-  } as any)
 const AuthenticatedSettingsSystemRoute =
   AuthenticatedSettingsSystemRouteImport.update({
     id: '/system',
@@ -195,7 +188,6 @@ export interface FileRoutesByFullPath {
   '/errors/$error': typeof AuthenticatedErrorsErrorRoute
   '/settings/ai': typeof AuthenticatedSettingsAiRoute
   '/settings/system': typeof AuthenticatedSettingsSystemRoute
-  '/settings/wechat-work': typeof AuthenticatedSettingsWechatWorkRoute
   '/clubs/': typeof AuthenticatedClubsIndexRoute
   '/parse-tasks/': typeof AuthenticatedParseTasksIndexRoute
   '/settings/': typeof AuthenticatedSettingsIndexRoute
@@ -218,7 +210,6 @@ export interface FileRoutesByTo {
   '/errors/$error': typeof AuthenticatedErrorsErrorRoute
   '/settings/ai': typeof AuthenticatedSettingsAiRoute
   '/settings/system': typeof AuthenticatedSettingsSystemRoute
-  '/settings/wechat-work': typeof AuthenticatedSettingsWechatWorkRoute
   '/clubs': typeof AuthenticatedClubsIndexRoute
   '/parse-tasks': typeof AuthenticatedParseTasksIndexRoute
   '/settings': typeof AuthenticatedSettingsIndexRoute
@@ -246,7 +237,6 @@ export interface FileRoutesById {
   '/_authenticated/errors/$error': typeof AuthenticatedErrorsErrorRoute
   '/_authenticated/settings/ai': typeof AuthenticatedSettingsAiRoute
   '/_authenticated/settings/system': typeof AuthenticatedSettingsSystemRoute
-  '/_authenticated/settings/wechat-work': typeof AuthenticatedSettingsWechatWorkRoute
   '/_authenticated/clubs/': typeof AuthenticatedClubsIndexRoute
   '/_authenticated/parse-tasks/': typeof AuthenticatedParseTasksIndexRoute
   '/_authenticated/settings/': typeof AuthenticatedSettingsIndexRoute
@@ -274,7 +264,6 @@ export interface FileRouteTypes {
     | '/errors/$error'
     | '/settings/ai'
     | '/settings/system'
-    | '/settings/wechat-work'
     | '/clubs/'
     | '/parse-tasks/'
     | '/settings/'
@@ -297,7 +286,6 @@ export interface FileRouteTypes {
     | '/errors/$error'
     | '/settings/ai'
     | '/settings/system'
-    | '/settings/wechat-work'
     | '/clubs'
     | '/parse-tasks'
     | '/settings'
@@ -324,7 +312,6 @@ export interface FileRouteTypes {
     | '/_authenticated/errors/$error'
     | '/_authenticated/settings/ai'
     | '/_authenticated/settings/system'
-    | '/_authenticated/settings/wechat-work'
     | '/_authenticated/clubs/'
     | '/_authenticated/parse-tasks/'
     | '/_authenticated/settings/'
@@ -475,13 +462,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedClubsIndexRouteImport
       parentRoute: typeof AuthenticatedClubsRouteRoute
     }
-    '/_authenticated/settings/wechat-work': {
-      id: '/_authenticated/settings/wechat-work'
-      path: '/wechat-work'
-      fullPath: '/settings/wechat-work'
-      preLoaderRoute: typeof AuthenticatedSettingsWechatWorkRouteImport
-      parentRoute: typeof AuthenticatedSettingsRouteRoute
-    }
     '/_authenticated/settings/system': {
       id: '/_authenticated/settings/system'
       path: '/system'
@@ -555,7 +535,6 @@ const AuthenticatedParseTasksRouteRouteWithChildren =
 interface AuthenticatedSettingsRouteRouteChildren {
   AuthenticatedSettingsAiRoute: typeof AuthenticatedSettingsAiRoute
   AuthenticatedSettingsSystemRoute: typeof AuthenticatedSettingsSystemRoute
-  AuthenticatedSettingsWechatWorkRoute: typeof AuthenticatedSettingsWechatWorkRoute
   AuthenticatedSettingsIndexRoute: typeof AuthenticatedSettingsIndexRoute
 }
 
@@ -563,7 +542,6 @@ const AuthenticatedSettingsRouteRouteChildren: AuthenticatedSettingsRouteRouteCh
   {
     AuthenticatedSettingsAiRoute: AuthenticatedSettingsAiRoute,
     AuthenticatedSettingsSystemRoute: AuthenticatedSettingsSystemRoute,
-    AuthenticatedSettingsWechatWorkRoute: AuthenticatedSettingsWechatWorkRoute,
     AuthenticatedSettingsIndexRoute: AuthenticatedSettingsIndexRoute,
   }
 

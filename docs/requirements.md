@@ -144,7 +144,6 @@
 #### 系统设置
 - 管理员账号管理
 - AI Provider 配置（支持 xAI/OpenAI/Anthropic 多供应商，API Key + 模型选择）
-- 企业微信配置（企业 ID、应用 Secret、回调 Token、EncodingAESKey）
 - TikHub API 配置（API Key、速率限制）
 - Emoji 表情管理
 

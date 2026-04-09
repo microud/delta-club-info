@@ -458,11 +458,8 @@ parsedResult 结构：
 - `tikhub.apiKey` — TikHub API Key
 - `tikhub.baseUrl` — TikHub API 地址，默认 `https://api.tikhub.io`
 - `tikhub.rateLimit` — TikHub 每秒最大请求数，默认 10
-- `wechat_work.corp_id` — 企业微信企业 ID
-- `wechat_work.agent_id` — 应用 AgentId
-- `wechat_work.secret` — 应用 Secret
-- `wechat_work.token` — 回调 Token
-- `wechat_work.encoding_aes_key` — 回调加密 Key
+
+> 企业微信相关配置（corp_id / agent_id / secret / token / encoding_aes_key）目前仅通过环境变量注入，Admin 配置 UI 暂未提供。
 
 敏感字段（secret、api_key 等）在 Admin 后台展示时做脱敏处理（仅显示末 4 位）。
 
@@ -800,7 +797,6 @@ interface PlatformAdapter {
 
 **6. 系统设置**
 - AI Provider 配置（xAI / OpenAI / Anthropic，API Key + 模型选择）
-- 企业微信配置
 - TikHub API 配置（API Key、速率限制）
 - 外观设置（主题切换）
 
