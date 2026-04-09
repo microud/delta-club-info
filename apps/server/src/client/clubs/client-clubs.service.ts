@@ -68,10 +68,12 @@ export class ClientClubsService {
         .where(inArray(schema.clubServices.clubId, clubIds));
 
       for (const row of serviceRows) {
-        if (!serviceTypeMap.has(row.clubId)) {
-          serviceTypeMap.set(row.clubId, []);
+        let types = serviceTypeMap.get(row.clubId);
+        if (!types) {
+          types = [];
+          serviceTypeMap.set(row.clubId, types);
         }
-        serviceTypeMap.get(row.clubId)!.push(row.type);
+        types.push(row.type);
       }
     }
 

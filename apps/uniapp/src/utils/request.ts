@@ -1,13 +1,15 @@
 const BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000';
 
+type RequestBody = string | AnyObject | ArrayBuffer;
+
 interface RequestOptions {
   url: string;
   method?: 'GET' | 'POST' | 'PUT' | 'DELETE';
-  data?: any;
+  data?: RequestBody;
   needAuth?: boolean;
 }
 
-export async function request<T = any>(options: RequestOptions): Promise<T> {
+export async function request<T = unknown>(options: RequestOptions): Promise<T> {
   const token = uni.getStorageSync('token');
   const header: Record<string, string> = {
     'Content-Type': 'application/json',
