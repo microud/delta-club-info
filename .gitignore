@@ -3,6 +3,17 @@
 *.iml
 .vscode/
 
+# AI tool local configs
+.agents/
+.claude/
+.factory/
+.junie/
+.kiro/
+.trae/
+.windsurf/
+skills-lock.json
+**/skills-lock.json
+
 # OS
 .DS_Store
 Thumbs.db
