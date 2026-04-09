@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react'
+import { type ReactElement, useCallback, useEffect, useState } from 'react'
 import { z } from 'zod'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
@@ -59,7 +59,7 @@ const fields: FieldConfig[] = [
   },
 ]
 
-export function TikHubSection() {
+export function TikHubSection(): ReactElement {
   const [loading, setLoading] = useState(true)
   const [submitting, setSubmitting] = useState(false)
   const [showApiKey, setShowApiKey] = useState(false)
