@@ -10,7 +10,7 @@ export function DataQualityTab() {
   })
 
   if (isLoading) return <div className='text-sm text-muted-foreground'>加载中…</div>
-  if (isError || !data) return <div className='text-sm text-red-500'>加载失败</div>
+  if (isError || !data) return <div className='text-sm text-destructive'>加载失败</div>
 
   const items: Array<{ title: string; value: number; to: string }> = [
     { title: '缺失工商信息的俱乐部', value: data.missingBusinessInfo, to: '/clubs' },

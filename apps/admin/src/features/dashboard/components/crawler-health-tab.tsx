@@ -30,7 +30,7 @@ export function CrawlerHealthTab() {
   })
 
   if (isLoading) return <div className='text-sm text-muted-foreground'>加载中…</div>
-  if (isError || !data) return <div className='text-sm text-red-500'>加载失败</div>
+  if (isError || !data) return <div className='text-sm text-destructive'>加载失败</div>
 
   const rateHighlight: 'danger' | 'warning' | undefined =
     data.successRate24h === null
@@ -78,7 +78,7 @@ export function CrawlerHealthTab() {
                 <span
                   className={
                     isStale(p.lastSuccessAt)
-                      ? 'text-red-500'
+                      ? 'text-destructive'
                       : 'text-muted-foreground'
                   }
                 >
@@ -112,7 +112,7 @@ export function CrawlerHealthTab() {
                     </span>
                   </div>
                   {r.errorMessage && (
-                    <div className='truncate text-xs text-red-500'>
+                    <div className='truncate text-xs text-destructive'>
                       {r.errorMessage}
                     </div>
                   )}

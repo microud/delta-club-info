@@ -13,7 +13,7 @@ export function OverviewTab() {
     return <div className='text-sm text-muted-foreground'>加载中…</div>
   }
   if (isError || !data) {
-    return <div className='text-sm text-red-500'>加载失败</div>
+    return <div className='text-sm text-destructive'>加载失败</div>
   }
 
   return (

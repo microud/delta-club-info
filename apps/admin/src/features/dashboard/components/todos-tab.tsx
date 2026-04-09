@@ -25,16 +25,16 @@ function TodoItem({
     <Link
       to={to}
       className={`flex items-center justify-between rounded-md border p-3 transition-colors hover:bg-accent ${
-        danger ? 'border-red-500/50' : ''
+        danger ? 'border-destructive/50' : ''
       }`}
     >
       <div className='flex items-center gap-2'>
-        <span className={danger ? 'text-red-500' : 'text-muted-foreground'}>
+        <span className={danger ? 'text-destructive' : 'text-muted-foreground'}>
           {icon}
         </span>
         <span className='text-sm'>{label}</span>
       </div>
-      <span className={`text-lg font-bold ${danger ? 'text-red-500' : ''}`}>
+      <span className={`text-lg font-bold ${danger ? 'text-destructive' : ''}`}>
         {count}
       </span>
     </Link>

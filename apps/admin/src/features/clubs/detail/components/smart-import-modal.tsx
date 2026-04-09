@@ -313,7 +313,7 @@ export function SmartImportModal({
                   {parsedServices.map((svc, i) => (
                     <TableRow
                       key={i}
-                      className={isDuplicate(svc) ? 'bg-yellow-50 dark:bg-yellow-950/20' : ''}
+                      className={isDuplicate(svc) ? 'bg-warning/10' : ''}
                     >
                       <TableCell>
                         <Select
@@ -378,7 +378,7 @@ export function SmartImportModal({
             )}
 
             {parsedServices.some(isDuplicate) && (
-              <p className='text-xs text-yellow-600'>
+              <p className='text-xs text-warning'>
                 黄色标记的服务与现有服务类型和名称重复
               </p>
             )}

@@ -14,9 +14,9 @@ export const sentimentLabels: Record<string, string> = {
 }
 
 export const sentimentColors: Record<string, string> = {
-  FAVORABLE: 'text-green-600',
-  UNFAVORABLE: 'text-red-600',
-  NEUTRAL: 'text-gray-500',
+  FAVORABLE: 'text-success',
+  UNFAVORABLE: 'text-destructive',
+  NEUTRAL: 'text-muted-foreground',
 }
 
 export const sentiments = ['FAVORABLE', 'UNFAVORABLE', 'NEUTRAL'] as const

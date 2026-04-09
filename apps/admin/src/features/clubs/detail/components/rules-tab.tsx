@@ -152,7 +152,7 @@ export function RulesTab({ clubId }: RulesTabProps) {
                   <p className='line-clamp-2'>{rule.content}</p>
                 </TableCell>
                 <TableCell>
-                  <span className={sentimentColors[rule.sentiment] ?? 'text-gray-500'}>
+                  <span className={sentimentColors[rule.sentiment] ?? 'text-muted-foreground'}>
                     {sentimentLabels[rule.sentiment] ?? rule.sentiment}
                   </span>
                 </TableCell>

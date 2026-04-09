@@ -14,8 +14,8 @@ export function StatCard({ title, value, subtext, icon, highlight }: StatCardPro
   return (
     <Card
       className={cn(
-        highlight === 'warning' && 'border-yellow-500/50',
-        highlight === 'danger' && 'border-red-500/50',
+        highlight === 'warning' && 'border-warning/50',
+        highlight === 'danger' && 'border-destructive/50',
       )}
     >
       <CardHeader className='flex flex-row items-center justify-between space-y-0 pb-2'>
