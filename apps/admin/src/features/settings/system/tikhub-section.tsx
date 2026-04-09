@@ -18,43 +18,53 @@ import {
 
 const formSchema = z.object({
   apiKey: z.string().min(1, 'API Key 不能为空'),
-  baseUrl: z.string().url('请输入有效的 URL').default('https://api.tikhub.io'),
-  rateLimit: z.coerce.number().min(1, '最小值为 1').max(100, '最大值为 100').default(10),
+  baseUrl: z.string().url('请输入有效的 URL'),
+  rateLimit: z.coerce.number().min(1, '最小值为 1').max(100, '最大值为 100'),
 })
 
-type FormValues = z.infer<typeof formSchema>
+type FormInput = z.input<typeof formSchema>
+type FormValues = z.output<typeof formSchema>
 
-const fields = [
+type FieldConfig = {
+  name: keyof FormValues
+  label: string
+  desc: string
+  placeholder: string
+  isPassword: boolean
+  type?: React.HTMLInputTypeAttribute
+}
+
+const fields: FieldConfig[] = [
   {
-    name: 'apiKey' as const,
+    name: 'apiKey',
     label: 'API Key',
     desc: 'TikHub API 密钥，用于访问 TikHub 数据服务。',
     placeholder: '••••••••',
     isPassword: true,
   },
   {
-    name: 'baseUrl' as const,
+    name: 'baseUrl',
     label: 'API 地址',
     desc: 'TikHub API 基础 URL，默认为 https://api.tikhub.io。',
     placeholder: 'https://api.tikhub.io',
     isPassword: false,
   },
   {
-    name: 'rateLimit' as const,
+    name: 'rateLimit',
     label: '速率限制',
     desc: '每秒最大请求数，建议根据账号套餐设置，范围 1-100。',
     placeholder: '10',
     isPassword: false,
     type: 'number',
   },
-] as const
+]
 
 export function TikHubSection() {
   const [loading, setLoading] = useState(true)
   const [submitting, setSubmitting] = useState(false)
   const [showApiKey, setShowApiKey] = useState(false)
 
-  const form = useForm<FormValues>({
+  const form = useForm<FormInput, unknown, FormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
       apiKey: '',
@@ -125,7 +135,11 @@ export function TikHubSection() {
                           type={showApiKey ? 'text' : 'password'}
                           placeholder={f.placeholder}
                           className='pr-10'
-                          {...field}
+                          name={field.name}
+                          ref={field.ref}
+                          onBlur={field.onBlur}
+                          onChange={field.onChange}
+                          value={field.value == null ? '' : String(field.value)}
                         />
                         <Button
                           type='button'
@@ -146,7 +160,11 @@ export function TikHubSection() {
                         className='w-[280px] shrink-0'
                         type={f.type ?? 'text'}
                         placeholder={f.placeholder}
-                        {...(field as React.InputHTMLAttributes<HTMLInputElement>)}
+                        name={field.name}
+                        ref={field.ref}
+                        onBlur={field.onBlur}
+                        onChange={field.onChange}
+                        value={field.value == null ? '' : String(field.value)}
                       />
                     )}
                   </FormControl>
