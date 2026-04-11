@@ -1,8 +1,14 @@
 import { Inject, Injectable, NotFoundException } from '@nestjs/common';
 import { NodePgDatabase } from 'drizzle-orm/node-postgres';
-import { eq, ilike, count, desc, and, inArray,  SQL } from 'drizzle-orm';
+import { eq, ilike, count, desc, and, asc, arrayOverlaps, isNotNull, sql, SQL } from 'drizzle-orm';
 import { DRIZZLE } from '../../database/database.module';
 import * as schema from '../../database/schema';
+
+interface FindAllFilters {
+  sortBy?: 'createdAt' | 'operatingDays';
+  minOperatingDays?: number;
+  hasCompanyInfo?: boolean;
+}
 
 @Injectable()
 export class ClientClubsService {
@@ -10,11 +16,16 @@ export class ClientClubsService {
     @Inject(DRIZZLE) private readonly db: NodePgDatabase<typeof schema>,
   ) {}
 
-  async findAll(page = 1, pageSize = 20, keyword?: string, serviceTypes?: string) {
+  async findAll(
+    page = 1,
+    pageSize = 20,
+    keyword?: string,
+    serviceTypes?: string,
+    filters?: FindAllFilters,
+  ) {
     const offset = (page - 1) * pageSize;
 
-    // Build where conditions
-    const conditions: ReturnType<typeof eq>[] = [
+    const conditions: SQL[] = [
       eq(schema.clubs.status, 'published' as typeof schema.clubs.$inferSelect.status),
     ];
 
@@ -22,23 +33,33 @@ export class ClientClubsService {
       conditions.push(ilike(schema.clubs.name, `%${keyword}%`));
     }
 
-    // Filter by serviceTypes if provided
     if (serviceTypes) {
       const types = serviceTypes.split(',').map((t) => t.trim()).filter(Boolean);
       if (types.length > 0) {
-        const serviceRows = await this.db
-          .selectDistinct({ clubId: schema.clubServices.clubId })
-          .from(schema.clubServices)
-          .where(inArray(schema.clubServices.type, types as (typeof schema.clubServices.$inferSelect.type)[]));
-        const clubIdsForServiceFilter = serviceRows.map((r) => r.clubId);
-        if (clubIdsForServiceFilter.length === 0) {
-          return { data: [], total: 0, page, pageSize };
-        }
-        conditions.push(inArray(schema.clubs.id, clubIdsForServiceFilter));
+        conditions.push(arrayOverlaps(schema.clubs.serviceTypes, types));
       }
     }
 
-    const where = conditions.length === 1 ? conditions[0] : and(...conditions);
+    if (filters?.minOperatingDays) {
+      const cutoffDate = new Date();
+      cutoffDate.setDate(cutoffDate.getDate() - filters.minOperatingDays);
+      conditions.push(
+        sql`${schema.clubs.establishedAt} IS NOT NULL AND ${schema.clubs.establishedAt} <= ${cutoffDate.toISOString().split('T')[0]}`,
+      );
+    }
+
+    if (filters?.hasCompanyInfo) {
+      conditions.push(isNotNull(schema.clubs.companyName));
+    }
+
+    const where = and(...conditions);
+
+    let orderBy;
+    if (filters?.sortBy === 'operatingDays') {
+      orderBy = asc(schema.clubs.establishedAt);
+    } else {
+      orderBy = desc(schema.clubs.createdAt);
+    }
 
     const [clubs, [{ value: total }]] = await Promise.all([
       this.db
@@ -48,41 +69,18 @@ export class ClientClubsService {
           logo: schema.clubs.logo,
           description: schema.clubs.description,
           establishedAt: schema.clubs.establishedAt,
+          serviceTypes: schema.clubs.serviceTypes,
           createdAt: schema.clubs.createdAt,
         })
         .from(schema.clubs)
         .where(where)
-        .orderBy(desc(schema.clubs.createdAt))
+        .orderBy(orderBy)
         .limit(pageSize)
         .offset(offset),
       this.db.select({ value: count() }).from(schema.clubs).where(where),
     ]);
 
-    // Fetch service types for each club
-    const clubIds = clubs.map((c) => c.id);
-    const serviceTypeMap: Map<string, string[]> = new Map();
-    if (clubIds.length > 0) {
-      const serviceRows = await this.db
-        .selectDistinct({ clubId: schema.clubServices.clubId, type: schema.clubServices.type })
-        .from(schema.clubServices)
-        .where(inArray(schema.clubServices.clubId, clubIds));
-
-      for (const row of serviceRows) {
-        let types = serviceTypeMap.get(row.clubId);
-        if (!types) {
-          types = [];
-          serviceTypeMap.set(row.clubId, types);
-        }
-        types.push(row.type);
-      }
-    }
-
-    const data = clubs.map((c) => ({
-      ...c,
-      serviceTypes: serviceTypeMap.get(c.id) ?? [],
-    }));
-
-    return { data, total, page, pageSize };
+    return { data: clubs, total, page, pageSize };
   }
 
   async findOne(id: string) {

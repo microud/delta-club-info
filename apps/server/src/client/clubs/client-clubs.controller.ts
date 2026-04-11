@@ -18,8 +18,15 @@ export class ClientClubsController {
     @Query('pageSize', new DefaultValuePipe(20), ParseIntPipe) pageSize: number,
     @Query('keyword') keyword?: string,
     @Query('serviceTypes') serviceTypes?: string,
+    @Query('sortBy') sortBy?: string,
+    @Query('minOperatingDays') minOperatingDays?: string,
+    @Query('hasCompanyInfo') hasCompanyInfo?: string,
   ) {
-    return this.clientClubsService.findAll(page, pageSize, keyword, serviceTypes);
+    return this.clientClubsService.findAll(page, pageSize, keyword, serviceTypes, {
+      sortBy: sortBy as 'createdAt' | 'operatingDays' | undefined,
+      minOperatingDays: minOperatingDays ? parseInt(minOperatingDays, 10) : undefined,
+      hasCompanyInfo: hasCompanyInfo === 'true' ? true : undefined,
+    });
   }
 
   @Get(':id')
