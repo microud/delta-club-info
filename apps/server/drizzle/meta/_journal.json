@@ -71,6 +71,13 @@
       "when": 1775567811108,
       "tag": "0009_add-content-blogger-accounts-crawl-tasks-v2",
       "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "7",
+      "when": 1744329600000,
+      "tag": "0010_add_service_types_to_clubs",
+      "breakpoints": true
     }
   ]
 }
