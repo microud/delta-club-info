@@ -19,7 +19,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
-import { clubFormSchema, clubStatusLabels, type ClubFormValues } from '../data/schema'
+import { clubFormSchema, clubStatusLabels, clubServiceTypeLabels, type ClubFormValues } from '../data/schema'
 import { fetchWechatAvatar } from '@/lib/api'
 import { ImageUploadGrid } from '@/components/image-upload-grid'
 
@@ -35,6 +35,7 @@ export function ClubForm({ initialData, onSubmit, isSubmitting }: ClubFormProps)
     resolver: zodResolver(clubFormSchema),
     defaultValues: initialData ?? {
       orderPosters: [],
+      serviceTypes: [],
       name: '',
       status: 'draft',
       logo: '',
@@ -214,6 +215,42 @@ export function ClubForm({ initialData, onSubmit, isSubmitting }: ClubFormProps)
             </FormItem>
           )}
         />
+
+        <div className='space-y-2'>
+          <FormField
+            control={form.control}
+            name='serviceTypes'
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>支持的服务类型</FormLabel>
+                <div className='flex flex-wrap gap-2'>
+                  {Object.entries(clubServiceTypeLabels).map(([value, label]) => {
+                    const selected = field.value?.includes(value) ?? false
+                    return (
+                      <Button
+                        key={value}
+                        type='button'
+                        variant={selected ? 'default' : 'outline'}
+                        size='sm'
+                        onClick={() => {
+                          const current = field.value ?? []
+                          field.onChange(
+                            selected
+                              ? current.filter((v: string) => v !== value)
+                              : [...current, value]
+                          )
+                        }}
+                      >
+                        {label}
+                      </Button>
+                    )
+                  })}
+                </div>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        </div>
 
         <div className='space-y-4 border-t pt-4'>
           <h3 className='text-sm font-medium'>订单海报</h3>

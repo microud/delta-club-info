@@ -22,6 +22,7 @@ export const clubSchema = z.object({
   companyEstablishedAt: z.string().nullable(),
   businessStatus: z.string().nullable(),
   orderPosters: z.array(z.string()),
+  serviceTypes: z.array(z.string()).default([]),
   createdAt: z.string(),
   updatedAt: z.string(),
 })
@@ -46,6 +47,7 @@ export const clubFormSchema = z.object({
   companyEstablishedAt: z.string().optional(),
   businessStatus: z.string().optional(),
   orderPosters: z.array(z.string()).optional(),
+  serviceTypes: z.array(z.string()).optional(),
 })
 
 export type ClubFormValues = z.infer<typeof clubFormSchema>
@@ -55,4 +57,12 @@ export const clubStatusLabels: Record<string, string> = {
   published: '已发布',
   closed: '已倒闭',
   archived: '已归档',
+}
+
+export const clubServiceTypeLabels: Record<string, string> = {
+  KNIFE_RUN: '跑刀',
+  ACCOMPANY: '陪玩',
+  ESCORT_TRIAL: '护航体验',
+  ESCORT_STANDARD: '护航标准',
+  ESCORT_FUN: '护航趣味',
 }
