@@ -22,9 +22,12 @@ export class ClientClubsController {
     @Query('minOperatingDays') minOperatingDays?: string,
     @Query('hasCompanyInfo') hasCompanyInfo?: string,
   ) {
+    const validSortBy = sortBy === 'operatingDays' ? 'operatingDays' as const : undefined;
+    const parsedDays = minOperatingDays ? parseInt(minOperatingDays, 10) : undefined;
+
     return this.clientClubsService.findAll(page, pageSize, keyword, serviceTypes, {
-      sortBy: sortBy as 'createdAt' | 'operatingDays' | undefined,
-      minOperatingDays: minOperatingDays ? parseInt(minOperatingDays, 10) : undefined,
+      sortBy: validSortBy,
+      minOperatingDays: Number.isFinite(parsedDays) ? parsedDays : undefined,
       hasCompanyInfo: hasCompanyInfo === 'true' ? true : undefined,
     });
   }

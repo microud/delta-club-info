@@ -49,7 +49,7 @@ export class ClientClubsService {
     }
 
     if (filters?.hasCompanyInfo) {
-      conditions.push(isNotNull(schema.clubs.companyName));
+      conditions.push(sql`${schema.clubs.companyName} IS NOT NULL AND ${schema.clubs.companyName} <> ''`);
     }
 
     const where = and(...conditions);
