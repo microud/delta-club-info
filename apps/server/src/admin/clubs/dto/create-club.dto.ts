@@ -79,4 +79,9 @@ export class CreateClubDto {
   @IsString({ each: true })
   @IsArray()
   orderPosters?: string[];
+
+  @IsOptional()
+  @IsArray()
+  @IsString({ each: true })
+  serviceTypes?: string[];
 }
