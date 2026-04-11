@@ -1,7 +1,7 @@
 {
   "pages": [
     { "path": "pages/home/index", "style": { "navigationBarTitleText": "首页" } },
-    { "path": "pages/clubs/index", "style": { "navigationBarTitleText": "俱乐部" } },
+    { "path": "pages/clubs/index", "style": { "navigationBarTitleText": "俱乐部", "enablePullDownRefresh": true } },
     { "path": "pages/clubs/detail", "style": { "navigationBarTitleText": "俱乐部详情" } },
     { "path": "pages/videos/detail", "style": { "navigationBarTitleText": "视频详情" } },
     { "path": "pages/announcements/detail", "style": { "navigationBarTitleText": "公告详情" } },
